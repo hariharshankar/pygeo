@@ -1,0 +1,8 @@
+<div class='tab-content'>
+    {% for v in values %}
+    <div class="{{ loop.cycle('odd-row', 'even-row') }}">
+        <span class="row-number">{{ loop.index }}</span>
+        <a href="{{ baseurl + v[0] }}">{{ v[1] }}</a>
+    </div>
+    {% endfor %}
+</div>

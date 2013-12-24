@@ -1,0 +1,231 @@
+body, html {
+    margin: 10px;
+}
+
+body {
+    font: 0.9em "EB Garamond", Georgia, serif !important;
+    width: 1100px;
+    height: auto;
+}
+
+.information {
+    text-align: center;
+    width: 600px;
+}
+
+.ui-widget {
+    font: 0.9em "EB Garamond", Georgia, serif !important;
+}
+
+.ui-widget-content {
+    font: 0.9em "EB Garamond", Georgia, serif !important;
+}
+
+.ui-tabs {
+    padding: 0;
+    margin: 0;
+}
+
+.ui-tabs-panel {
+    padding: 0 !important;
+    margin: 0;
+    width: 95%;
+}
+
+#searchWrapper {
+    height: 100%;
+    height: !important;
+    min-height: 600px;
+}
+
+#searchLeftPane {
+    width: 300px;
+    border-right: 1px solid gray;
+    float: left;
+}
+
+#searchRightPane {
+    width: 850px;
+    margin-left: 300px;
+    padding: 5px;
+}
+
+#rightPaneTabs {
+    font-size: 0.9em;
+    float: left;
+    width: 840px;
+}
+
+
+.searchSelectable .ui-selecting { 
+    background: #FECA40; 
+}
+
+.searchSelectable .ui-selected { 
+    background: #F39814; 
+    color: white; 
+}
+
+.searchSelectableHeader { 
+    list-style-type: none; 
+    margin: 0; 
+    padding: 0; 
+    width: 88%; 
+    border: 1px solid gray;
+}
+
+.searchSelectable { 
+    list-style-type: none; 
+    margin: 0; 
+    padding: 0; 
+    width: 90%; 
+    border: 1px solid gray;
+    max-height: 170px;
+    overflow: auto;
+}
+
+.searchSelectable div { 
+    margin: 0; 
+    padding: 0.2em; 
+    font-size: 1.1em; 
+    height: 18px; 
+}
+
+.searchUpdateButton {
+    text-align: center;
+    padding: 5px;
+}
+
+.ui-button {
+    font-size: 0.8em;
+}
+
+th {
+    font-size: 0.9em;
+}
+
+
+.module-header {
+    margin-top: 10px;
+    margin-bottom: 0;
+    padding: 3px;
+    font-weight: bold;
+    font-size: 1.2em;
+    display: block;
+    text-align: center;
+}
+
+.module-content {
+    margin: 0;
+    padding: 10px;
+    display: block;
+}
+
+.label_rng1 {
+    font-weight: bold;
+}
+
+.label_rng {
+    padding-left: 75px;
+}
+
+path {
+    stroke-width: 1;
+    fill: none;
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+.x.axis line {
+    stroke: lightgrey;
+}
+
+.x.axis .minor {
+    stroke-opacity: .5;
+}
+
+.x.axis path {
+    display: none;
+}
+
+.x.axis text {
+    font-size: 14;
+}
+
+.y.axis line, .y.axis path {
+    fill: none;
+    stroke: #000;
+}
+
+.y.axis text {
+    font-size: 14;
+}
+
+
+table.line-html-table {
+    display: block;
+    overflow: scroll;
+}
+
+.summary-results {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-widget-header {
+  vertical-align: top;
+  text-align: center; 
+  font-size: 1.2em;
+  padding: 3px;
+}
+
+.summary-widget-container {
+    height: 500px;
+}
+
+.summary-widget-table {
+    width: 35%;
+}
+.summary-widget-chart {
+}
+
+.perf-row {
+  line-height: 15px;
+  height: 35px;
+}
+    
+.performance-label {
+  width: 200px;
+}
+
+.performance-values {
+  display: block;
+  overflow-x: scroll;
+}
+
+.odd-row {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.even-row {
+  background-color: #EAE8E8;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.tab-content {
+    font-size: 1.1em;
+}
+
+.row-number {
+    padding: 10px;
+}
+
+#map-resize {
+    padding-bottom: 15px;
+}
+
