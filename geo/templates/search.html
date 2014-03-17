@@ -3,9 +3,9 @@
 {% block title %}Search - GEO{% endblock %}
 
 {% block scripts %}
-<script src="/static/js/geo.js"></script>
+<script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
 <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry"></script>
-<script src="/static/d3/d3.min.js"></script>
+<script src="{{ url_for('static', filename='d3/d3.min.js', _external=True) }}"></script>
 {% endblock %}
 {% block body_onload %}Search.init(){% endblock %}
 {% block content %}

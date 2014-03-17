@@ -3,8 +3,8 @@ import flask
 mod = flask.Blueprint("index", __name__)
 
 
-@mod.route("/", endpoint="index")
-@mod.route("/index.html", endpoint="index")
+@mod.route("/", endpoint="home")
+@mod.route("/index.html")
 def view():
 
     return flask.render_template("index.html")

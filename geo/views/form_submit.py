@@ -5,7 +5,7 @@ from geo.db.query import Select
 
 mod = flask.Blueprint("formsubmit", __name__)
 
-@mod.route("/formsubmit", methods=['POST'])
+@mod.route("/formsubmit", methods=['POST'], endpoint="formsubmit")
 def view():
 
     request = flask.request

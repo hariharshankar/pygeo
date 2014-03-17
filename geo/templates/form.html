@@ -3,7 +3,7 @@
 {% block title %}{{title}} - GEO{% endblock %}
 
 {% block scripts %}
-    <script src="/static/js/geo.js"></script>
+    <script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
     <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry,projection"></script>
 {% endblock %}
 
@@ -20,7 +20,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-    <form action="/formsubmit" method="POST" id="form" style="margin-left: 305px;">
+        <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form" style="margin-left: 305px;">
         <div class="all-modules ui-widget ui-helper-reset">
             {% for m in modules %}
                 <div class="ui-widget-header ui-corner-top module-header {{ m.module_header_class }}">

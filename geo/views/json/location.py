@@ -4,7 +4,7 @@ from geo.core.location import Location
 mod = flask.Blueprint("location", __name__)
 
 
-@mod.route("/location")
+@mod.route("/location", endpoint="location")
 def view():
 
     typ = flask.request.args.get("type", 0)

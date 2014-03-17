@@ -4,7 +4,7 @@ from geo.core.geo_user import GeoUser
 mod = flask.Blueprint("user", __name__)
 
 
-@mod.route("/login", endpoint='factsheet', methods=['POST'])
+@mod.route("/login", endpoint='login', methods=['POST'])
 def login():
 
     request = flask.request
@@ -30,7 +30,7 @@ def login():
     return flask.jsonify(data={'error': True})
 
 
-@mod.route("/logout", methods=['GET'])
+@mod.route("/logout", endpoint='logout', methods=['GET'])
 def logout():
     session = flask.session
     session.pop('username', None)
