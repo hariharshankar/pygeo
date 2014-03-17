@@ -1,0 +1,45 @@
+{% extends "geo.html" %}
+
+{% block title %}{{title}} - GEO{% endblock %}
+
+{% block scripts %}
+    <script src="/static/js/geo.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry,projection"></script>
+{% endblock %}
+
+{% block body_onload %}Form.init(){% endblock %}
+{% block content %}
+    <div id="formLeftPane">
+    </div>
+        {% with warnings = get_flashed_messages(category_filter=["warning"]) %}
+            {% if warnings %}
+                <div class='ui-state-highlight ui-corner-all form-flashes'>
+                    {% for message in warnings %}
+                        {{ message|safe }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    <form action="/formsubmit" method="POST" id="form" style="margin-left: 305px;">
+        <div class="all-modules ui-widget ui-helper-reset">
+            {% for m in modules %}
+                <div class="ui-widget-header ui-corner-top module-header {{ m.module_header_class }}">
+                    <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                    {{ m.module_heading }}
+                </div>
+                <div class="module-content ui-corner-bottom ui-widget-content" id="{{ m.module_id }}">
+                    {{ m.module_content|safe }}
+                </div>
+            {% endfor %}
+            
+            {% if session.username %}
+                <input type="button" id="submit" name="submit" value="Submit" style="margin: 10px;"/>
+            {% else %}
+                <div class="ui-state-highlight ui-corner-all" style="padding: 10px; margin: 10px;">
+                    Please sign in to submit your changes to this fact sheet. 
+                    If you do not have an account, please <b><a href="/register">register</a></b>.
+                </div>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}

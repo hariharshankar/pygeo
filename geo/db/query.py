@@ -8,7 +8,6 @@ class Select():
         """
         self.db = db
 
-
     def read(self, table_name, columns=[], where=[], order_by=[], limit=[]):
         """
         Fetch rows from database.
@@ -23,17 +22,15 @@ class Select():
         :param limit: list<<int>,<int>> start stop limits like [0,1]
         """
 
-        if table_name == "":
+        if table_name == "" or table_name.find(" ") >= 0:
             return
 
         sql = ["SELECT"]
 
         if len(columns) == 0:
             sql.append("*")
-            #cols = self.read_column_names(table_name)
-            #columns = [c[0] for c in cols]
         else:
-            sql.append(",".join(columns))
+            sql.append(",".join([c for c in columns if c.find(" ") < 0]))
 
         sql.extend(["FROM", table_name])
 
@@ -54,19 +51,20 @@ class Select():
         if len(limit) > 0:
             sql.append("LIMIT")
             sql.append(",".join(limit))
-        #return self.db.session.query(*columns)\
-        #        .from_statement(" ".join(sql)).all()
         return self.db.session.execute(" ".join(sql))
 
-
-    def read_column_names(self, table_name):
+    def read_column_names(self, table_name, where=None):
         """
         Read the columns of a table. Helps build queries dynamically
         without knowing the table columns.
         """
 
+        sql = "SHOW COLUMNS FROM %s" % table_name
+        if where:
+            sql = sql + " LIKE '%s'" % where
+
         return self.db.session.query("Field", "Type")\
-                .from_statement("SHOW COLUMNS FROM %s" % (table_name)).all()
+            .from_statement(sql).all()
 
     def process_result_set(self, result):
         """
@@ -83,4 +81,5 @@ class Select():
         rows = result.fetchall()
         values = [r.values() for r in rows]
         values.sort()
+
         return keys, values

@@ -1,0 +1,26 @@
+{% extends "geo.html" %}
+
+{% block title %}Login - GEO{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/sha1.js"></script>
+<script>
+    function sha1Password() {
+        var pword = SHA1( document.getElementById("password").value ); 
+        document.getElementById("password").value = pword;
+        return true;
+    }
+</script>
+{% endblock %}
+{% block content %}
+<div id="loginWrapper">
+    <form id="login" action="login" method="post" onsubmit="return sha1Password();" >
+			Username:
+			<input type="text" size="10" id="username" name="username" />
+			Password:
+			<input type="password" size="10" id="password" name="password" />
+            <input type="hidden" name="next" id="next" value="{{ request.path }}" />
+			<input type="submit" name="login" value="Login" />
+	    </form>
+</div>
+{% endblock %}

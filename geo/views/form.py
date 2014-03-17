@@ -1,18 +1,19 @@
 import flask
+from geo.core.geo_resource import GeoResource
+
 
 mod = flask.Blueprint("form", __name__)
 
-@mod.route("/form.php", defaults={'pid': 0})
-@mod.route("/geoid/<int:pid>")
-def view(pid):
-    #mod = Moderation(db)
 
-    #keys, values = mod.get_all_resources(225, 1)
-    #s.extend(sel.read("Type", ["Type", "Type_ID"], [["Type_ID", "=", "1"]], ("Type_ID", "desc"), ("0","1")))
+@mod.route("/form.php", alias=True)
+@mod.route("/geoid/<int:description_id>", endpoint='factsheet')
+def view(description_id):
 
-    #types = db.Type.all()
-    return flask.jsonify(keys=[], values=[])
+    if not description_id:
+        description_id = flask.request.args.get("pid", 0)
 
-#if __name__ == "__main__":
-#    app.run(debug=True)
+    geo_resource = GeoResource(db, description_id)
 
+    html = geo_resource.generate_editable()
+    title = geo_resource.get_resource_name(geo_resource.type_name)
+    return flask.render_template("form.html", modules=html, title=title)

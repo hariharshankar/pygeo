@@ -62,7 +62,12 @@ class Location():
             details['overlayName'] = o['Overlay_Name']
             overlays.append(details)
 
-        return {"lat": lat, "lng": lng, "overlays": overlays}
+        locations = {}
+        locations['lat'] = lat
+        locations['lng'] = lng
+        locations['name'] = gresource.get_resource_name(type_name)
+        locations['overlays'] = overlays
+        return {"locations": [locations]}
 
     def for_many_resources(self, country=0, typ=0):
         """

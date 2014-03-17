@@ -1,7 +1,9 @@
 from geo.db.query import Select
+from geo.core.main import Main
+from geo.serializations.html import Html
 
 
-class GeoResource():
+class GeoResource(Html):
 
     parent_plant_id = 0
     type_id = 0
@@ -25,12 +27,16 @@ class GeoResource():
         self.latest_revision_id = 0
         self.name = ""
 
+        self.select = Select(self.connection)
+        self.main = Main(self.connection)
+
         if not self.type_id or not self.country_id or not self.state_id:
             self.__get_ids()
 
+        self.type_name = self.main.get_type_name(self.type_id)
+
     def __get_ids(self):
-        select = Select(self.connection)
-        result = select.read("History", where=[["Description_ID", "=", self.description_id]])
+        result = self.select.read("History", where=[["Description_ID", "=", self.description_id]])
         if result.rowcount == 0:
             raise LookupError("Description ID %s does not exist." % self.description_id)
 
@@ -51,12 +57,13 @@ class GeoResource():
         if self.parent_plant_id == 0:
             self.__get_ids()
 
-        select = Select(self.connection)
-        id = select.read("History", columns=["max(Description_ID) as Description_ID"],
+        id = self.select.read("History", columns=["max(Description_ID)"],
                          where=[["Parent_Plant_ID", "=", self.parent_plant_id],
                                 ["and"], ["Accepted", "=", "1"]])
 
-        self.latest_revision_id = id.first()['Description_ID']
+        res = id.first()
+        print res
+        self.latest_revision_id = res[0]
         return self.latest_revision_id
 
 
@@ -70,11 +77,16 @@ class GeoResource():
             return self.name
 
         desc_table = type_name + "_Description"
-        select = Select(self.connection)
-        desc = select.read(desc_table,
+        desc = self.select.read(desc_table,
                     columns=["Name_omit"],
                     where=[["Description_ID", "=", self.get_latest_revision_id()]]
                     )
         self.name = desc.first()['Name_omit']
         return self.name
 
+if __name__ == "__main__":
+    from geo.db.connection import Db
+
+    d = Db()
+    g = GeoResource(d, 1222)
+    g.generate_editable()

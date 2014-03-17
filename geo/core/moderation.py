@@ -18,7 +18,7 @@ class Moderation():
         """
 
         if not country or not typ:
-            return ([],[])
+            return ([], [])
 
         main = Main(self.db)
 
@@ -29,7 +29,7 @@ class Moderation():
 
         # get the latest description id for all resources
         description_ids = select.read("History",
-                                      columns=["distinct(Parent_Plant_ID) as Parent_Plant_ID",
+                                      columns=["distinct(Parent_Plant_ID)",
                                                "Type_ID",
                                                "Country_ID",
                                                "State_ID"],

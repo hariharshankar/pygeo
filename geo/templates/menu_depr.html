@@ -1,0 +1,90 @@
+
+    <link rel="stylesheet" media="screen" href="static/superfish/css/superfish.css">
+    <!--<script src="static/superfish/js/hoverIntent.js"></script>-->
+    <script src="static/superfish/js/superfish.js"></script>
+
+    <script>
+
+        jQuery(document).ready(function(){
+            jQuery('ul.sf-menu').superfish();
+        });
+
+    </script>
+    <style>
+        .menu {
+            display: "inline-block";
+            margin-left: 300px;
+            font-size: 0.9em;
+        }
+        .sf-menu a {
+            color: #ccc;
+        }
+
+        .sf-menu li, .sf-menu ul li {
+            background: #4b4b4b;
+        }
+
+        .sf-menu li.sfHover, .sf-menu li:hover {
+            /*background: #706D6D;*/
+            background: #fff;
+            border: #4b4b4b solid 1px;
+        }
+
+        .sf-menu a.sfHover, .sf-menu a:hover {
+            /*background: #706D6D;*/
+            color: #4b4b4b;
+        }
+
+
+    </style>
+
+    {% block scripts %}{% endblock %}
+
+</head>
+<body onload="{% block body_onload %}{% endblock %}">
+    <div class="menu">
+        <ul class="sf-menu">
+            <li>
+            <a id="PowerPlants" title="Power Plants" href="#MainMenu">Power Plants</a>
+            <ul>
+                <li><a href="/select.php?tgl=Edit">View and Edit Plant Data</a></li>
+                <li><a href="/select.php?tgl=New">Create New Plant</a></li>
+                <li><a href="/select.php?tgl=Kml">Download as KML</a></li>
+                <li><a href="/analyze.php">Perform Analysis</a></li>
+                <li><a href="/constructNetworkIndex.php">Map Power Plants</a></li>
+            </ul>
+            </li>			
+            <li>		
+            <a id="Resources" title="Fuels and Resources" href="#MainMenu">Fuels and Resources</a>
+            <ul>
+                <li><a href="/select.php?tgl=Edit">View and Edit Resource Data</a></li>
+                <li><a href="/select.php?tgl=New">Create New Resource</a></li>
+                <li><a href="/select.php?tgl=Kml">Download as KML</a></li>
+                <li><a href="/analyze.php">Perform Analysis</a></li>
+                <li><a href="/constructNetworkIndex.php">Map Fuels & Resources</a></li>		
+            </ul>
+            </li>
+            <li>
+            <a id="Transmission" title="Energy Transmission" href="#MainMenu">Energy Transmission</a>
+            <ul>
+                <li><a href="/select.php?tgl=Edit">View and Edit Transmission Data</a></li>
+                <li><a href="/select.php?tgl=New">Create New Transmission System</a></li>
+                <li><a href="/select.php?tgl=Kml">Download as KML</a></li>
+                <li><a href="/analyze.php">Perform Analysis</a></li>
+                <li><a href="/constructNetworkIndex.php">Map Transmission Systems</a></li>
+            </ul>
+            </li>
+            <li>
+            <a id="Consumers" title="Energy Consumers" href="#MainMenu">Energy Consumers</a>
+            <ul>
+                <li><a href="/select.php?tgl=Edit">View and Edit Consumers Data</a></li>
+                <li><a href="/select.php?tgl=New">Create New Consumers System</a></li>
+                <li><a href="/select.php?tgl=Kml">Download as KML</a></li>
+                <li><a href="/analyze.php">Perform Analysis</a></li>
+                <li><a href="/constructNetworkIndex.php">Map Consumer Systems</a></li>
+            </ul>
+            </li>
+            
+            <li>
+            <a id="build_network" title="Interactive way to view Data in GEO" href="/constructNetworkIndex.php">Map Data in GEO</a>
+            </li>

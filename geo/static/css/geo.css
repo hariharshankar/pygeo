@@ -8,6 +8,90 @@ body {
     height: auto;
 }
 
+#header {
+    position: relative;
+}
+
+#wrapper {
+    display: block;
+    position: absolute;
+    top: 150px;
+    width: inherit;
+}
+
+.logo {
+    width: 300px;
+    height: 120px;
+    position: absolute;
+}
+
+#toolbar {
+    padding: 2px;
+    display: block;
+    margin-left: 310px;
+    margin-top: 30px;
+    float: right;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    background: none;
+    border: 0;
+}
+
+#toolbar .ui-button {
+    background: none;
+    border: 0;
+}
+
+#toolbar .ui-button-text {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+#toolbar .ui-icon{
+    right: 0px;
+    padding: 2px;
+}
+
+#toolbar .ui-state-hover {
+    border: 1px solid #999999;
+    /*background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
+    background: #dadada 50% 50% repeat-x;
+    color: #212121;
+}
+.ui-menu {
+    position: absolute;
+    width: inherit;
+    z-index: 1000;
+}
+
+.ui-menu .ui-menu-item {
+    margin: 5px 13px 5px 0;
+    font-size: 1.2em;
+}
+
+.ui-menu .ui-menu-item .ui-state-focus {
+    border: 1px solid #999999;
+    /*background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
+    background: #dadada 50% 50% repeat-x;
+    color: #212121;
+}
+
+
+#login_page {
+    font-size: 1.0em;
+    font-weight: bold;
+    padding: 0.4em;
+}
+#login_page .ui-button-text {
+    font-size: 1.2em;
+}
+*+html #toolbar {
+    display: inline;
+}
+#login_page input.text { margin-bottom:12px; width:95%; padding: .4em; }
+
+#login_page fieldset { padding:0; border:0; margin-top:15px; }
+
 .information {
     text-align: center;
     width: 600px;
@@ -21,6 +105,10 @@ body {
     font: 0.9em "EB Garamond", Georgia, serif !important;
 }
 
+.ui-widget input {
+    font: 1.0em "EB Garamond", Georgia, serif !important;
+}
+
 .ui-tabs {
     padding: 0;
     margin: 0;
@@ -29,7 +117,25 @@ body {
 .ui-tabs-panel {
     padding: 0 !important;
     margin: 0;
-    width: 95%;
+    width: 99%;
+}
+
+#formLeftPane {
+    width: 300px;
+    border-right: 1px solid gray;
+    float: left;
+}
+
+#homeWrapper {
+    font-size: 1.2em;
+    line-height: 1.5em;
+    color: #555555;
+}
+
+#homeWrapper h1 {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #999999;
+    color: #555555;
 }
 
 #searchWrapper {
@@ -56,7 +162,6 @@ body {
     width: 840px;
 }
 
-
 .searchSelectable .ui-selecting { 
     background: #FECA40; 
 }
@@ -71,7 +176,8 @@ body {
     margin: 0; 
     padding: 0; 
     width: 88%; 
-    border: 1px solid gray;
+    border: 0;
+    background: none;
 }
 
 .searchSelectable { 
@@ -79,7 +185,6 @@ body {
     margin: 0; 
     padding: 0; 
     width: 90%; 
-    border: 1px solid gray;
     max-height: 170px;
     overflow: auto;
 }
@@ -97,22 +202,28 @@ body {
 }
 
 .ui-button {
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 th {
     font-size: 0.9em;
 }
 
+.all-modules {
+    width: 870px;
+}
 
 .module-header {
     margin-top: 10px;
     margin-bottom: 0;
-    padding: 3px;
-    font-weight: bold;
-    font-size: 1.2em;
+    padding: 4px;
+    font-size: 1.1em;
     display: block;
+    font-weight: normal;
+    /*
     text-align: center;
+    font-weight: bold;
+    */
 }
 
 .module-content {
@@ -180,6 +291,7 @@ table.line-html-table {
   text-align: center; 
   font-size: 1.2em;
   padding: 3px;
+  width: 98%;
 }
 
 .summary-widget-container {
@@ -207,18 +319,19 @@ table.line-html-table {
 }
 
 .odd-row {
-  padding-top: 3px;
+  padding-top: 7px;
   padding-bottom: 3px;
 }
 
 .even-row {
-  background-color: #EAE8E8;
-  padding-top: 3px;
+  background-color: #f1f1f1;
+  padding-top: 7px;
   padding-bottom: 3px;
 }
 
 .tab-content {
     font-size: 1.1em;
+    width: 100%;
 }
 
 .row-number {
@@ -229,3 +342,11 @@ table.line-html-table {
     padding-bottom: 15px;
 }
 
+.form-flashes {
+    padding: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    margin-left: 100px;
+    margin-right: 100px;
+}

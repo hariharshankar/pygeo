@@ -5,6 +5,15 @@ var Chart;
 var Summary;
 var Geo;
 
+jQuery.fn.center = function () {
+    this.css("position","absolute");
+    //this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
+    //                                            $(window).scrollTop()) + "px");
+    this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
+                                                $(window).scrollLeft()) + "px");
+    return this;
+}
+
 Geo = {
     searchDatabase_Type_Default: "PowerPlants",
     searchType_Default: "1",
@@ -304,10 +313,10 @@ Form = {
 
     initPerformance: function() {
         // adjust performance value/label height to be in sync
-        $(".performance-label").offset({top: $(".performance-values").offset().top})
+        //$(".performance-label").offset({top: $(".performance-values").offset().top})
         $(".performance-values").width($("#Annual_Performance").width() 
                                             - $(".performance-label").width()
-                                            - 20); 
+                                           - 20); 
 
         // setting the scrollbar to point to 2010
         // TODO: try to calculate this dynamically
@@ -316,6 +325,7 @@ Form = {
 
     init: function() {
 
+        $("#submit").button().center();
         $(".module-header").click( function(event) {
             var panel = $(this).next();
             var isOpen = panel.is(":visible");
@@ -454,7 +464,7 @@ Chart = {
         var data = lineData.data
         var keys = lineData.keys
         var years = lineData.years
-        var w = $("#"+tableContainer).width();
+        var w = $("#"+tableContainer).width()-20;
 
         var html = ''
         html += "<table style='width: "+w+"; height: 400px;' class='line-html-table'>";
@@ -1069,9 +1079,10 @@ Summary = {
         var url = $("#summary_json").attr("value")
         url = url.replace(new RegExp(".type_id=[0-9]{1,2}"), "")
         $.getJSON(url, function(d) {
+            d = d.data
             cumulativeCapacity = {}
             numberOfPlants = {}
-            for (j=0,k; k=d.keys[j]; j++) {
+            for (j=0,k=""; k=d.keys[j]; j++) {
                 if (k.search("Cumulative_Capacity") == 0) {
                     for (i=0; i<d.values.length; i++) {
                         var type = ""
@@ -1111,9 +1122,9 @@ Summary = {
         reqData["return_type"] = "Type"
         reqData["Database_Type"] = ["powerplants"]
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: reqUrl,
-            data: JSON.stringify(reqData),
+            data: $.param(reqData),
             dataType: "json",
             contentType: "application/json; charset=utf-8",            
             success: function(data, textStatus, jqXHR) {
@@ -1128,6 +1139,7 @@ Summary = {
             var newCapAddedIndex = 0
             var annGWhGenIndex = 0
             var annCO2EmIndex = 0
+            d = d.data
 
             for (var i=0, k; k=d.keys[i]; i++) {
                 if (k.search("New_Capacity_Added") == 0) {
@@ -1146,6 +1158,7 @@ Summary = {
                     numberOfPlants = d.values[0][i]
                 }
             }
+            console.log(numberOfPlants, cumulativeCapacity)
 
             Summary.displaySummaryResults(numberOfPlants, cumulativeCapacity, "summary-overview")
 

@@ -3,7 +3,7 @@ import flask
 mod = flask.Blueprint("map", __name__)
 
 
-@mod.route("/map")
+@mod.route("/map", endpoint="map")
 def view():
 
     typ = flask.request.args.get("type", "")

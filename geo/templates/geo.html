@@ -1,0 +1,169 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="/static/jquery-ui-1.10.2.custom/css/custom-theme/jquery-ui-1.10.2.custom.min.css">
+    <link rel="stylesheet" href="/static/css/geo.css">
+    <link rel="stylesheet" href="/static/chosen_v1.0.0/chosen.min.css">
+
+    <script src="/static/jquery-ui-1.10.2.custom/js/jquery-1.9.1.js"></script>
+    <script src="/static/jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js"></script>
+    <script src="/static/chosen_v1.0.0/chosen.jquery.min.js"></script>
+    <script src="/static/js/sha1.js"></script>
+    <script>
+        $( function() {
+            $("#account_button").hide();
+            $("#login_button").hide();
+            $( "#account_info" ).hide().menu();
+            $( "#energy_resources_type" ).hide().menu();
+            $( "#energy_resources" ).button({
+                icons: {
+                    secondary: "ui-icon-triangle-1-s"
+                }
+            })
+            .click( function() {
+                var menu = $("#energy_resources_type").show().position({
+                    my: "right top",
+                    at: "right bottom",
+                    of: this
+                });
+                $( document ).one("click", function() {
+                    menu.hide();
+                });
+                return false;
+            });
+            $( "#country_summary" ).button();
+            $( "#analyze" ).button();
+            $( "#map_data" ).button();
+            $( "#download_data" ).button();
+
+            $( "#login_page" ).dialog({
+                autoOpen: false,
+                height: 250,
+                width: 300,
+                modal: true,
+                title: "Login - GEO",
+                hide: {
+                    effect: "blind",
+                    duration: 1000
+                }
+            });
+
+            if( $("#logged_username").val() != null ) {
+                showAccountMenu()
+            }
+            else {
+                showLoginMenu()
+            }
+
+        });
+
+        function showLoginMenu() {
+
+            $( "#login_button" )
+            .button()
+            .show()
+            .click( function() {
+                $( "#login_page" ).dialog("open");
+            });
+            $("#login_submit")
+                .button()
+                .click( function() {
+                    info = {}
+                    info['username'] = $("#username").val()
+                    info['password'] = SHA1( $("#password").val() )
+                    $.post( "/login", info,  function(data) {
+                        if (data['data']['error']) {
+                            $("#login_message")
+                            .text("Error: Invalid username or password.")
+                            .addClass("ui-state-error")
+                        }
+                        else {
+                            t = "Logged in successfully. Welcome <b>" + data['data']['fullname'] +"</b>!"
+                            $("#login_message")
+                                .html(t)
+                                .addClass("ui-state-highlight");
+                            $("#login_page").dialog("close");
+                            location.reload();
+                        }
+                    });
+                });
+        }
+
+        function showAccountMenu() {
+            $("#login_button").hide()
+            $("#account_button").show()
+            $( "#account_button" ).button({
+                icons: {
+                    secondary: "ui-icon-triangle-1-s"
+                }
+            })
+            .click( function() {
+                var menu = $("#account_info").show().position({
+                    my: "right top",
+                    at: "right bottom",
+                    of: this
+                });
+                $( document ).one("click", function() {
+                    menu.hide();
+                });
+                return false;
+            });
+        }
+
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</head>
+<body onload="{% block body_onload %}{% endblock %}">
+    <div id="header">
+    <a href="/" alt="Home" title="Home">
+        <img src="/static/img/geo_logo.png" class="logo"/>
+    </a>
+    <div id="toolbar" class="ui-widget-header ui-corner-all">
+        <button id="energy_resources" name="energy_resources">energy resources</button>
+        |
+        <button id="country_summary" name="country_summary">country summary</button>
+        |
+        <button id="analyze" name="analyze">analyze</button>
+        |
+        <button id="map_data" name="map_data">map data</button>
+        |
+        <button id="download_data" name="download_data">download data</button>
+        |
+        <button id="login_button" name="login_button">login</button>
+        <button id="account_button" name="account_button">account</button>
+    </div>
+    <ul id="energy_resources_type">
+        <li><a href="#">Power Plants</a></li>
+        <li><a href="#">Fuels and Resources</a></li>
+        <li><a href="#">Transmission</a></li>
+        <li><a href="#">Consumers</a></li>
+    </ul>
+    <ul id="account_info">
+        {% if session.username %}
+            <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
+            <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
+            <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
+            <li class="ui-state-disabled">Logged in as {{session.username}}</li>
+        {% endif %}
+        <li><a href="/logout?next={{ request.path }}">Logout</a></li>
+    </ul>
+    <div id="login_page">
+            <fieldset>
+                <label for="username">Username:</label>
+                <input type="text" size="10" id="username" name="username" class="text ui-widget-content ui-corner-all"/>
+                <label for="password">Password:</label>
+                <input type="password" size="10" id="password" name="password" class="text ui-widget-content ui-corner-all"/>
+                <div id="login_message" style="height: 20px; padding: 5px;"/>
+            </fieldset>
+            <button id="login_submit" style="margin: 5px;">Login</button>
+        </div>
+    </div>
+    <div id="wrapper">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
