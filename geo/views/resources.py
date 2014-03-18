@@ -10,7 +10,6 @@ def view():
     typ = flask.request.args.get("type", 0)
     country = flask.request.args.get("country", 0)
 
-    print(typ, country)
     moderation = Moderation(db)
     keys, values = moderation.get_all_resources(country=country, typ=typ)
     baseurl = "geoid/"

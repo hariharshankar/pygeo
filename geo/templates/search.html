@@ -17,8 +17,8 @@
         <div id='searchState' class='searchSelectable'></div>
         <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Update</button></div>
 
-        <input type="hidden" name="jsonListService" id="jsonListService" value="/menu" />
-        <input type="hidden" name="jsonMapService" id="jsonMapService" value="/map" />
+        <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
+        <input type="hidden" name="jsonMapService" id="jsonMapService" value="{{ url_for('map.map') }}" />
     </div>
     <div id="searchRightPane">
         <div id='rightPaneTabs'>

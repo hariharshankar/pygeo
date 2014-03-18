@@ -4,7 +4,7 @@ from geo.core.main import Main
 mod = flask.Blueprint("menu", __name__)
 
 
-@mod.route("/menu")
+@mod.route("/menu", endpoint="menu")
 def view():
 
     db_name = flask.request.args.get("database_type", "")
