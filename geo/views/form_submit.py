@@ -33,7 +33,7 @@ def view():
     form_data["Moderated"] = "0"
     form_data["Moderator_ID"] = "0"
     form_data["Accepted"] = "0"
-    form_data["User_ID"] = "11"
+    form_data["User_ID"] = flask.session['user_id']
     form_data["Parent_Plant_ID"] = str(parent_plant_id)
 
     description_id = insert.insert("History", form_data, "history")

@@ -40,13 +40,14 @@ class InsertFactSheet():
         sql_values = {}
 
         parent_plant_id = form_data.get("Parent_Plant_ID", 0)
+
         if int(parent_plant_id) > 0:
             sql_fields.append("`Parent_Plant_ID`=:parent_plant_id")
             sql_values['parent_plant_id'] = parent_plant_id
 
         sql_statement = "INSERT INTO History SET " + ",".join(sql_fields)
 
-        sql_values['user_id'] = form_data.get('User_ID', 11)
+        sql_values['user_id'] = form_data.get('User_ID', 0)
         sql_values['moderated'] = form_data.get('Moderated', 0)
         sql_values['moderated_id'] = form_data.get('Moderator_ID')
         sql_values['type_id'] = form_data.get('Type_ID')
