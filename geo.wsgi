@@ -1,3 +1,5 @@
 import sys
-sys.path.insert(0, '/Library/WebServer/Documents/pygeo')
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from geo import app as application
