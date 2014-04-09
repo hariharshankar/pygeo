@@ -60,5 +60,4 @@ def view():
                     ])
     """
     title = type_name + " - " + country_name
-    print title
     return flask.render_template("summary.html", content="".join(content), title=title)

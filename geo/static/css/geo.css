@@ -210,7 +210,7 @@ th {
 }
 
 .all-modules {
-    width: 870px;
+    width: 950px;
 }
 
 .module-header {
@@ -349,4 +349,18 @@ table.line-html-table {
     text-align: center;
     margin-left: 100px;
     margin-right: 100px;
+}
+
+.chart_infobox {
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: #333333 0px 0px 10px;
+    margin: 200px auto;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.8);
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 10500;
+    font-weight: bold;
 }

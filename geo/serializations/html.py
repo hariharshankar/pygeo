@@ -19,10 +19,16 @@ class Html():
                                        where=[["Type_ID", "=", self.type_id]]
                                        )
         modules = res_modules.first()
+        module_names = []
+
+        if type(modules.Features) == str:
+            module_names = modules.Features.split(',')
+        else:
+            module_names = modules.Features
 
         html = []
 
-        for m in modules.Features.split(","):
+        for m in module_names:
             module_id = m
             module_heading = self.__make_readable(m)
 
@@ -43,7 +49,7 @@ class Html():
     def __make_readable(self, token):
 
         reserved_words = \
-            ["_itf", "_rng1", "_rng2", "_rng3", "_nbr", "_yr", "_dt"]
+            ["_itf", "_rng1", "_rng2", "_rng3", "_nbr", "_yr", "_dt", "_omit"]
         for r in reserved_words:
             token = token.replace(r, "")
 
@@ -245,7 +251,7 @@ class Html():
                 control_keys,
                 control_values,
                 self.type_name + "_" + feature,
-                "unit")
+                "unit_control")
         )
         html.append("</table>")
         return "".join(html)
@@ -416,31 +422,26 @@ class Html():
 
     def __create_input_field(self, key, value, row_type):
 
+        def get_input_text(key, value, size):
+            return "".join(["<input type='text' name='", key,
+                            "' id='", key,
+                            "' value='", value,
+                            "' size='", size, "' />"
+                            ])
+
+
         value = str(value)
 
         if row_type == "unit":
-            return "".join(["<input type='text' name='", key,
-                            "' id='", key,
-                            "' value='", value,
-                            "' size='6' />"
-                            ])
+            return get_input_text(key, value, "10")
+        if row_type == "unit_control":
+            return get_input_text(key, value, "7")
         elif row_type == "generic":
-            return "".join(["<input type='text' name='", key,
-                            "' id='", key,
-                            "' value='", value,
-                            "' size='50' />"
-                            ])
+            return get_input_text(key, value, "50")
         elif row_type == "performance":
-            return "".join(["<input type='text' name='", key,
-                            "' id='", key,
-                            "' value='", value,
-                            "' size='6' />"
-                            ])
+            return get_input_text(key, value, "6")
         else:
-            return "".join(["<input type='text' name='", key,
-                           "' id='", key,
-                           "' value='", value,
-                           "' size='85' />"])
+            return get_input_text(key, value, "95")
 
     def __create_enum_from_table(self, key, value, table_name):
         t_name = key.replace("_enum", "")
@@ -532,7 +533,7 @@ class Html():
         row.append("</select>")
         return "".join(row)
 
-    def __create_number_input_field(self, key, value, size=11):
+    def __create_number_input_field(self, key, value, size=15):
         return "".join(["<input type='text' name='", key,
                         "' id='", key,
                         "' value='", str(value),
@@ -554,15 +555,30 @@ class Html():
         table.append("<tr class='perf-row even-row'></tr>")
         row_count += 1
 
+        year_index = None
+        key_count = 0
+        vals = []
         for k in keys:
+
+            if k == "Year_yr":
+                year_index = key_count
+            elif not year_index:
+                key_count += 1
+
             if self.__display_key(k):
                 if row_count % 2 == 0:
                     table.append("<tr class='perf-row even-row'>")
                 else:
                     table.append("<tr class='perf-row odd-row'>")
+                table.extend(["<td><input type='checkbox' id='",
+                              k,
+                              "_###_",
+                              str(row_count),
+                              "' /></td>"])
                 table.append("<th>" + self.__make_readable(k) + "</th>")
                 table.append("</tr>")
                 row_count += 1
+            vals.append(None)
 
         table.append("</table>")
         table.append("</td>")
@@ -580,9 +596,6 @@ class Html():
 
         key_count = 0
         for k in keys:
-            year_index = 1
-            if k == "Year_yr":
-                year_index = key_count
 
             if self.__display_key(k):
                 if row_count % 2 == 0:
@@ -591,9 +604,13 @@ class Html():
                     table.append("<tr class='perf-row odd-row'>")
 
                 for year in range(decade_start, decade_end):
-                    for v in values:
-                        if v[year_index] == str(year):
+                    v = None
+                    for val in values:
+                        if val[year_index] == year:
+                            v = val
                             break
+                    if not v:
+                        v = vals
 
                     value = ""
                     value = v[key_count]

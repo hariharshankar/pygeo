@@ -62,7 +62,6 @@ class GeoResource(Html):
                                 ["and"], ["Accepted", "=", "1"]])
 
         res = id.first()
-        print res
         self.latest_revision_id = res[0]
         return self.latest_revision_id
 

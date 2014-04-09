@@ -129,7 +129,7 @@ class Main():
 
         try:
             type_id = int(typ)
-        except ValueError, e:
+        except ValueError as e:
             type_id = self.get_type_id(typ)
 
         if not type_id:
@@ -163,7 +163,7 @@ class Main():
 
         try:
             country_id = int(country)
-        except ValueError, e:
+        except ValueError as e:
             country_id = self.get_country_id(country)
 
         if not country_id:

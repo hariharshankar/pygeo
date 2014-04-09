@@ -312,6 +312,65 @@ Form = {
     },
 
     initPerformance: function() {
+
+        $("#Annual_Performance").prepend("<button id='plot_performance_parmeters'>Plot selected parameters vs years</button>");
+        $("#Annual_Performance").prepend("<div id='performance_chart' style='width: 650px; height: 400px; overflow: hidden;'></div>")
+        $("#performance_chart").dialog({
+            height: 420,
+            width: 700,
+            modal: true,
+            autoOpen: false,
+            close: function(event, ui) {
+                $("#performance_chart").empty();
+                $("#performance_chart").css("width", "650")
+                $("#performance_chart").css("height", "400")
+                console.log($("#performance_chart").css("width"))
+                console.log($("#performance_chart").css("height"))
+            }
+        });
+        
+        $("#plot_performance_parmeters").button()
+            .click( function(event) {
+                event.preventDefault();
+                data = {}
+                data['keys'] = []
+                data['values'] = []
+                data['keys'].push('Year')
+                checkedFields = []
+                $(".performance-label input").each( function() {
+                    if (this.checked) {
+                        checkedFields.push(this)
+                        var id = $(this).attr("id").split('_###_')[0];
+                        data['keys'].push(id)
+                    }
+                });
+                for (var year=1950; year<2020; year++) {
+                    d = []
+                    for (f in checkedFields) {
+                        var id = $(checkedFields[f]).attr("id").split('_###_')[0];
+                        id = id.replace(/[^\w\*\s]/g, "\\$&")
+
+                        id += "_\\#\\#\\#_";
+                        v = $("#" + id + year).val()
+                        if (v.trim() != "") {
+                            if (d.length == 0) 
+                                d.push(year)
+                            d.push(v);
+                        }
+                    }
+                    if (d.length > 0)
+                        data['values'].push(d);
+                }
+                if (data['values'].length > 0) {
+                    d = Chart.parseChartData(data);
+
+                    //var lineData = { "years": d[1], "data": d[2], "keys": d[0] };
+                    Chart.plotLineChart(d, "performance_chart")
+                    $("#performance_chart").dialog("open");
+                }
+            });
+
+
         // adjust performance value/label height to be in sync
         //$(".performance-label").offset({top: $(".performance-values").offset().top})
         $(".performance-values").width($("#Annual_Performance").width() 
@@ -447,11 +506,11 @@ Form = {
                         }
                     })
                 })
-                    
-            })
+            });
 
 
-        Map.init(true);
+
+        //Map.init(true);
         Form.initPerformance();
     }
 
@@ -660,59 +719,91 @@ Chart = {
         }
     },
 
+    showData: function(obj, d) {
+        var coord = d3.mouse(obj);
+        var infobox = d3.select(".chart_infobox");
+        // now we just position the infobox roughly where our mouse is
+        infobox.style("left", (coord[0] + 100) + "px" );
+        infobox.style("top", (coord[1] - 100) + "px");
+        $(".chart_infobox").html(d);
+        $(".chart_infobox").show();
+    },
+ 
+    hideData: function() {
+        $(".chart_infobox").hide();
+    },
+
     plotLineChart: function(lineData, chartContainer) {
 
-        var data = lineData.data
-        var keys = lineData.keys
-        var years = lineData.years
+        console.log(lineData)
+        //var data = lineData.data
+        //var keys = lineData.keys
+        //var years = lineData.years
 
         // define dimensions of graph
         var m = [80, 85, 80, 80]; // margins
         var w = $("#"+chartContainer).width() - m[1] - m[3]; // width
         var h = $("#"+chartContainer).height() - m[0] - m[2]; // height
 
+        $("#"+chartContainer).append("<div class='chart_infobox' style='display:none;'>Value</div>");
+
         // Add an SVG element with the desired dimensions and margin.
         var graph = d3.select("#"+chartContainer).append("svg:svg")
-        .attr("width", w + m[1] + m[3])
-        .attr("height", h + m[0] + m[2])
-        .append("svg:g")
-        .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+                    .attr("width", w + m[1] + m[3])
+                    .attr("height", h + m[0] + m[2])
+                    .append("svg:g")
+                    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
         var colors = ["crimson", "steelblue", "forestgreen", "mediumvioletred", "black"] 
 
-        setTimeout(function() {
+        //setTimeout(function() {
 
-            // X scale will fit all values from data[] within pixels 0-w
-            var x = d3.scale.linear().domain([years[0], years[years.length-1]]).range([0, w]);
+        // X scale will fit all values from data[] within pixels 0-w
+        //var x = d3.scale.linear().domain([years[0], years[years.length-1]]).range([0, w]);
+        var startYear = lineData[0].xvalues[0];
+        var yearLen = lineData[0].xvalues.length;
+        var endYear = lineData[0].xvalues[yearLen-1];
+        var x = d3.time.scale().domain([new Date((startYear).toString()), new Date((endYear).toString())]).range([0,w]);
 
-            // create xAxis
-            var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
-            // Add the x-axis.
-            graph.append("svg:g")
+        // create xAxis
+        //var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+        var xAxis = d3.svg.axis().orient("bottom").scale(x);
+
+        // Add the x-axis.
+        graph.append("svg:g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + h + ")")
-            .call(xAxis);
+            .call(xAxis)
+            .append("text")
+            .attr("x", w/2 - 30)
+            .attr("y", 40)
+            .attr("dx", ".71em")
+            .style("fill", "black")
+            .text("Year");
 
+        // create a line function that can convert data[] into x and y points
+        var line = d3.svg.line()
+                    .interpolate('cardinal')
+                    // assign the X function to plot our line as we wish
+                    .x(function(d,i) { 
+                        //console.log(d, i)
+                        return x(new Date(lineData[0].xvalues[i].toString()));
+                        //return x(years[i]); 
+                    })
+                    .y(function(d) { 
+                        return y(d); 
+                    })
 
-            for (var lineCount=0; lineCount<data.length; lineCount++) {
-                var y = d3.scale.linear().domain([0, d3.max(data[lineCount])]).range([h, 0]);
+        var y;
+        for (var lineCount=0; lineCount<lineData.length; lineCount++) {
+            y = d3.scale.linear().domain([0, d3.max(lineData[lineCount].yvalues)]).range([h, 0]);
 
-                // create a line function that can convert data[] into x and y points
-                var line = d3.svg.line()
-                // assign the X function to plot our line as we wish
-                .x(function(d,i) { 
-                    return x(years[i]); 
-                })
-                .y(function(d) { 
-                    return y(d); 
-                })
-
-                // left side y axis
-                if (lineCount == 0) {
-                    // create left yAxis
-                    var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
-                    // Add the y-axis to the left
-                    graph.append("svg:g")
+            // left side y axis
+            if (lineCount == 0) {
+                // create left yAxis
+                var yAxisLeft = d3.svg.axis().scale(y).ticks(6).orient("left");
+                // Add the y-axis to the left
+                graph.append("svg:g")
                     .attr("class", "y axis axisLeft")
                     .attr("transform", "translate(-15,0)")
                     .style("fill", colors[lineCount])
@@ -723,14 +814,14 @@ Chart = {
                     .attr("dy", ".71em")
                     .style("fill", colors[lineCount])
                     .style("text-anchor", "end")
-                    .text(keys[lineCount]);
-                }
-                // second, right side y axis
-                else {
-                    // create right yAxis
-                    var yAxisRight = d3.svg.axis().scale(y).ticks(6).orient("right");
-                    // Add the y-axis to the right
-                    graph.append("svg:g")
+                    .text(lineData[lineCount].ylabel);
+            }
+            // second, right side y axis
+            else {
+                // create right yAxis
+                var yAxisRight = d3.svg.axis().scale(y).ticks(6).orient("right");
+                // Add the y-axis to the right
+                graph.append("svg:g")
                     .attr("class", "y axis axisRight")
                     .attr("transform", "translate(" + (w+15) + ",0)")
                     .style("fill", colors[lineCount])
@@ -741,33 +832,72 @@ Chart = {
                     .attr("dy", ".71em")
                     .style("text-anchor", "end")
                     .style("fill", colors[lineCount])
-                    .text(keys[lineCount]);
-                }
-                // add lines
-                graph.append("svg:path")
-                .attr("d", line(data[lineCount]))
-                .style("stroke", colors[lineCount])
-                .attr("class", "data");
+                    .text(lineData[lineCount].ylabel);
             }
-        }, 1500);
+        var series = graph.append('svg:g')
+                        .data([lineData[lineCount]])
+                        .attr("class", "series");
+
+        /*
+        var series = graph.selectAll('.series')
+                        .data([lineData[lineCount]])
+                        .enter().append("g")
+                        .attr("class", "series");
+        */
+        // add lines
+        series.append("svg:path")
+            .attr("d", function(d, i) {console.log(d); return line(d.yvalues)})
+            .style("stroke", function(d, i) { return colors[lineCount]})
+            .style("stroke-width", "4px")
+            //.attr("class", "data");
+        series.selectAll(".point")
+                        //.data(data[lineCount])
+                        .data(function (d, i) { return d.yvalues; })
+                        .enter().append("circle")
+                        .attr("class", "point")
+                        .attr("fill", "black")
+                        .attr("cx", function(d, i) { return x(new Date(lineData[0].xvalues[i].toString())); })
+                        .attr("cy", function(d, i) { return y(d); })
+                        .attr("r", 5)
+                        .on("mouseover", function(d) { Chart.showData(this, d);})
+                        .on("mouseout", function(){ Chart.hideData();});
+
+        }
+        //}, 1500);
     },
 
 
     parseChartData: function(d) {
-        var keys = []
-        var data = []
-        var years = []
+        values = []
+        //var keys = []
+        //var data = []
+        //keys.push(d.keys[0]);
         for (k=1; k<d.keys.length; k++) {
+            var years = []
             var dLine = [];
+            var value = {}
+            value['xlabel'] = d.keys[0];
             for (v=0; v<d.values.length; v++) {
-                if (years.indexOf(d.values[v][0]) < 0)
+                if (years.indexOf(d.values[v][0]) < 0) {
                     years.push(d.values[v][0]);
-                dLine.push(Math.round(d.values[v][k]))
+                }
+                if (!d.values[v][k]) {
+                    val = null
+                }
+                else {
+                    val = d.values[v][k]
+                }
+                dLine.push(Math.round(val))
             }
-            data.push(dLine)
-            keys = d.keys
+            //data.push(dLine)
+            key = d.keys[k].replace("_nbr", "")
+            //keys.push(key.replace(/_/g, " "));
+            value['ylabel'] = key
+            value['xvalues'] = years
+            value['yvalues'] = dLine
+            values.push(value)
         }
-        return [keys, years, data]
+        return values
     },
 
     getPerformanceCumulativeChart: function() {

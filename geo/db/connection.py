@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+import sys
 
 class Db():
 
@@ -9,9 +9,17 @@ class Db():
         Instantiate a db connection.
         """
 
+        connection_string = ""
+        if sys.version_info[0] == 3:
+            connection_string = "mysql+mysqlconnector://geo:0p3nM0d3!@localhost/geoDev"
+        elif sys.version_info[0] == 2:
+            connection_string = "mysql://geo:0p3nM0d3!@localhost/geoDev"
+        else:
+            return
+
         try:
             self.__db = create_engine(
-                "mysql://geo:0p3nM0d3!@localhost/geoDev",
+                connection_string,
                 echo=True)
             Session = sessionmaker(bind=self.__db)
             self.__session = Session()
