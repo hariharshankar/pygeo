@@ -22,7 +22,47 @@ Geo = {
     searchTab_Default: "list",
 
     getUrlParameter: function(name) {
-        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+
+        if (location.search.length > 0) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+        }
+        locs = Geo.getPageUrl().replace("http://", "").split("/");
+        
+        name = name.toLowerCase()
+        loc_cursor = 2;  // skips domain name
+        if (['type', 'country'].indexOf(locs[loc_cursor]) >= 0) {
+            if (name == "database_type") {
+                return null;
+            }
+            else if (name == "state") {
+                return null;
+            }
+            else if (name == "type" && locs[loc_cursor] == "type") {
+                return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
+            }
+            else if (name == "type" && locs[loc_cursor] == "country") {
+                return null;
+            }
+            else if (name == "country" && locs[loc_cursor] == "type") {
+                return (locs[loc_cursor+2] != undefined) ? locs[loc_cursor+2] : "";
+            }
+            else if (name == "country" && locs[loc_cursor] == "country") {
+                return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
+            }
+        }
+        
+        if (name ==  "database_type") {
+            return (locs[loc_cursor] != undefined) ? locs[loc_cursor] : "";
+        }
+        else if (name == "type") {
+            return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
+        }
+        else if (name == "country") {
+            return (locs[loc_cursor+2] != undefined) ? locs[loc_cursor+2] : "";
+        }
+        else if (name == "state") {
+            return (locs[loc_cursor+3] != undefined) ? locs[loc_cursor+3] : "";
+        }
     },
 
     getPageUrl: function() {
@@ -48,9 +88,29 @@ Search = {
         else
             k = data['keys'][0]
 
-        var elementContentClass = element + "Content" 
-            
-        select += "<select data-placeholder='Choose a "+k+"'class='chosen-select' style='width: 90%;'>"
+        var elementContentClass = element + "Content";
+
+        var disableSelect = false
+        if (Geo.getPageUrl().search("/summary/type/") >= 0 && 
+                ['searchDatabase_Type', 'searchState'].indexOf(element) >= 0) {
+            disableSelect = true
+            if (element == "searchDatabase_Type") {
+                Search[element] = "powerplants"
+            }
+        } 
+        else if (Geo.getPageUrl().search("/summary/country/") >= 0 && 
+                ['searchDatabase_Type', 'searchState', 'searchType'].indexOf(element) >= 0) {
+            disableSelect = true
+            if (element == "searchDatabase_Type") {
+                Search[element] = "powerplants"
+            }
+        } 
+        if (disableSelect) {
+            select += "<select data-placeholder='Choose a "+k+"'class='chosen-select' style='width: 90%;' disabled='disabled'>"
+        }
+        else {
+            select += "<select data-placeholder='Choose a "+k+"'class='chosen-select' style='width: 90%;'>"
+        }
         for (var v in data['values']) {
             var value = data['values'][v]
             var v = ""
@@ -63,6 +123,8 @@ Search = {
                 v = value[0]
                 id = v
             }
+                
+            if (Search[element] == undefined) Search[element] = "";
             if (v && Search[element].toLowerCase() == v.toLowerCase() || Search[element] == id) 
                 select += "<option class='ui-widget-content ui-selected "+elementContentClass+"' value='"+id+"' selected='selected'>"+v+"</option>";
             else
@@ -72,47 +134,25 @@ Search = {
         $(select).insertAfter("#"+element)
         $(".chosen-select").chosen()
 
+        sel = $("#"+element).next()
+        sel.change(function() {
+            $(this).nextAll('.searchSelectableHeader').remove()
+            nextSelect = $(this).next().next()
+            nextSelect.nextAll('.chosen-select').remove()
+            nextSelect.nextAll('.chosen-container').remove()
+            Search.createSelectables(nextSelect)
+        })
         heading = "<h3 class='ui-widget-header module-header searchSelectableHeader'>"+k+"</h3>";
         $("#"+element).before(heading)
         $("."+elementContentClass).click(function() {
             $(this).addClass("ui-selected").siblings().removeClass("ui-selected")
         })
+        Search.createSelectables($("#"+element).next().next().next())
     },
-    /*
-    createHtmlForSelectables: function (element, data) {
-        select = "";
-        var k = ""
-        if (data["keys"].length == 2)
-            k = data['keys'][1]
-        else
-            k = data['keys'][0]
 
-        var elementContentClass = element + "Content" 
-            
-        for (var v in data['values']) {
-            var value = data['values'][v]
-            var v = ""
-            if (value.length == 2)
-                v = value[1]
-            else
-                v = value[0]
-            if (Search[element].toLowerCase() == v.toLowerCase()) 
-                select += "<div class='ui-widget-content ui-selected "+elementContentClass+"'>"+v+"</div>";
-            else
-                select += "<div class='ui-widget-content "+elementContentClass+"'>"+v+"</div>";
-        }
-        $("#"+element).append(select)
-
-        heading = "<h3 class='ui-widget-header module-header searchSelectableHeader'>"+k+"</h3>";
-        $("#"+element).before(heading)
-        $("."+elementContentClass).click(function() {
-            $(this).addClass("ui-selected").siblings().removeClass("ui-selected")
-        })
-    },
-    */
     getUserValues: function() {
 
-        params = {}
+        params = ""
         $(".searchSelectable").each(function() {
             var key = $(this).attr("id").replace("search", "").toLowerCase()
             /*
@@ -122,11 +162,18 @@ Search = {
             }
             */
             var value = $(this).next().next().find(".chosen-single").text()
-            
-            if (!value || value == "") {
-                value = ""
+            if ($(this).next().attr('disabled') != 'disabled') {
+
+                if (!value || value == "") {
+                    value = ""
+                }
+                $(this).next().children().each( function() {
+                    if ($(this).text().toLowerCase() == value.toLowerCase()) {
+                        params += "/" + $(this).attr('value').toLowerCase()
+                    }
+                });
             }
-            params[key] = value.toLowerCase()
+            //params[key] = value.toLowerCase()
         })
         return params
     },
@@ -144,6 +191,7 @@ Search = {
         })    
     },
 
+    /*
     createRightPaneTabs: function() {
         $( "#rightPaneTabs" ).tabs({
             load: function (event, ui) {
@@ -190,10 +238,21 @@ Search = {
             i++
         })
     },
+    */
 
     createSelectables: function(t) {
         if ($(t).attr("id") == "searchUpdateButton") {
-            Search.createRightPaneTabs()
+            //Search.createRightPaneTabs()
+            /*
+            base_url = Geo.getPageUrl()
+            
+            params = Search.getUserValues()
+            //updateUrl = base_url + "?" + $.param(params)
+            b = base_url.replace("http://", "").split('/')
+            new_url = "http://" + b[0] + "/" + b[1] + params
+            if (base_url != new_url) 
+                window.location.href = new_url;
+            */
             return;
         }
         var type = $(t).attr("id").replace("search", "")
@@ -201,24 +260,20 @@ Search = {
         var data = {}
 
         data["return_type"] = type.toLowerCase()
-        var sel = Search.selectableIds
 
-        for (var s in sel) {
-            var prevType = sel[s].replace("search", "").toLowerCase()
+        $(t).prevAll('.searchSelectable').each( function(index) {
+
+            var prevType = $(this).attr("id").replace("search", "").toLowerCase()
             var prevValue = ""
-            if ($("#"+ sel[s] +" .ui-selected").text() != "")
-                prevValue = $("#"+ sel[s] +" .ui-selected").text()
-            else 
-                prevValue = Search[sel[s]]
-            data[prevType] = prevValue
-        }
+             
+            data[prevType] = $(this).next().next().children('.chosen-single').text()
+        });
         //var postData = JSON.stringify(data)
         Search.getSelectValues(url + "?" + $.param(data), null, "search"+type)
             
         var id = $(t).attr("id")
 
         Search.selectableIds.push($(t).attr("id"))
-        Search.createSelectables($(t).next())
         
         
         /*
@@ -238,6 +293,7 @@ Search = {
     init: function() {
         var shdReloadPage = false
         var params = {}
+        /*
         if (Geo.getUrlParameter("database_type") == null) {
             params['database_type'] = Geo.searchDatabase_Type_Default 
             shdReloadPage = true
@@ -267,24 +323,30 @@ Search = {
         else {
             params['state'] = Geo.getUrlParameter("state")
         }
+        */
 
-        if (Geo.getUrlParameter("tab") == null) {
-            params['tab'] = Geo.searchTab_Default
-            shdReloadPage = true
-        }
-        else {
-            params['tab'] = Geo.getUrlParameter("tab")
+        /*
+        url = ""
+        for (k in params) {
+            url += "/" + params[k]
         }
         if (shdReloadPage) {
-            window.location.href = window.location.href.split("?")[0] + "?" + $.param(params)
+            window.location.href = window.location.href.split("?")[0] + $.param(params)
             return;
         }
+        */
+        params['database_type'] = Geo.getUrlParameter("database_type")
+        params['type'] = Geo.getUrlParameter("type")
+        params['country'] = Geo.getUrlParameter("country")
+        params['state'] = Geo.getUrlParameter("state")
+
         Search.searchDatabase_Type = params['database_type']
         Search.searchType = params['type']
         Search.searchCountry = params['country']
         Search.searchState = params['state']
-        Search.searchTab = params['tab']
+        Search.searchTab = params['tab']    
 
+        
         Search.createSelectables($(".searchSelectable").first())
 
         $("#updateSearch")
@@ -293,8 +355,15 @@ Search = {
             event.preventDefault()
             params = Search.getUserValues()
             base_url = Geo.getPageUrl()
-            updateUrl = base_url + "?" + $.param(params)
-            window.location.href = updateUrl
+            
+            //updateUrl = base_url + "?" + $.param(params)
+            b = base_url.replace("http://", "").split('/')
+            url = "http://" + b[0] + "/" + b[1];
+            if (['type', 'country'].indexOf(b[2]) >= 0) {
+                url += "/" + b[2];
+            }
+            //console.log(url+ params)
+            window.location.href = url + params
         })
     }
 }
@@ -324,8 +393,6 @@ Form = {
                 $("#performance_chart").empty();
                 $("#performance_chart").css("width", "650")
                 $("#performance_chart").css("height", "400")
-                console.log($("#performance_chart").css("width"))
-                console.log($("#performance_chart").css("height"))
             }
         });
         
@@ -507,43 +574,36 @@ Form = {
                     })
                 })
             });
-
-
-
-        //Map.init(true);
+        Map.init(true);
         Form.initPerformance();
     }
-
 }
 
 
 Chart = {
     plotLineDataTable: function(lineData, tableContainer) {
 
-        var data = lineData.data
-        var keys = lineData.keys
-        var years = lineData.years
+        var years = lineData[0]['xvalues']
         var w = $("#"+tableContainer).width()-20;
 
         var html = ''
         html += "<table style='width: "+w+"; height: 400px;' class='line-html-table'>";
         html += "<tr class='line-html-table-header'>";
-        //html += "<th class='ui-widget-header'>Year</th>";
-        for (var k in keys) {
-            html += "<th class='ui-widget-header'>"+keys[k]+"</th>";
+        html += "<th class='ui-widget-header'>Year</th>";
+        for (var k in lineData) {
+            html += "<th class='ui-widget-header'>"+lineData[k]['ylabel']+"</th>";
         }
         html += "</tr>";
 
         var count = 0;
         
-        for (var y in years) {    
+        for (var y in years) {
             html += "<tr>";
             html += "<td class='line-html-table-years'>"+years[y]+"</td>";
 
-            // keys array contain "years" and data array does not... 
-            // TODO: better data structure
-            for (k=0; k <keys.length-1; k++) {
-                html += "<td align='center'>"+data[k][count]+"</td>";
+            for (k in lineData) {
+                data = lineData[k]['yvalues']
+                html += "<td align='center'>"+data[y]+"</td>";
             }
             html += "</tr>";
             count++;
@@ -735,7 +795,6 @@ Chart = {
 
     plotLineChart: function(lineData, chartContainer) {
 
-        console.log(lineData)
         //var data = lineData.data
         //var keys = lineData.keys
         //var years = lineData.years
@@ -846,7 +905,7 @@ Chart = {
         */
         // add lines
         series.append("svg:path")
-            .attr("d", function(d, i) {console.log(d); return line(d.yvalues)})
+            .attr("d", function(d, i) {return line(d.yvalues)})
             .style("stroke", function(d, i) { return colors[lineCount]})
             .style("stroke-width", "4px")
             //.attr("class", "data");
@@ -863,7 +922,7 @@ Chart = {
                         .on("mouseout", function(){ Chart.hideData();});
 
         }
-        //}, 1500);
+        //}, 500);
     },
 
 
@@ -1060,6 +1119,7 @@ Map = {
             var overlay = overlays[o]
             var pointsString = overlay.points
 
+            console.log(pointsString)
             var points = eval(pointsString)
             var pointsArray = []
             
@@ -1102,6 +1162,9 @@ Map = {
 
     init: function(showDrawingTools) {
 
+        if (!showDrawingTools)
+            Search.init()
+
         if( document.getElementById('map-container') == undefined )
             return;
 
@@ -1114,6 +1177,9 @@ Map = {
                 var geoCoder = new google.maps.Geocoder();
                 geoCoder.geocode({'address': searchLocation, 'partialmatch':true}, Map.getMapBounds);
             }
+
+            $("#map-container").width("100%")
+            $("#map-container").height("600px")
 
             Map.map = new google.maps.Map(document.getElementById('map-container'), {
                 zoom: 15,
@@ -1247,6 +1313,7 @@ Summary = {
 
     init: function() {
 
+        Search.init()
         var reqUrl = $("#jsonListService").attr("value")
         var reqData = {}
         reqData["return_type"] = "Type"
@@ -1288,11 +1355,10 @@ Summary = {
                     numberOfPlants = d.values[0][i]
                 }
             }
-            console.log(numberOfPlants, cumulativeCapacity)
 
             Summary.displaySummaryResults(numberOfPlants, cumulativeCapacity, "summary-overview")
 
-            var newCapArr = Chart.parseChartData($.parseJSON(d.values[0][newCapAddedIndex]))
+            newCapArr = Chart.parseChartData($.parseJSON(d.values[0][newCapAddedIndex]))
             newCapKeys = newCapArr[0]
             newCapYears = newCapArr[1]
             newCapData = newCapArr[2]
@@ -1308,19 +1374,19 @@ Summary = {
                 perfCumulativeChartData.push([annGWhGen.values[v][0], annGWhGen.values[v][1], annCO2Em.values[v][1]])
             }
 
-            var arr = Chart.parseChartData({"keys": perfCumulativeChartKeys, "values": perfCumulativeChartData})
+            arr = Chart.parseChartData({"keys": perfCumulativeChartKeys, "values": perfCumulativeChartData})
             cumKeys = arr[0]
             cumYears = arr[1]
             cumData = arr[2]
         }) 
         .done( function() { 
             var lineData = { "years": cumYears, "data": cumData, "keys": cumKeys };
-            Chart.plotLineChart(lineData, "performance_linechart_cumulative_chart")
-            Chart.plotLineDataTable(lineData, "performance_linechart_cumulative_table")
+            Chart.plotLineChart(arr, "performance_linechart_cumulative_chart")
+            Chart.plotLineDataTable(arr, "performance_linechart_cumulative_table")
             
             lineData = { "years": newCapYears, "data": newCapData, "keys": newCapKeys };
-            Chart.plotLineChart(lineData, "unit_linechart_cumulative_chart")
-            Chart.plotLineDataTable(lineData, "unit_linechart_cumulative_table")
+            Chart.plotLineChart(newCapArr, "unit_linechart_cumulative_chart")
+            Chart.plotLineDataTable(newCapArr, "unit_linechart_cumulative_table")
         })
         .fail( function() { return null; } );
     }

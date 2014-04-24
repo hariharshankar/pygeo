@@ -3,7 +3,7 @@ drop database geoDev;
 create database geoDev;
 use geoDev;
 
-source ~/GEO_DB.sql;
+source ~/Downloads/GEO_DB.sql;
 
 /*combining moderated_history table */
 alter table History add (Moderated_Time_Stamp timestamp null, Moderator_ID int, Accepted tinyint, Comments text);

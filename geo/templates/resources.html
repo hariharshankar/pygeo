@@ -1,3 +1,6 @@
+{% extends "search.html" %}
+{% block body_onload %}Search.init(){% endblock %}
+{% block right_pane_content %}
 <div class='tab-content'>
     {% for v in values %}
     <div class="{{ loop.cycle('odd-row', 'even-row') }}">
@@ -6,3 +9,4 @@
     </div>
     {% endfor %}
 </div>
+{% endblock %}

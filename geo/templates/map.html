@@ -1,4 +1,15 @@
+{% extends "search.html" %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry"></script>
+{% endblock %}
+
+{% block body_onload %}Map.init(){% endblock %}
+
+{% block right_pane_content %}
 <div id="map-metadata">
     <input type="hidden" name="map_json" id="map_json" class="widget_urls" value="{{ map_url }}" />
 </div>
 <div id="map-container"></div>
+{% endblock %}

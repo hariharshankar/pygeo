@@ -76,6 +76,15 @@ body {
     color: #212121;
 }
 
+.ui-widget-header {
+    background: #Fff;
+    border: 0px;
+    border-bottom: 1px solid #ccc;
+    font-size: 1.8em;
+    margin: 10px 0 5px 0;
+    padding: 4px;
+    font-weight: bold;
+}
 
 #login_page {
     font-size: 1.0em;
@@ -107,6 +116,11 @@ body {
 
 .ui-widget input {
     font: 1.0em "EB Garamond", Georgia, serif !important;
+}
+
+.ui-state-default {
+    font-size: 1.6em;
+    background: #fff !important;
 }
 
 .ui-tabs {
@@ -173,11 +187,12 @@ body {
 
 .searchSelectableHeader { 
     list-style-type: none; 
-    margin: 0; 
+    margin-top: 10px; 
     padding: 0; 
     width: 88%; 
     border: 0;
     background: none;
+    font-size: 1.1em;
 }
 
 .searchSelectable { 
@@ -214,16 +229,22 @@ th {
 }
 
 .module-header {
-    margin-top: 10px;
-    margin-bottom: 0;
-    padding: 4px;
-    font-size: 1.1em;
     display: block;
-    font-weight: normal;
     /*
+    margin-bottom: 0;
+    margin-top: 10px;
+    padding: 4px;
+    font-weight: normal;
+    font-size: 1.1em;
     text-align: center;
     font-weight: bold;
     */
+}
+
+.module-container {
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 10px;
 }
 
 .module-content {
@@ -288,9 +309,11 @@ table.line-html-table {
 
 .summary-widget-header {
   vertical-align: top;
+  /*
   text-align: center; 
   font-size: 1.2em;
   padding: 3px;
+  */
   width: 98%;
 }
 

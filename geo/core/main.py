@@ -1,7 +1,8 @@
 from geo.db.query import Select
+import flask
 
 
-class Main():
+class Main(object):
     """
     Utility class for retrieving non-geo-resource centric data.
     """
@@ -9,6 +10,7 @@ class Main():
     def __init__(self, connection):
         #self.connection = connection
         self.select = Select(connection)
+        self.session = flask.session
 
     def get_type_name(self, type_id):
         """
@@ -66,15 +68,19 @@ class Main():
 
         return self.select.process_result_set(result)
 
-    def get_databases(self):
+    def get_databases(self, type_id=None):
         """
         Returns the database names for all types.
 
         :@returns List of tuples: [(db_name),..]
         """
 
+        where = []
+        if type_id:
+            where.append(["Type_ID", "=", type_id])
         result = self.select.read("Type",
-                                  columns=["distinct(Database_Type)"]
+                                  columns=["distinct(Database_Type)"],
+                                  where=where
                                   )
 
         return self.select.process_result_set(result)
@@ -119,12 +125,41 @@ class Main():
         if result.returns_rows:
             return result.first()['Country_ID']
 
+    def get_types_for_country(self, country_id):
+        """
+        Returns all the types for a given country
+
+        :@param country_id: country id or country name
+        :@returns Keys and values as a list of tuples:
+            ['k1', 'k2'], [(type_id, type),..]
+        """
+
+        type_result = self.select.read("History",
+                            columns=["distinct(Type_ID)"],
+                            where=[["Country_ID", "=", country_id]],
+                            order_by=["Type_ID", "asc"])
+
+        types = type_result.fetchall()
+        keys = ['Type_ID', 'Type']
+        values = []
+
+        for t in types:
+            tid = t['Type_ID']
+            result = self.select.read("Type",
+                                    columns=["Type_ID", "Type"],
+                                    where=[["Type_ID", "=", tid]]
+                                    )
+            values.append(result.first().values())
+
+        return keys, values
+
     def get_countries(self, typ):
         """
         Returns all the countries that has data for the given type.
 
         :@param typ: type id or type name
-        :@returns List of tuples: [(country_id, country),..]
+        :@returns Keys and values as a list of tuples:
+            ['k1', 'k2'], [(country_id, country),..]
         """
 
         try:
@@ -175,6 +210,34 @@ class Main():
                                   order_by=["State", "asc"]
                                   )
         return self.select.process_result_set(result)
+
+    def get_search_redirect_url(self, prefix, return_type=None):
+        url = []
+        if not prefix.startswith("/"):
+            prefix = "/" + prefix
+
+        url.append(prefix)
+
+        if not return_type in ['type_summary', 'country_summary']:
+            url.append(self.session.get('pref_db_type', 'powerplants'))
+
+        if not return_type == 'country_summary':
+            url.append(self.session.get('pref_type', "1"))
+
+        url.append(self.session.get('pref_country', "1"))
+
+        if not return_type in ['type_summary', 'country_summary']:
+            url.append(self.session.get('pref_state', "0"))
+
+        return "/".join(url)
+
+    def store_user_pref(self, db_type, country, typ, state):
+
+        self.session['pref_country'] = str(country)
+        self.session['pref_type'] = str(typ)
+        self.session['pref_db_type'] = db_type
+        self.session['pref_state'] = str(state)
+        return
 
 
 if __name__ == "__main__":

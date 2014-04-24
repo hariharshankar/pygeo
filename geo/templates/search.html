@@ -4,10 +4,8 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
-<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry"></script>
 <script src="{{ url_for('static', filename='d3/d3.min.js', _external=True) }}"></script>
 {% endblock %}
-{% block body_onload %}Search.init(){% endblock %}
 {% block content %}
 <div id="searchWrapper">
     <div id="searchLeftPane">
@@ -15,19 +13,13 @@
         <div id='searchType' class='searchSelectable'></div>
         <div id='searchCountry' class='searchSelectable'></div>
         <div id='searchState' class='searchSelectable'></div>
-        <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Update</button></div>
+        <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
 
         <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
-        <input type="hidden" name="jsonMapService" id="jsonMapService" value="{{ url_for('map.map') }}" />
     </div>
     <div id="searchRightPane">
-        <div id='rightPaneTabs'>
-            <ul>
-                <li><a href='resources'>List of Resources</a></li>
-                <li><a href='summary'>Summary</a></li>
-                <li><a href='map'>Map</a></li>
-                <li><a href='analysis'>Analysis</a></li>
-            </ul>
+        <div id='rightPane'>
+            {% block right_pane_content %}{% endblock %}
         </div>
     </div>
 </div>

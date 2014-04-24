@@ -2,10 +2,10 @@ import flask
 from geo.db import connection
 import geo.views.form as form
 import geo.views.resources as resources
-import geo.views.search as search
 import geo.views.map
 import geo.views.form_submit as formsubmit
-import geo.views.summary as summary
+import geo.views.type_summary as type_summary
+import geo.views.country_summary as country_summary
 import geo.views.user as user
 import geo.views.index as index
 
@@ -27,7 +27,8 @@ menu.db = conn
 geo.views.map.db = conn
 location.db = conn
 formsubmit.db = conn
-summary.db = conn
+type_summary.db = conn
+country_summary.db = conn
 summarydata.db = conn
 linechart.db = conn
 user.db = conn
@@ -36,10 +37,10 @@ index.db = conn
 # html
 app.register_blueprint(form.mod)
 app.register_blueprint(resources.mod)
-app.register_blueprint(search.mod)
 app.register_blueprint(geo.views.map.mod)
 app.register_blueprint(formsubmit.mod)
-app.register_blueprint(summary.mod)
+app.register_blueprint(type_summary.mod)
+app.register_blueprint(country_summary.mod)
 app.register_blueprint(user.mod)
 app.register_blueprint(index.mod)
 

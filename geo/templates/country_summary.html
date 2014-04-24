@@ -1,0 +1,21 @@
+{% extends "search.html" %}
+{% block body_onload %}Summary.init(){% endblock %}
+{% block right_pane_content %}
+<div id="summary-results ui-widget ui-helper-reset" class='summary-results'>
+
+    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>Overview</h3>
+    <div>
+        {{ overview|safe }}
+    </div>
+
+    {% for m in modules %}
+        <div class="module-container ui-corner-bottom ui-widget-content">
+          <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>{{ m.heading }}</h3>
+          <div style="font-size: 1.1em;">
+              {{ m.content|safe }}
+          </div>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

@@ -24,12 +24,14 @@
         <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form" style="margin-left: 305px;">
         <div class="all-modules ui-widget ui-helper-reset">
             {% for m in modules %}
+                <div class="module-container ui-corner-bottom ui-widget-content">
                 <div class="ui-widget-header ui-corner-top module-header {{ m.module_header_class }}">
                     <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
                     {{ m.module_heading }}
                 </div>
-                <div class="module-content ui-corner-bottom ui-widget-content" id="{{ m.module_id }}">
+                <div class="module-content" id="{{ m.module_id }}">
                     {{ m.module_content|safe }}
+                </div>
                 </div>
             {% endfor %}
             

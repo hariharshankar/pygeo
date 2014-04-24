@@ -13,15 +13,19 @@
     <script src="{{ url_for('static', filename='js/sha1.js', _external=True) }}"></script>
     <script>
         $( function() {
-            $("#account_button").hide();
-            $("#login_button").hide();
-            $( "#account_info" ).hide().menu();
-            $( "#energy_resources_type" ).hide().menu();
+            //$("#account_button").hide();
+            //$("#login_button").hide();
+            //$( "#account_info" ).hide().menu();
+            //$( "#energy_resources_type" ).hide().menu();
             $( "#energy_resources" ).button({
-                icons: {
-                    secondary: "ui-icon-triangle-1-s"
-                }
+                //icons: {
+                //    secondary: "ui-icon-triangle-1-s"
+                //}
             })
+            .click( function() {
+                window.location = "/resources/";
+            });
+            /*
             .click( function() {
                 var menu = $("#energy_resources_type").show().position({
                     my: "right top",
@@ -33,9 +37,24 @@
                 });
                 return false;
             });
-            $( "#country_summary" ).button();
-            $( "#analyze" ).button();
-            $( "#map_data" ).button();
+            */
+            $( "#country_summary" ).button()
+            .click( function() {
+                window.location = "/summary/country/";
+            });
+            $( "#type_summary" ).button()
+            .click( function() {
+                window.location = "/summary/type/";
+            });
+            $( "#analyze" ).button()
+            .click( function() {
+                window.location = "/analyze/";
+            });
+            $( "#map_data" ).button()
+            .click( function() {
+                window.location = "/map/";
+            });
+            /*
             $( "#download_data" ).button();
 
             $( "#login_page" ).dialog({
@@ -56,9 +75,11 @@
             else {
                 showLoginMenu()
             }
+            */
 
         });
 
+        /*
         function showLoginMenu() {
 
             $( "#login_button" )
@@ -111,6 +132,7 @@
                 return false;
             });
         }
+        */
 
     </script>
 
@@ -125,17 +147,21 @@
     <div id="toolbar" class="ui-widget-header ui-corner-all">
         <button id="energy_resources" name="energy_resources">energy resources</button>
         |
-        <button id="country_summary" name="country_summary">country summary</button>
+        <button id="country_summary" name="country_summary">summary by country</button>
         |
-        <button id="analyze" name="analyze">analyze</button>
+        <button id="type_summary" name="type_summary">summary by type</button>
         |
         <button id="map_data" name="map_data">map data</button>
         |
+        <button id="analyze" name="analyze">analyze</button>
+        <!--
         <button id="download_data" name="download_data">download data</button>
         |
         <button id="login_button" name="login_button">login</button>
         <button id="account_button" name="account_button">account</button>
+        -->
     </div>
+    <!--
     <ul id="energy_resources_type">
         <li><a href="#">Power Plants</a></li>
         <li><a href="#">Fuels and Resources</a></li>
@@ -162,6 +188,7 @@
             <button id="login_submit" style="margin: 5px;">Login</button>
         </div>
     </div>
+    -->
     <div id="wrapper">
         {% block content %}{% endblock %}
     </div>
