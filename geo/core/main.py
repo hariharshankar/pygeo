@@ -1,3 +1,7 @@
+"""
+A utility class for the views.
+"""
+
 from geo.db.query import Select
 import flask
 
@@ -37,16 +41,18 @@ class Main(object):
         """
 
         try:
-            t = int(type_name)
+            type_id = int(type_name)
             #FIXME: check if the id is valid
             # this is already an id, so return
-            return t
-        except:
+            return type_id
+        except ValueError:
             pass
 
         result = self.select.read("Type",
                                   columns=["Type_ID"],
-                                  where=[["Type", "like", "'" + type_name + "'"]]
+                                  where=[["Type",
+                                          "like",
+                                          "'" + type_name + "'"]]
                                   )
 
         if result.returns_rows:
@@ -62,7 +68,8 @@ class Main(object):
 
         result = self.select.read("Type",
                                   columns=["Type_ID", "Type"],
-                                  where=[["Database_Type", "like", "'" + db_name + "'"]],
+                                  where=[["Database_Type", "like",
+                                          "'" + db_name + "'"]],
                                   order_by=["Type_ID", "asc"]
                                   )
 
@@ -110,16 +117,17 @@ class Main(object):
         """
 
         try:
-            c = int(country_name)
+            country_id = int(country_name)
             #FIXME: check if the id is valid
             # this is already an id, so return
-            return c
-        except:
+            return country_id
+        except ValueError:
             pass
 
         result = self.select.read("Country",
                                   columns=["Country_ID"],
-                                  where=[["Country", "like", "'" + country_name + "'"]]
+                                  where=[["Country", "like",
+                                          "'" + country_name + "'"]]
                                   )
 
         if result.returns_rows:
@@ -135,20 +143,21 @@ class Main(object):
         """
 
         type_result = self.select.read("History",
-                            columns=["distinct(Type_ID)"],
-                            where=[["Country_ID", "=", country_id]],
-                            order_by=["Type_ID", "asc"])
+                                       columns=["distinct(Type_ID)"],
+                                       where=[["Country_ID", "=",
+                                               country_id]],
+                                       order_by=["Type_ID", "asc"])
 
         types = type_result.fetchall()
         keys = ['Type_ID', 'Type']
         values = []
 
-        for t in types:
-            tid = t['Type_ID']
+        for typ in types:
+            tid = typ['Type_ID']
             result = self.select.read("Type",
-                                    columns=["Type_ID", "Type"],
-                                    where=[["Type_ID", "=", tid]]
-                                    )
+                                      columns=["Type_ID", "Type"],
+                                      where=[["Type_ID", "=", tid]]
+                                      )
             values.append(result.first().values())
 
         return keys, values
@@ -164,16 +173,16 @@ class Main(object):
 
         try:
             type_id = int(typ)
-        except ValueError as e:
+        except ValueError:
             type_id = self.get_type_id(typ)
 
         if not type_id:
             return
 
         country_result = self.select.read("History",
-                                     columns=["distinct(Country_ID)"],
-                                     where=[["Type_ID", "=", type_id]]
-                                     )
+                                          columns=["distinct(Country_ID)"],
+                                          where=[["Type_ID", "=", type_id]]
+                                          )
         countries = country_result.fetchall()
         keys = ["Country_ID", "Country"]
         values = []
@@ -181,9 +190,9 @@ class Main(object):
         for country in countries:
             cid = country['Country_ID']
             result = self.select.read("Country",
-                                  columns=["Country_ID", "Country"],
-                                  where=[["Country_ID", "=", cid]]
-                                  )
+                                      columns=["Country_ID", "Country"],
+                                      where=[["Country_ID", "=", cid]]
+                                      )
             values.append(result.first().values())
         values.sort()
         return keys, values
@@ -198,7 +207,7 @@ class Main(object):
 
         try:
             country_id = int(country)
-        except ValueError as e:
+        except ValueError:
             country_id = self.get_country_id(country)
 
         if not country_id:
@@ -212,6 +221,11 @@ class Main(object):
         return self.select.process_result_set(result)
 
     def get_search_redirect_url(self, prefix, return_type=None):
+        """
+        Creates redirect urls for search interfaces using default
+        values in cookies.
+        """
+
         url = []
         if not prefix.startswith("/"):
             prefix = "/" + prefix
@@ -232,16 +246,13 @@ class Main(object):
         return "/".join(url)
 
     def store_user_pref(self, db_type, country, typ, state):
+        """
+        Store user choices for country, type, etc in cookies
+        for easy loading default url params when loading.
+        """
 
         self.session['pref_country'] = str(country)
         self.session['pref_type'] = str(typ)
         self.session['pref_db_type'] = db_type
         self.session['pref_state'] = str(state)
         return
-
-
-if __name__ == "__main__":
-    from geo.db.connection import Db
-    d = Db()
-    m = Main(d)
-    print(m.get_type_name(1))

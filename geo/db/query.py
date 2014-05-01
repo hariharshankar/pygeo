@@ -1,14 +1,25 @@
+"""
+Builds and executes all select sql statements.
+"""
 
-class Select():
+
+class Select(object):
+    """
+    Builds and executes all select sql statements.
+    """
 
     def __init__(self, db):
         """
         Query the database.
         :param db: a valid database connection.
         """
-        self.db = db
+        self.db_conn = db
 
-    def read(self, table_name, columns=[], where=[], order_by=[], limit=[]):
+    def read(self, table_name,
+             columns=None,
+             where=None,
+             order_by=None,
+             limit=None):
         """
         Fetch rows from database.
 
@@ -27,31 +38,31 @@ class Select():
 
         sql = ["SELECT"]
 
-        if len(columns) == 0:
+        if not columns or len(columns) == 0:
             sql.append("*")
         else:
             sql.append(",".join([c for c in columns if c.find(" ") < 0]))
 
         sql.extend(["FROM", table_name])
 
-        if len(where) > 0 and len(where) % 2 == 1:
+        if where and len(where) > 0 and len(where) % 2 == 1:
             sql.append("WHERE")
-            for i, w in enumerate(where):
-                if i % 2 == 0 and len(w) == 3:
-                    sql.extend([str(q) for q in w])
-                elif i % 2 == 1 and len(w) == 1:
-                    sql.append(w[0])
+            for i, whe in enumerate(where):
+                if i % 2 == 0 and len(whe) == 3:
+                    sql.extend([str(q) for q in whe])
+                elif i % 2 == 1 and len(whe) == 1:
+                    sql.append(whe[0])
                 else:
                     sql.pop()
 
-        if len(order_by) > 0:
+        if order_by and len(order_by) > 0:
             sql.append("ORDER BY")
             sql.extend(order_by)
 
-        if len(limit) > 0:
+        if limit and len(limit) > 0:
             sql.append("LIMIT")
             sql.append(",".join(limit))
-        return self.db.session.execute(" ".join(sql))
+        return self.db_conn.session.execute(" ".join(sql))
 
     def read_column_names(self, table_name, where=None):
         """
@@ -63,7 +74,7 @@ class Select():
         if where:
             sql = sql + " LIKE '%s'" % where
 
-        return self.db.session.query("Field", "Type")\
+        return self.db_conn.session.query("Field", "Type")\
             .from_statement(sql).all()
 
     def process_result_set(self, result):
@@ -75,7 +86,6 @@ class Select():
         keys = result.keys()
         values = []
         if not result.returns_rows:
-            print("No rows in db.")
             return keys, values
 
         rows = result.fetchall()

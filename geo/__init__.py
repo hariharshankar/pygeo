@@ -1,7 +1,13 @@
+"""
+Registering all the views in flask.
+Includes both html and json end points.
+"""
+
 import flask
 from geo.db import connection
 import geo.views.form as form
 import geo.views.resources as resources
+import geo.views.moderation as moderation
 import geo.views.map
 import geo.views.form_submit as formsubmit
 import geo.views.type_summary as type_summary
@@ -33,10 +39,12 @@ summarydata.db = conn
 linechart.db = conn
 user.db = conn
 index.db = conn
+moderation.db = conn
 
 # html
 app.register_blueprint(form.mod)
 app.register_blueprint(resources.mod)
+app.register_blueprint(moderation.mod)
 app.register_blueprint(geo.views.map.mod)
 app.register_blueprint(formsubmit.mod)
 app.register_blueprint(type_summary.mod)

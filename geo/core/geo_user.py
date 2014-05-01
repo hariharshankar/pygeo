@@ -1,7 +1,14 @@
+"""
+A GEO User
+"""
+
 from geo.db.query import Select
 
 
-class GeoUser():
+class GeoUser(object):
+    """
+    A Geo User
+    """
 
     def __init__(self, connection, user_id=None, username=None):
         """
@@ -13,7 +20,9 @@ class GeoUser():
 
         self.select = Select(connection)
 
-        user = self.get_user_info(self.select, username=username, user_id=user_id)
+        user = self.get_user_info(self.select,
+                                  username=username,
+                                  user_id=user_id)
 
         self.user_id = user['User_ID']
         self.username = user['Username_require']
@@ -23,6 +32,9 @@ class GeoUser():
 
     @staticmethod
     def get_user_info(select, user_id=None, username=None):
+        """
+        Gets the user's information, given a user id or name.
+        """
 
         result = None
         if user_id:
@@ -30,7 +42,9 @@ class GeoUser():
             if result.rowcount == 0:
                 raise LookupError("User ID %s does not exist." % user_id)
         elif username:
-            result = select.read("User", where=[["Username_require", "LIKE", "'"+username+"'"]])
+            result = select.read("User",
+                                 where=[["Username_require", "LIKE",
+                                         "'" + username + "'"]])
             if result.rowcount == 0:
                 raise LookupError("Username %s does not exist." % username)
         if not result:
@@ -39,4 +53,7 @@ class GeoUser():
         return result.first()
 
     def validate_user(self, password):
+        """
+        Validates a user's password.
+        """
         return self.__password == password

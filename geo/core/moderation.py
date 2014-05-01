@@ -1,12 +1,19 @@
+"""
+Handles moderation and moderated resources.
+"""
+
 from geo.db.query import Select
 from geo.core.main import Main
 from geo.core.geo_resource import GeoResource
 
 
-class Moderation():
+class Moderation(object):
+    """
+    Handles moderation and moderated resources.
+    """
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db_conn):
+        self.db_conn = db_conn
 
     def get_all_resources(self, country=0, typ=0):
         """
@@ -20,12 +27,12 @@ class Moderation():
         if not country or not typ:
             return ([], [])
 
-        main = Main(self.db)
+        main = Main(self.db_conn)
 
         type_id = main.get_type_id(typ)
         country_id = main.get_country_id(country)
 
-        select = Select(self.db)
+        select = Select(self.db_conn)
 
         # get the latest description id for all resources
         description_ids = select.read("History",
@@ -46,12 +53,12 @@ class Moderation():
 
         type_name = main.get_type_name(type_id)
 
-        for r in description_ids:
-            geo_resource = GeoResource(self.db,
-                                       r['Parent_Plant_ID'],
-                                       type_id=r['Type_ID'],
-                                       country_id=r['Country_ID'],
-                                       state_id=r['State_ID'])
+        for res in description_ids:
+            geo_resource = GeoResource(self.db_conn,
+                                       res['Parent_Plant_ID'],
+                                       type_id=res['Type_ID'],
+                                       country_id=res['Country_ID'],
+                                       state_id=res['State_ID'])
             latest_id = geo_resource.get_latest_revision_id()
             resource_name = geo_resource.get_resource_name(type_name)
             values.append([str(latest_id), unicode(resource_name, "utf-8")])

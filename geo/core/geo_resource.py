@@ -1,9 +1,16 @@
+"""
+Defining an energy resource.
+"""
+
 from geo.db.query import Select
 from geo.core.main import Main
 from geo.serializations.html import Html
 
 
 class GeoResource(Html):
+    """
+    Defines an energy resource.
+    """
 
     parent_plant_id = 0
     type_id = 0
@@ -11,10 +18,14 @@ class GeoResource(Html):
     state_id = 0
     description_id = 0
 
-    def __init__(self, connection, description_id, type_id=None, country_id=None, state_id=None):
+    def __init__(self, connection, description_id,
+                 type_id=None, country_id=None, state_id=None):
         """
         The primitive class for all geo resources.
         """
+
+        Html.__init__(self)
+
         if not description_id or int(description_id) == 0:
             raise AttributeError("Description ID must be an int > 0")
 
@@ -36,9 +47,17 @@ class GeoResource(Html):
         self.type_name = self.main.get_type_name(self.type_id)
 
     def __get_ids(self):
-        result = self.select.read("History", where=[["Description_ID", "=", self.description_id]])
+        """
+        Private class, gets the necessary ids from the History
+        table for a resource.
+        """
+
+        result = self.select.read("History",
+                                  where=[["Description_ID", "=",
+                                          self.description_id]])
         if result.rowcount == 0:
-            raise LookupError("Description ID %s does not exist." % self.description_id)
+            raise LookupError("Description ID %s does not exist." %
+                              self.description_id)
 
         ids = result.first()
         self.type_id = ids['Type_ID']
@@ -57,14 +76,14 @@ class GeoResource(Html):
         if self.parent_plant_id == 0:
             self.__get_ids()
 
-        id = self.select.read("History", columns=["max(Description_ID)"],
-                         where=[["Parent_Plant_ID", "=", self.parent_plant_id],
-                                ["and"], ["Accepted", "=", "1"]])
+        ids = self.select.read("History", columns=["max(Description_ID)"],
+                               where=[["Parent_Plant_ID", "=",
+                                       self.parent_plant_id],
+                                      ["and"], ["Accepted", "=", "1"]])
 
-        res = id.first()
+        res = ids.first()
         self.latest_revision_id = res[0]
         return self.latest_revision_id
-
 
     def get_resource_name(self, type_name):
         """
@@ -77,15 +96,9 @@ class GeoResource(Html):
 
         desc_table = type_name + "_Description"
         desc = self.select.read(desc_table,
-                    columns=["Name_omit"],
-                    where=[["Description_ID", "=", self.get_latest_revision_id()]]
-                    )
+                                columns=["Name_omit"],
+                                where=[["Description_ID", "=",
+                                        self.get_latest_revision_id()]]
+                                )
         self.name = desc.first()['Name_omit']
         return self.name
-
-if __name__ == "__main__":
-    from geo.db.connection import Db
-
-    d = Db()
-    g = GeoResource(d, 1222)
-    g.generate_editable()
