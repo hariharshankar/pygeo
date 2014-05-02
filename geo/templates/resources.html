@@ -1,11 +1,11 @@
 {% extends "search.html" %}
-{% block body_onload %}Search.init(){% endblock %}
+{% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block right_pane_content %}
 <div class='tab-content'>
     {% for v in values %}
     <div class="{{ loop.cycle('odd-row', 'even-row') }}">
         <span class="row-number">{{ loop.index }}.</span>
-        <a href="{{ baseurl + v[0] }}">{{ v[1] }}</a>
+        <a href="{{ baseurl + v[0] }}" target="_blank">{{ v[1] }}</a>
     </div>
     {% endfor %}
 </div>

@@ -11,17 +11,13 @@
     <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js', _external=True) }}"></script>
     <script src="{{ url_for('static', filename='chosen_v1.0.0/chosen.jquery.min.js', _external=True) }}"></script>
     <script src="{{ url_for('static', filename='js/sha1.js', _external=True) }}"></script>
+    <script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
     <script>
         $( function() {
-            //$("#account_button").hide();
-            //$("#login_button").hide();
-            //$( "#account_info" ).hide().menu();
+            $( "#account_info" ).hide();
+            $( "#login_page" ).hide();
             //$( "#energy_resources_type" ).hide().menu();
-            $( "#energy_resources" ).button({
-                //icons: {
-                //    secondary: "ui-icon-triangle-1-s"
-                //}
-            })
+            $( "#energy_resources" ).button()
             .click( function() {
                 window.location = "/resources/";
             });
@@ -54,20 +50,7 @@
             .click( function() {
                 window.location = "/map/";
             });
-            /*
-            $( "#download_data" ).button();
-
-            $( "#login_page" ).dialog({
-                autoOpen: false,
-                height: 250,
-                width: 300,
-                modal: true,
-                title: "Login - GEO",
-                hide: {
-                    effect: "blind",
-                    duration: 1000
-                }
-            });
+            //$( "#download_data" ).button();
 
             if( $("#logged_username").val() != null ) {
                 showAccountMenu()
@@ -75,19 +58,12 @@
             else {
                 showLoginMenu()
             }
-            */
-
+            
+            Search.init();
         });
 
-        /*
         function showLoginMenu() {
 
-            $( "#login_button" )
-            .button()
-            .show()
-            .click( function() {
-                $( "#login_page" ).dialog("open");
-            });
             $("#login_submit")
                 .button()
                 .click( function() {
@@ -105,7 +81,6 @@
                             $("#login_message")
                                 .html(t)
                                 .addClass("ui-state-highlight");
-                            $("#login_page").dialog("close");
                             location.reload();
                         }
                     });
@@ -113,26 +88,9 @@
         }
 
         function showAccountMenu() {
-            $("#login_button").hide()
-            $("#account_button").show()
-            $( "#account_button" ).button({
-                icons: {
-                    secondary: "ui-icon-triangle-1-s"
-                }
-            })
-            .click( function() {
-                var menu = $("#account_info").show().position({
-                    my: "right top",
-                    at: "right bottom",
-                    of: this
-                });
-                $( document ).one("click", function() {
-                    menu.hide();
-                });
-                return false;
-            });
+            $("#login_page").hide()
+            $("#account_info").show()
         }
-        */
 
     </script>
 
@@ -156,40 +114,54 @@
         <button id="analyze" name="analyze">analyze</button>
         <!--
         <button id="download_data" name="download_data">download data</button>
-        |
-        <button id="login_button" name="login_button">login</button>
-        <button id="account_button" name="account_button">account</button>
         -->
     </div>
-    <!--
-    <ul id="energy_resources_type">
-        <li><a href="#">Power Plants</a></li>
-        <li><a href="#">Fuels and Resources</a></li>
-        <li><a href="#">Transmission</a></li>
-        <li><a href="#">Consumers</a></li>
-    </ul>
-    <ul id="account_info">
+    <div id="wrapper">
+        <div id="leftPane">
+            <div class='leftPane-module-container'>
+                <div class="leftPane-header">
+                    <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                    <h3>Search</h3>
+                </div>
+                <div id="searchLeftPane" class="leftPane-module">
+                    <div id='searchDatabase_Type' class='searchSelectable'></div>
+                    <div id='searchType' class='searchSelectable'></div>
+                    <div id='searchCountry' class='searchSelectable'></div>
+                    <div id='searchState' class='searchSelectable'></div>
+                    <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
+
+                    <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
+                </div>
+            </div>
+            <div class='leftPane-module-container'>
+                <div class="leftPane-header">
+                    <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                    <h3>Login</h3>
+                </div>
+                <div id="leftPane-login" class='leftPane-module'>
+                    <div id="login_page">
+                        <fieldset>
+                            <label for="username">Username:</label>
+                            <input type="text" size="10" id="username" name="username" class="text ui-widget-content ui-corner-all"/>
+                            <label for="password">Password:</label>
+                            <input type="password" size="10" id="password" name="password" class="text ui-widget-content ui-corner-all"/>
+                        </fieldset>
+                        <button id="login_submit" style="margin: 5px;">Login</button>
+                        <div id="login_message" style="padding: 5px;"></div>
+                    </div>
+                    <div id="account_info">
         {% if session.username %}
             <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
             <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
             <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
-            <li class="ui-state-disabled">Logged in as {{session.username}}</li>
+            <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
+            <a href="{{ url_for('user.logout', next=request.url, _external=True) }}">Logout</a>
         {% endif %}
-        <li><a href="{{ url_for('user.logout', next=request.url, _external=True) }}">Logout</a></li>
-    </ul>
-    <div id="login_page">
-            <fieldset>
-                <label for="username">Username:</label>
-                <input type="text" size="10" id="username" name="username" class="text ui-widget-content ui-corner-all"/>
-                <label for="password">Password:</label>
-                <input type="password" size="10" id="password" name="password" class="text ui-widget-content ui-corner-all"/>
-                <div id="login_message" style="height: 20px; padding: 5px;"/>
-            </fieldset>
-            <button id="login_submit" style="margin: 5px;">Login</button>
-        </div>
     </div>
-    -->
-    <div id="wrapper">
+                </div>
+            </div>
+            {% block user_pref %}{% endblock %}
+        </div>
         {% block content %}{% endblock %}
     </div>
 </body>

@@ -21,48 +21,8 @@ Geo = {
     searchState_Default: "0",
     searchTab_Default: "list",
 
-    getUrlParameter: function(name) {
-
-        if (location.search.length > 0) {
-            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
-        }
-        locs = Geo.getPageUrl().replace("http://", "").split("/");
-        
-        name = name.toLowerCase()
-        loc_cursor = 2;  // skips domain name
-        if (['type', 'country'].indexOf(locs[loc_cursor]) >= 0) {
-            if (name == "database_type") {
-                return null;
-            }
-            else if (name == "state") {
-                return null;
-            }
-            else if (name == "type" && locs[loc_cursor] == "type") {
-                return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
-            }
-            else if (name == "type" && locs[loc_cursor] == "country") {
-                return null;
-            }
-            else if (name == "country" && locs[loc_cursor] == "type") {
-                return (locs[loc_cursor+2] != undefined) ? locs[loc_cursor+2] : "";
-            }
-            else if (name == "country" && locs[loc_cursor] == "country") {
-                return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
-            }
-        }
-        
-        if (name ==  "database_type") {
-            return (locs[loc_cursor] != undefined) ? locs[loc_cursor] : "";
-        }
-        else if (name == "type") {
-            return (locs[loc_cursor+1] != undefined) ? locs[loc_cursor+1] : "";
-        }
-        else if (name == "country") {
-            return (locs[loc_cursor+2] != undefined) ? locs[loc_cursor+2] : "";
-        }
-        else if (name == "state") {
-            return (locs[loc_cursor+3] != undefined) ? locs[loc_cursor+3] : "";
-        }
+    getUserPref: function(name) {
+        return $("#user_pref_"+name).val()
     },
 
     getPageUrl: function() {
@@ -155,12 +115,6 @@ Search = {
         params = ""
         $(".searchSelectable").each(function() {
             var key = $(this).attr("id").replace("search", "").toLowerCase()
-            /*
-            var value = $(this).children(".ui-selected").text()
-            if (value != "") {
-                params[key] = value.toLowerCase()
-            }
-            */
             var value = $(this).next().next().find(".chosen-single").text()
             if ($(this).next().attr('disabled') != 'disabled') {
 
@@ -173,7 +127,6 @@ Search = {
                     }
                 });
             }
-            //params[key] = value.toLowerCase()
         })
         return params
     },
@@ -191,68 +144,8 @@ Search = {
         })    
     },
 
-    /*
-    createRightPaneTabs: function() {
-        $( "#rightPaneTabs" ).tabs({
-            load: function (event, ui) {
-                if (ui.tab[0].textContent == "Summary") {
-                    Summary.init()
-                }
-                else if (ui.tab[0].textContent == "Map") {
-                    var map_container = $("#map-container")
-                    map_container.css("weight", map_container.parent().width()-5)
-                    map_container.css("height", "800")
-                    map_container.css("padding", "1px")
-
-                    Map.init(false)
-                }
-            },
-            beforeLoad: function (event, ui) {
-                // reset the url to take new config params
-                params = {}
-                params['type'] = Geo.getUrlParameter("type")
-                params['country'] = Geo.getUrlParameter("country")
-                params['state'] = Geo.getUrlParameter("state")
-
-                var tab = ui.tab.text().split(" ")[0].toLowerCase()
-                if (tab != Geo.getUrlParameter("tab")) {
-                    event.preventDefault()
-                    if (!event.originalEvent) {
-                        console.log("cancelled: " + tab)
-                        return
-                    }
-                    params['tab'] = tab
-                    var url = Geo.getPageUrl() + "?" + $.param(params)
-                    document.location.href = url
-                }
-                ui.ajaxSettings.url = ui.ajaxSettings.url + "?" + $.param(params)
-            }
-        });
-        var reqTab = Search.searchTab
-        var i=0
-        $("#rightPaneTabs ul li").each( function() {
-            var tabTitle = $(this).text().toLowerCase()
-            if(tabTitle.search(reqTab.toLowerCase()) >= 0) {
-                $("#rightPaneTabs").tabs({active: i})
-            }
-            i++
-        })
-    },
-    */
-
     createSelectables: function(t) {
         if ($(t).attr("id") == "searchUpdateButton") {
-            //Search.createRightPaneTabs()
-            /*
-            base_url = Geo.getPageUrl()
-            
-            params = Search.getUserValues()
-            //updateUrl = base_url + "?" + $.param(params)
-            b = base_url.replace("http://", "").split('/')
-            new_url = "http://" + b[0] + "/" + b[1] + params
-            if (base_url != new_url) 
-                window.location.href = new_url;
-            */
             return;
         }
         var type = $(t).attr("id").replace("search", "")
@@ -268,24 +161,11 @@ Search = {
              
             data[prevType] = $(this).next().next().children('.chosen-single').text()
         });
-        //var postData = JSON.stringify(data)
         Search.getSelectValues(url + "?" + $.param(data), null, "search"+type)
             
         var id = $(t).attr("id")
 
         Search.selectableIds.push($(t).attr("id"))
-        
-        
-        /*
-        $(t).selectable({
-            selected: function(event, ui) {
-            },
-            create: function(event, ui) {
-                Search.selectableIds.push($(t).attr("id"))
-                Search.createSelectables($(t).next())
-            }
-        });
-        */
     },
     
     plantListPostData: {},
@@ -293,52 +173,10 @@ Search = {
     init: function() {
         var shdReloadPage = false
         var params = {}
-        /*
-        if (Geo.getUrlParameter("database_type") == null) {
-            params['database_type'] = Geo.searchDatabase_Type_Default 
-            shdReloadPage = true
-        }
-        else {
-            params['database_type'] = Geo.getUrlParameter("database_type")
-        }
-
-        if (Geo.getUrlParameter("type") == null) {
-            params['type'] = Geo.searchType_Default
-            shdReloadPage = true
-        }
-        else {
-            params['type'] = Geo.getUrlParameter("type")
-        }
-        if (Geo.getUrlParameter("country") == null) {
-            params['country'] = Geo.searchCountry_Default
-            shdReloadPage = true
-        }
-        else {
-            params['country'] = Geo.getUrlParameter("country")
-        }
-        if (Geo.getUrlParameter("state") == null) {
-            params['state'] = Geo.searchState_Default
-            shdReloadPage = true
-        }
-        else {
-            params['state'] = Geo.getUrlParameter("state")
-        }
-        */
-
-        /*
-        url = ""
-        for (k in params) {
-            url += "/" + params[k]
-        }
-        if (shdReloadPage) {
-            window.location.href = window.location.href.split("?")[0] + $.param(params)
-            return;
-        }
-        */
-        params['database_type'] = Geo.getUrlParameter("database_type")
-        params['type'] = Geo.getUrlParameter("type")
-        params['country'] = Geo.getUrlParameter("country")
-        params['state'] = Geo.getUrlParameter("state")
+        params['database_type'] = Geo.getUserPref("db_type")
+        params['type'] = Geo.getUserPref("type")
+        params['country'] = Geo.getUserPref("country")
+        params['state'] = Geo.getUserPref("state")
 
         Search.searchDatabase_Type = params['database_type']
         Search.searchType = params['type']
@@ -356,15 +194,42 @@ Search = {
             params = Search.getUserValues()
             base_url = Geo.getPageUrl()
             
-            //updateUrl = base_url + "?" + $.param(params)
             b = base_url.replace("http://", "").split('/')
-            url = "http://" + b[0] + "/" + b[1];
-            if (['type', 'country'].indexOf(b[2]) >= 0) {
-                url += "/" + b[2];
+            url = "http://" + b[0] + "/";
+
+            if (['resources', 'summary', 'map', 'analyze'].indexOf(b[2]) >= 0) {
+                url += b[1];
+                if (['type', 'country'].indexOf(b[2]) >= 0) {
+                    url += "/" + b[2];
+                }
             }
-            //console.log(url+ params)
+            else {
+                url += "resources"
+            }
             window.location.href = url + params
         })
+
+        $(".leftPane-header").click( function(event) {
+            var panel = $(this).next();
+            console.log(panel)
+            var isOpen = panel.is(":visible");
+
+            panel[isOpen? 'slideUp': 'slideDown']()
+            .trigger(isOpen? 'hide': 'show');
+
+            if (isOpen) {
+                $($(this).children()[0]).switchClass("ui-icon-circle-minus", "ui-icon-circle-plus");
+                $(this).addClass("ui-corner-bottom");
+                $(this).addClass("ui-accordion-header")
+            }
+            else {
+                $($(this).children()[0]).switchClass("ui-icon-circle-plus", "ui-icon-circle-minus");
+                $(this).removeClass("ui-corner-bottom");
+                $(this).removeClass("ui-accordion-header")
+            }
+
+            return false;
+        });
     }
 }
 
@@ -372,11 +237,9 @@ Search = {
 Form = {
     createSingleRowButtons: function() {
         var button = '';
-        //button += "<div><span>";
         button += "<button class='add-single-row-button'>Add another row</button>";
         button += "</span><span>";
         button += "<button class='remove-single-row-button'>Delete selected row</button>";
-        //button += "</span></div>"
         return button;
     },
 
@@ -431,7 +294,6 @@ Form = {
                 if (data['values'].length > 0) {
                     d = Chart.parseChartData(data);
 
-                    //var lineData = { "years": d[1], "data": d[2], "keys": d[0] };
                     Chart.plotLineChart(d, "performance_chart")
                     $("#performance_chart").dialog("open");
                 }
@@ -481,35 +343,15 @@ Form = {
             $(this).next().append(Form.createSingleRowButtons());
         });
 
-        /*
-        $(".single-rows").parent().each( function() {
-            $(this).children().first().each( function() {
-                $(this).first().prepend("<th></th>")
-            })
-        })
-
-        $(".single-rows").each( function() {
-            var checkbox = "<td><input type='checkbox'></td>"
-            $(this).prepend(checkbox)
-        })
-        */
-
         $(".add-single-row-button")
             .button()
             .click(function(event) {
                 event.preventDefault();
-                //var parentTable = $(this).parent().children().first()
                 $(this).parent().children().each( function() {
                     if ($(this)[0].tagName.toLowerCase() == "table") {
                         var parentTable = $(this) 
                         var newRow = $(parentTable).find(".single-rows").last().html()
                         newRow = "<tr>" + newRow + "</tr>"
-                        
-                        /*
-                        var indexElement = $(newRow).children().first()
-                        var index = parseInt(indexElement.html()) + 1
-                        indexElement.html(index.toString())
-                        */
                         
                         var index = 0;
                         $(parentTable).children().first().children().each( function() {
@@ -613,114 +455,6 @@ Chart = {
         $("#"+tableContainer).append(html)
     },
 
-    /*
-    plotPieChart: function(pieData, chartContainer) {
-
-        var data = []
-        for (var k in pieData) {
-            data.push(pieData[k])
-        }
-
-        // define dimensions of graph
-        var m = [80, 85, 80, 80]; // margins
-        var w = $("#"+chartContainer).width() - m[1] - m[3]; // width
-        var h = $("#"+chartContainer).height() - m[0] - m[2]; // height
-        var radius = Math.min(w, h) / 2;
-        var color = ["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00", "crimson", "steelblue", "forestgreen"]
-
-        var arc = d3.svg.arc()
-        .outerRadius(radius - 10)
-        .innerRadius(0);
-
-        var pie = d3.layout.pie()
-        .sort(null)
-        .value(function(d) { return d; });
-
-        var svg = d3.select("#"+chartContainer).append("svg")
-        .attr("width", w)
-        .attr("height", h)
-        .append("g")
-        .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
-
-        var g = svg.selectAll(".arc")
-        .data(pie(data))
-        .enter().append("g")
-        .attr("class", "arc");
-
-        var dCount = 0
-        g.append("path")
-        .attr("d", arc)
-        .style("fill", function(d) { dCount++; console.log(color[dCount]);return color[dCount]; });
-
-        g.append("text")
-        .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
-        .attr("dy", ".35em")
-        .style("text-anchor", "middle")
-        .text(function(d) { return d.data; });
-    },
-    */
-    /*
-    plotBubbleChart: function(bubbleData, chartContainer) {
-        var values = []
-        for (var k in bubbleData) {
-            values.push({"value": bubbleData[k], "key": k, "package": "type"})
-        }
-        var m = [80, 85, 80, 80]; // margins
-        var w = $("#"+chartContainer).width() - m[1] - m[3]; // width
-        var h = $("#"+chartContainer).height() - m[0] - m[2]; // height
-        
-        //var diameter = Math.min(w, h);
-        var diameter = 500
-
-        format = d3.format(",d"),
-        color = ["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00", "crimson", "steelblue", "forestgreen"];
-
-        var bubble = d3.layout.pack()
-            .sort(null)
-            .size([diameter, diameter])
-            //.padding(1.5);
-
-        var svg = d3.select("#"+chartContainer).append("svg")
-            .attr("width", diameter)
-            .attr("height", diameter)
-            .attr("class", "bubble");
-
-        var node = svg.selectAll(".node")
-            .data(bubble.nodes({children: values}))
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-            node.append("title")
-            .text(function(d) { console.log(d);return d.key + ": " + format(d.value); });
-
-            var dCount = 0
-            node.append("circle")
-            .attr("r", function(d) { return d.r; })
-            .style("fill", function(d) { return color[dCount++]; });
-
-            node.append("text")
-            .attr("dy", ".3em")
-            .style("text-anchor", "middle")
-            .text(function(d) { return d.key; });
-
-        // Returns a flattened hierarchy containing all leaf nodes under the root.
-        function classes(root) {
-            var classes = [];
-
-            function recurse(name, node) {
-                if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-                else classes.push({packageName: name, className: node.name, value: node.size});
-            }
-
-            recurse(null, root);
-            return {children: classes};
-        }
-
-        d3.select(self.frameElement).style("height", diameter + "px");
-    },
-    */
-
     plotBubbleChart: function(bubbleData, chartContainer) {
         var values = []
         for (var k in bubbleData) {
@@ -795,10 +529,6 @@ Chart = {
 
     plotLineChart: function(lineData, chartContainer) {
 
-        //var data = lineData.data
-        //var keys = lineData.keys
-        //var years = lineData.years
-
         // define dimensions of graph
         var m = [80, 85, 80, 80]; // margins
         var w = $("#"+chartContainer).width() - m[1] - m[3]; // width
@@ -815,17 +545,13 @@ Chart = {
 
         var colors = ["crimson", "steelblue", "forestgreen", "mediumvioletred", "black"] 
 
-        //setTimeout(function() {
-
         // X scale will fit all values from data[] within pixels 0-w
-        //var x = d3.scale.linear().domain([years[0], years[years.length-1]]).range([0, w]);
         var startYear = lineData[0].xvalues[0];
         var yearLen = lineData[0].xvalues.length;
         var endYear = lineData[0].xvalues[yearLen-1];
         var x = d3.time.scale().domain([new Date((startYear).toString()), new Date((endYear).toString())]).range([0,w]);
 
         // create xAxis
-        //var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
         var xAxis = d3.svg.axis().orient("bottom").scale(x);
 
         // Add the x-axis.
@@ -847,7 +573,6 @@ Chart = {
                     .x(function(d,i) { 
                         //console.log(d, i)
                         return x(new Date(lineData[0].xvalues[i].toString()));
-                        //return x(years[i]); 
                     })
                     .y(function(d) { 
                         return y(d); 
@@ -897,18 +622,11 @@ Chart = {
                         .data([lineData[lineCount]])
                         .attr("class", "series");
 
-        /*
-        var series = graph.selectAll('.series')
-                        .data([lineData[lineCount]])
-                        .enter().append("g")
-                        .attr("class", "series");
-        */
         // add lines
         series.append("svg:path")
             .attr("d", function(d, i) {return line(d.yvalues)})
             .style("stroke", function(d, i) { return colors[lineCount]})
             .style("stroke-width", "4px")
-            //.attr("class", "data");
         series.selectAll(".point")
                         //.data(data[lineCount])
                         .data(function (d, i) { return d.yvalues; })
@@ -922,15 +640,11 @@ Chart = {
                         .on("mouseout", function(){ Chart.hideData();});
 
         }
-        //}, 500);
     },
 
 
     parseChartData: function(d) {
         values = []
-        //var keys = []
-        //var data = []
-        //keys.push(d.keys[0]);
         for (k=1; k<d.keys.length; k++) {
             var years = []
             var dLine = [];
@@ -948,9 +662,7 @@ Chart = {
                 }
                 dLine.push(Math.round(val))
             }
-            //data.push(dLine)
             key = d.keys[k].replace("_nbr", "")
-            //keys.push(key.replace(/_/g, " "));
             value['ylabel'] = key
             value['xvalues'] = years
             value['yvalues'] = dLine
@@ -1134,20 +846,10 @@ Map = {
                 map: Map.map
             })
             var overlayNumber = parseInt(o) + 1
-            /*
-            overlayHtml.push(this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlays[o].color))
-            overlayHtml.push(this.createHiddenHtmlElement("Opacity_###_"+overlayNumber, overlays[o].opacity))
-            overlayHtml.push(this.createHiddenHtmlElement("Weight_###_"+overlayNumber, overlays[o].weight))
-            overlayHtml.push(this.createHiddenHtmlElement("Points_###_"+overlayNumber, overlays[o].points))
-            overlayHtml.push(this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlays[o].overlayType))
-            overlayHtml.push(this.createHiddenHtmlElement("Overlay_Name_###_"+overlayNumber, overlays[o].overlayName))
-            */
             Map.addOverlayEvents(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType)
             Map.updateOverlayData(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
             Map.overlaysCount++;
         }
-        //overlayHtml.push(this.createHiddenHtmlElement("numberOfCoal_Overlays", overlays.length))
-        //$("#overlay-details").append(overlayHtml.join(""))
     },
 
     showLatLng: function(lat, lng) {
@@ -1161,9 +863,6 @@ Map = {
     },
 
     init: function(showDrawingTools) {
-
-        if (!showDrawingTools)
-            Search.init()
 
         if( document.getElementById('map-container') == undefined )
             return;
@@ -1305,7 +1004,6 @@ Summary = {
             }
             html += "</table>";
             $("#"+tableContainer).append(html)
-            //Chart.plotBubbleChart(cumulativeCapacity, tableContainer)
         })
     },
 
@@ -1313,7 +1011,6 @@ Summary = {
 
     init: function() {
 
-        Search.init()
         var reqUrl = $("#jsonListService").attr("value")
         var reqData = {}
         reqData["return_type"] = "Type"

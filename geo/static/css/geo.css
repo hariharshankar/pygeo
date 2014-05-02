@@ -144,6 +144,10 @@ body {
     font-size: 1.2em;
     line-height: 1.5em;
     color: #555555;
+    display: block;
+    position: absolute;
+    width: inherit;
+    margin-left: 300px;
 }
 
 #homeWrapper h1 {
@@ -158,10 +162,26 @@ body {
     min-height: 600px;
 }
 
-#searchLeftPane {
+#leftPane {
     width: 300px;
     border-right: 1px solid gray;
     float: left;
+}
+
+.leftPane-module-container {
+    margin-bottom: 10px;
+}
+
+.leftPane-header {
+    border-bottom: 1px solid gray;
+}
+
+.leftPane-header h3 {
+    margin: 0;
+}
+
+.leftPane-module {
+    padding-left: 20px;
 }
 
 #searchRightPane {

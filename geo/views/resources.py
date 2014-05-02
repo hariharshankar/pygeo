@@ -15,12 +15,15 @@ def view(db_type=None, typ=None, country=None, state=None):
         country = flask.request.args.get("country", 0)
         state = flask.request.args.get("state", 0)
 
-    baseurl = "geoid/"
 
     main = Main(db)
 
     if not typ or not country:
-        url = main.get_search_redirect_url("resources")
+        pref = main.get_user_pref()
+        url_comp = ["/resources"]
+        url_comp.extend(pref)
+        url = "/".join(url_comp)
+        #url = main.get_search_redirect_url("resources")
         return flask.redirect(url)
 
     moderation = Moderation(db)
@@ -30,5 +33,8 @@ def view(db_type=None, typ=None, country=None, state=None):
     # storing the prefs to a cookie
     main.store_user_pref(db_type, country, typ, state)
 
+    user_pref = main.make_html_user_pref()
+
     return flask.render_template("resources.html",
-                                 values=values, baseurl=baseurl)
+                                 values=values, baseurl=baseurl,
+                                 user_pref=user_pref)

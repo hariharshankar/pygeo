@@ -2,6 +2,7 @@ import flask
 from geo.core.main import Main
 
 mod = flask.Blueprint("map", __name__)
+db = None
 
 
 @mod.route("/map/")
@@ -15,10 +16,16 @@ def view(db_type=None, typ=None, country=None, state=None):
 
     main = Main(db)
     if not typ or not country:
-        url = main.get_search_redirect_url("map")
+        pref = main.get_user_pref()
+        url_comp = ["/map"]
+        url_comp.extend(pref)
+        url = "/".join(url_comp)
+        #url = main.get_search_redirect_url("map")
         return flask.redirect(url)
 
     main.store_user_pref(db_type, country, typ, state)
     map_url = flask.url_for("location.location", _external=True, country=country, type=typ, state=state)
 
-    return flask.render_template("map.html", map_url=map_url)
+    user_pref_html = main.make_html_user_pref()
+
+    return flask.render_template("map.html", map_url=map_url, user_pref=user_pref_html)

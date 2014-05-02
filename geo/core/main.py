@@ -220,30 +220,16 @@ class Main(object):
                                   )
         return self.select.process_result_set(result)
 
-    def get_search_redirect_url(self, prefix, return_type=None):
+    def get_user_pref(self):
         """
-        Creates redirect urls for search interfaces using default
-        values in cookies.
+        Return the user preferences for the search parameters.
         """
 
-        url = []
-        if not prefix.startswith("/"):
-            prefix = "/" + prefix
-
-        url.append(prefix)
-
-        if not return_type in ['type_summary', 'country_summary']:
-            url.append(self.session.get('pref_db_type', 'powerplants'))
-
-        if not return_type == 'country_summary':
-            url.append(self.session.get('pref_type', "1"))
-
-        url.append(self.session.get('pref_country', "1"))
-
-        if not return_type in ['type_summary', 'country_summary']:
-            url.append(self.session.get('pref_state', "0"))
-
-        return "/".join(url)
+        return (self.session.get('pref_db_type', 'powerplants'),
+                self.session.get('pref_type', '1'),
+                self.session.get('pref_country', '1'),
+                self.session.get('pref_state', '0')
+        )
 
     def store_user_pref(self, db_type, country, typ, state):
         """
@@ -256,3 +242,25 @@ class Main(object):
         self.session['pref_db_type'] = db_type
         self.session['pref_state'] = str(state)
         return
+
+    def make_html_user_pref(self):
+        """
+        Makes html hidden elements with user pref values for client
+        side js processing.
+        """
+
+        prefs = self.get_user_pref()
+
+        html = []
+        html.extend(["<input type='hidden' id='user_pref_db_type' name='user_pref_db_type'",
+                     "value='", prefs[0], "' />"])
+
+        html.extend(["<input type='hidden' id='user_pref_country' name='user_pref_country'",
+                     "value='", prefs[2], "' />"])
+
+        html.extend(["<input type='hidden' id='user_pref_type' name='user_pref_type'",
+                     "value='", prefs[1], "' />"])
+
+        html.extend(["<input type='hidden' id='user_pref_state' name='user_pref_state'",
+                     "value='", prefs[3], "' />"])
+        return "".join(html)

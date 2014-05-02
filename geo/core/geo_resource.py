@@ -65,7 +65,7 @@ class GeoResource(Html):
         self.state_id = ids['State_ID']
         self.parent_plant_id = ids['Parent_Plant_ID']
 
-    def get_latest_revision_id(self):
+    def get_latest_revision_id(self, moderated=True):
         """
         Get the latest revision id for this resource.
         """
@@ -76,10 +76,12 @@ class GeoResource(Html):
         if self.parent_plant_id == 0:
             self.__get_ids()
 
+        where = [["Parent_Plant_ID", "=", self.parent_plant_id]]
+        if moderated:
+            where.extend([["and"], ["Accepted", "=", "1"]])
+
         ids = self.select.read("History", columns=["max(Description_ID)"],
-                               where=[["Parent_Plant_ID", "=",
-                                       self.parent_plant_id],
-                                      ["and"], ["Accepted", "=", "1"]])
+                               where=where)
 
         res = ids.first()
         self.latest_revision_id = res[0]
@@ -98,7 +100,7 @@ class GeoResource(Html):
         desc = self.select.read(desc_table,
                                 columns=["Name_omit"],
                                 where=[["Description_ID", "=",
-                                        self.get_latest_revision_id()]]
+                                        self.get_latest_revision_id(moderated=False)]]
                                 )
         self.name = desc.first()['Name_omit']
         return self.name

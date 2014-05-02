@@ -1,9 +1,10 @@
 {% extends "search.html" %}
-{% block body_onload %}Summary.init(){% endblock %}
+{% block title %}{{ title }}{% endblock %}
+{% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block right_pane_content %}
 <div id="summary-results ui-widget ui-helper-reset" class='summary-results'>
 
-    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>Overview</h3>
+    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>Overview for {{ country }}</h3>
     <div>
         {{ overview|safe }}
     </div>

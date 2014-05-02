@@ -3,11 +3,11 @@
 {% block title %}Search - GEO{% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
 <script src="{{ url_for('static', filename='d3/d3.min.js', _external=True) }}"></script>
 {% endblock %}
 {% block content %}
 <div id="searchWrapper">
+    <!--
     <div id="searchLeftPane">
         <div id='searchDatabase_Type' class='searchSelectable'></div>
         <div id='searchType' class='searchSelectable'></div>
@@ -17,6 +17,7 @@
 
         <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
     </div>
+    -->
     <div id="searchRightPane">
         <div id='rightPane'>
             {% block right_pane_content %}{% endblock %}

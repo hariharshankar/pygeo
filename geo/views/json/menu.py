@@ -2,15 +2,19 @@ import flask
 from geo.core.main import Main
 
 mod = flask.Blueprint("menu", __name__)
+db = None
 
 
 @mod.route("/menu", endpoint="menu")
 def view():
 
-    db_name = flask.request.args.get("database_type", "")
-    typ = flask.request.args.get("type", 0)
-    country = flask.request.args.get("country", 0)
-    state = flask.request.args.get("state", 0)
+    main = Main(db)
+    pref = main.get_user_pref()
+
+    db_name = flask.request.args.get("database_type", pref[0])
+    typ = flask.request.args.get("type", pref[1])
+    country = flask.request.args.get("country", pref[2])
+    state = flask.request.args.get("state", pref[3])
 
     return_type = flask.request.args.get("return_type", "")
 
@@ -19,7 +23,6 @@ def view():
         flask.abort(404)
 
     return_type = return_type.lower()
-    main = Main(db)
 
     keys = []
     values = []

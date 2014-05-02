@@ -5,6 +5,7 @@ from geo.db.query import Select
 
 
 mod = flask.Blueprint("country_summary", __name__)
+db = None
 
 
 @mod.route("/summary/country/")
@@ -12,9 +13,11 @@ mod = flask.Blueprint("country_summary", __name__)
 def view(country_id=None):
 
     main = Main(db)
+    pref = main.get_user_pref()
     if not country_id:
-        url = main.get_search_redirect_url("summary/country",
-                                           return_type='country_summary')
+        url = "/".join(["/summary/country", pref[2]])
+        #url = main.get_search_redirect_url("summary/country",
+        #                                   return_type='country_summary')
         return flask.redirect(url)
 
     country_name = main.get_country_name(country_id)
@@ -81,6 +84,11 @@ def view(country_id=None):
 
         modules.append(module)
 
+    main.store_user_pref(pref[0], country_id, pref[1], pref[3])
+    user_pref = main.make_html_user_pref()
+
     title = "Summary for " + country_name
     return flask.render_template("country_summary.html",
-                                 modules=modules, title=title)
+                                 modules=modules, title=title,
+                                 country=country_name,
+                                 user_pref=user_pref)

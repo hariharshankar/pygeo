@@ -15,7 +15,15 @@ mod = flask.Blueprint("moderation", __name__)
 @mod.route("/moderation/")
 def view():
 
-    main = Main(db)
     moderation = Moderation(db)
+    new_submits, edits = moderation.get_resources_to_moderate()
 
-    return flask.render_template("moderation.html")
+    main = Main(db)
+    user_pref = main.make_html_user_pref()
+
+    baseurl = "/geoid/"
+    return flask.render_template("moderation.html",
+                                 new_submits=new_submits,
+                                 edits=edits,
+                                 baseurl=baseurl,
+                                 user_pref=user_pref)

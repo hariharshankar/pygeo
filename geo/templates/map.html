@@ -5,6 +5,7 @@
 <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry"></script>
 {% endblock %}
 
+{% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block body_onload %}Map.init(){% endblock %}
 
 {% block right_pane_content %}

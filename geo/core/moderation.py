@@ -64,3 +64,49 @@ class Moderation(object):
             values.append([str(latest_id), unicode(resource_name, "utf-8")])
 
         return keys, values
+
+    def get_resources_to_moderate(self):
+        """
+        Returns a list of resources awaiting moderation.
+        Will return both new and edited resources.
+        """
+
+        select = Select(self.db_conn)
+
+        description_ids = select.read("History",
+                                      columns=[
+                                          "Parent_Plant_ID",
+                                          "Description_ID"
+                                      ],
+                                      where=[["Moderated", "=", "0"]],
+                                      order_by=["Description_ID", "desc"]
+        )
+
+        main = Main(self.db_conn)
+        new_submits = []
+        edits = []
+
+        for description_id in description_ids:
+            geo_resource = GeoResource(self.db_conn, description_id['Description_ID'])
+            type_id = geo_resource.type_id
+            country_id = geo_resource.country_id
+
+            type_name = main.get_type_name(type_id)
+            country_name = main.get_country_name(country_id)
+            geo_name = geo_resource.get_resource_name(type_name=type_name)
+            print(geo_name)
+            if description_id['Description_ID'] == description_id['Parent_Plant_ID']:
+                new_submits.append({
+                    'type_name': type_name,
+                    'country_name': country_name,
+                    'geo_name': unicode(geo_name, "utf-8"),
+                    'description_id': str(description_id['Description_ID'])
+                })
+            else:
+                edits.append({
+                    'type_name': type_name,
+                    'country_name': country_name,
+                    'geo_name': unicode(geo_name, "utf-8"),
+                    'description_id': str(description_id['Description_ID'])
+                })
+        return new_submits, edits

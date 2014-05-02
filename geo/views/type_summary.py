@@ -3,6 +3,7 @@ import flask
 from geo.core.main import Main
 
 mod = flask.Blueprint("type_summary", __name__)
+db = None
 
 
 @mod.route("/summary/type/")
@@ -10,8 +11,10 @@ mod = flask.Blueprint("type_summary", __name__)
 def view(type_id=None, country_id=None):
 
     main = Main(db)
+    pref = main.get_user_pref()
     if not type_id or not country_id:
-        url = main.get_search_redirect_url("summary/type", return_type="type_summary")
+        url = "/".join(["/summary/type", pref[1], pref[2]])
+        #url = main.get_search_redirect_url("summary/type", return_type="type_summary")
         #print(url)
         return flask.redirect(url)
 
@@ -28,6 +31,11 @@ def view(type_id=None, country_id=None):
                     "class='widget_urls'",
                     "/>"
                     ])
+    main.store_user_pref(pref[0], country_id, type_id, pref[3])
+    user_pref = main.make_html_user_pref()
+
     title = type_name + " - " + country_name
     return flask.render_template("type_summary.html",
-                                 content="".join(content), title=title)
+                                 content="".join(content),
+                                 title=title,
+                                 user_pref=user_pref)
