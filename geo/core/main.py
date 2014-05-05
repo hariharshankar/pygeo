@@ -179,23 +179,22 @@ class Main(object):
         if not type_id:
             return
 
-        country_result = self.select.read("History",
-                                          columns=["distinct(Country_ID)"],
-                                          where=[["Type_ID", "=", type_id]]
-                                          )
-        countries = country_result.fetchall()
+        country_ids = self.select.read("History",
+                                       columns=["distinct(Country_ID)"],
+                                       where=[["Type_ID", "=", type_id]]
+                                       )
         keys = ["Country_ID", "Country"]
-        values = []
 
-        for country in countries:
-            cid = country['Country_ID']
-            result = self.select.read("Country",
-                                      columns=["Country_ID", "Country"],
-                                      where=[["Country_ID", "=", cid]]
-                                      )
-            values.append(result.first().values())
-        values.sort()
-        return keys, values
+        countries = self.select.read("Country",
+                                     columns=["Country_ID", "Country"],
+                                     where=[["Country_ID", "in",
+                                             "(" +
+                                             ",".join([str(country_id[0])
+                                                       for country_id
+                                                       in country_ids])
+                                             + ")"]]
+                                     )
+        return keys, [list(country) for country in countries.fetchall()]
 
     def get_states(self, country):
         """

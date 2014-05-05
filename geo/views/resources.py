@@ -27,7 +27,7 @@ def view(db_type=None, typ=None, country=None, state=None):
         return flask.redirect(url)
 
     moderation = Moderation(db)
-    keys, values = moderation.get_all_resources(country=country, typ=typ)
+    keys, values = moderation.get_all_resources(country_id=country, type_id=typ)
     baseurl = "/geoid/"
 
     # storing the prefs to a cookie
