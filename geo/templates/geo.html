@@ -51,6 +51,10 @@
                 window.location = "/map/";
             });
             //$( "#download_data" ).button();
+            $( "#moderation" ).button()
+            .click( function() {
+                window.location = "/moderation";
+            });
 
             if( $("#logged_username").val() != null ) {
                 showAccountMenu()
@@ -63,6 +67,8 @@
         });
 
         function showLoginMenu() {
+            $("#account_info").hide();
+            $("#login_page").show();
 
             $("#login_submit")
                 .button()
@@ -150,15 +156,18 @@
                         <div id="login_message" style="padding: 5px;"></div>
                     </div>
                     <div id="account_info">
-        {% if session.username %}
-            <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
-            <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
-            <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
-            <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
-            <a href="{{ url_for('user.logout', next=request.url, _external=True) }}">Logout</a>
-        {% endif %}
-    </div>
+                    {% if session.username %}
+                        <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
+                        <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
+                        <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
+                        <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
+                        <a href="{{ url_for('user.logout', next=request.url, _external=True) }}">Logout</a>
+                    {% endif %}
+                    </div>
                 </div>
+            </div>
+            <div class="leftPane-link">
+                <button id="moderation" name="moderation">Submissions awaiting moderation</button>
             </div>
             {% block user_pref %}{% endblock %}
         </div>

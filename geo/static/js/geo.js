@@ -197,7 +197,7 @@ Search = {
             b = base_url.replace("http://", "").split('/')
             url = "http://" + b[0] + "/";
 
-            if (['resources', 'summary', 'map', 'analyze'].indexOf(b[2]) >= 0) {
+            if (['resources', 'summary', 'map', 'analyze'].indexOf(b[1]) >= 0) {
                 url += b[1];
                 if (['type', 'country'].indexOf(b[2]) >= 0) {
                     url += "/" + b[2];
@@ -211,7 +211,6 @@ Search = {
 
         $(".leftPane-header").click( function(event) {
             var panel = $(this).next();
-            console.log(panel)
             var isOpen = panel.is(":visible");
 
             panel[isOpen? 'slideUp': 'slideDown']()

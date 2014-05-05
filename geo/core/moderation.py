@@ -47,7 +47,7 @@ class Moderation(object):
                                                "Description_ID"],
                                       where=[["Parent_Plant_ID",
                                               "in",
-                                              "(" + ",".join(str(x[0]) for x in parent_ids) + ")"]
+                                              [x[0] for x in parent_ids]]
                                              ]
                                       )
 
@@ -58,12 +58,12 @@ class Moderation(object):
         resources = {}
         for did in description_ids:
             if resources.get(did['Parent_Plant_ID'], 0) < int(did['Description_ID']):
-                resources[did['Parent_Plant_ID']] = str(did['Description_ID'])
+                resources[did['Parent_Plant_ID']] = did['Description_ID']
 
         names = select.read(type_name + "_Description",
                             columns=["Name_omit"],
                             where=[["Description_ID", "in",
-                                   "(" + ",".join(resources.values()) + ")"]
+                                   resources.values()]
                                    ])
 
         values = zip(resources.values(), [name[0] for name in names])

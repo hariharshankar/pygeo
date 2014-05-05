@@ -80,31 +80,52 @@ class Location(object):
         locations['overlays'] = overlays
         return {"locations": [locations]}
 
-    def for_many_resources(self, country=None, typ=None):
+    def for_many_resources(self, country_id=None, type_id=None):
         """
         Returns the location information for all the resources
         in a country for the type.
 
-        :@param country: the country id/name
-        :@param typ: type id/name
+        :@param country: the country id
+        :@param typ: type id
         """
 
-        moderation = Moderation(self.connection)
-        keys, values = moderation.get_all_resources(country=country, typ=typ)
-        del keys
+        if int(country_id) <= 0 or int(type_id) <= 0:
+            return {}
 
-        type_id = self.main.get_type_id(typ)
-        country_id = self.main.get_country_id(country)
+        moderation = Moderation(self.connection)
+        keys, values = moderation.get_all_resources(country_id=country_id, type_id=type_id)
+        del keys
 
         table_name = self.main.get_type_name(type_id) + "_Location"
 
         loc = []
+        locations = self.select.read(table_name,
+                                     columns=["Description_ID",
+                                              "Latitude_Start",
+                                              "Longitude_Start"],
+                                     where=[["Description_ID",
+                                             "in",
+                                             [value[0] for value in values]]]
+                                     )
+
+        locations = locations.fetchall()
+
+        for value in values:
+            for location in locations:
+                if value[0] == location[0]:
+                    loc.append([location[1],
+                                location[2],
+                                value[1]
+                                ])
+        """
+        lat = loc['Latitude_Start']
+        lng = loc['Longitude_Start']
         for value in values:
             desc_id = value[0]
             name = value[1]
 
             lat, lng = self.__get_lat_lng(table_name, desc_id)
             loc.append([lat, lng, name])
-
+        """
         return {"locations": loc, "boundLocation":
                 self.main.get_country_name(country_id)}

@@ -2,6 +2,7 @@ import flask
 from geo.core.location import Location
 
 mod = flask.Blueprint("location", __name__)
+db = None
 
 
 @mod.route("/location", endpoint="location")
@@ -16,4 +17,4 @@ def view():
     if description_id > 0:
         return flask.jsonify(data=loc.for_one_resource(description_id=description_id))
     else:
-        return flask.jsonify(data=loc.for_many_resources(typ=typ, country=country))
+        return flask.jsonify(data=loc.for_many_resources(type_id=typ, country_id=country))

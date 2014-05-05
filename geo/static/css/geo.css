@@ -47,17 +47,35 @@ body {
     padding-right: 3px;
 }
 
-#toolbar .ui-icon{
+#toolbar .ui-icon {
     right: 0px;
     padding: 2px;
 }
 
 #toolbar .ui-state-hover {
     border: 1px solid #999999;
-    /*background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;*/
     background: #dadada 50% 50% repeat-x;
     color: #212121;
 }
+
+.leftPane-link {
+    border-top: 1px solid #ccc;
+    font-size: 1.2em;
+}
+
+.leftPane-link .ui-button {
+    border: 0;
+    background: none;
+    color: #000;
+    width: 100%
+}
+
+.leftPane-link .ui-state-hover {
+    border: 1px solid #999999;
+    background: #dadada 50% 50% repeat-x;
+    color: #212121;
+}
+
 .ui-menu {
     position: absolute;
     width: inherit;
@@ -173,7 +191,7 @@ body {
 }
 
 .leftPane-header {
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid #ccc;
 }
 
 .leftPane-header h3 {

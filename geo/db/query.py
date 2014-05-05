@@ -45,12 +45,23 @@ class Select(object):
 
         sql.extend(["FROM", table_name])
 
+        params = {}
         if where and len(where) > 0 and len(where) % 2 == 1:
             sql.append("WHERE")
             for i, whe in enumerate(where):
-                if i % 2 == 0 and len(whe) == 3:
-                    sql.extend([str(q) for q in whe])
-                elif i % 2 == 1 and len(whe) == 1:
+                if i % 2 == 0\
+                        and len(whe) == 3\
+                        and whe[1].lower() in\
+                        ['<', '>', '<=', '>=', '=', 'like', 'in']:
+                    # the prepare stmt throws an error if "in" is used
+                    # with only one value. converting it into "=" instead.
+                    if whe[1].lower() == 'in' and len(whe[2]) == 1:
+                        sql.extend([whe[0], "=", ":wh"+str(i)])
+                        params["wh"+str(i)] = whe[2][0]
+                    else:
+                        sql.extend([whe[0], whe[1], ":wh"+str(i)])
+                        params["wh"+str(i)] = whe[2]
+                elif i % 2 == 1 and whe[0].lower() in ['and', 'or']:
                     sql.append(whe[0])
                 else:
                     sql.pop()
@@ -62,7 +73,7 @@ class Select(object):
         if limit and len(limit) > 0:
             sql.append("LIMIT")
             sql.append(",".join(limit))
-        return self.db_conn.session.execute(" ".join(sql))
+        return self.db_conn.session.execute(" ".join(sql), params)
 
     def read_column_names(self, table_name, where=None):
         """

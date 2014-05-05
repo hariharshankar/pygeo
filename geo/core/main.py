@@ -52,7 +52,7 @@ class Main(object):
                                   columns=["Type_ID"],
                                   where=[["Type",
                                           "like",
-                                          "'" + type_name + "'"]]
+                                          type_name]]
                                   )
 
         if result.returns_rows:
@@ -69,7 +69,7 @@ class Main(object):
         result = self.select.read("Type",
                                   columns=["Type_ID", "Type"],
                                   where=[["Database_Type", "like",
-                                          "'" + db_name + "'"]],
+                                          db_name]],
                                   order_by=["Type_ID", "asc"]
                                   )
 
@@ -127,7 +127,7 @@ class Main(object):
         result = self.select.read("Country",
                                   columns=["Country_ID"],
                                   where=[["Country", "like",
-                                          "'" + country_name + "'"]]
+                                          country_name]]
                                   )
 
         if result.returns_rows:
@@ -188,11 +188,8 @@ class Main(object):
         countries = self.select.read("Country",
                                      columns=["Country_ID", "Country"],
                                      where=[["Country_ID", "in",
-                                             "(" +
-                                             ",".join([str(country_id[0])
-                                                       for country_id
-                                                       in country_ids])
-                                             + ")"]]
+                                             [country_id[0]
+                                              for country_id in country_ids]]]
                                      )
         return keys, [list(country) for country in countries.fetchall()]
 
