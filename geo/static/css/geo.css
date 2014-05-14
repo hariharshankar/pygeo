@@ -16,7 +16,7 @@ body {
     display: block;
     position: absolute;
     top: 150px;
-    width: inherit;
+    width: 100%;
 }
 
 .logo {
@@ -164,8 +164,9 @@ body {
     color: #555555;
     display: block;
     position: absolute;
-    width: inherit;
+    width: 800px;
     margin-left: 300px;
+    padding-left: 10px;
 }
 
 #homeWrapper h1 {

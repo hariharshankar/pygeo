@@ -24,7 +24,7 @@ def view(db_type=None, typ=None, country=None, state=None):
         return flask.redirect(url)
 
     main.store_user_pref(db_type, country, typ, state)
-    map_url = flask.url_for("location.location", _external=True, country=country, type=typ, state=state)
+    map_url = flask.url_for("location.location", country=country, type=typ, state=state)
 
     user_pref_html = main.make_html_user_pref()
 

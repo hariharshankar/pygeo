@@ -3,15 +3,15 @@
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui-1.10.2.custom/css/custom-theme/jquery-ui-1.10.2.custom.min.css', _external=True) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/geo.css', _external=True) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='chosen_v1.0.0/chosen.min.css', _external=True) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui-1.10.2.custom/css/custom-theme/jquery-ui-1.10.2.custom.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='chosen_v1.0.0/chosen.min.css') }}">
 
-    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-1.9.1.js', _external=True) }}"></script>
-    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js', _external=True) }}"></script>
-    <script src="{{ url_for('static', filename='chosen_v1.0.0/chosen.jquery.min.js', _external=True) }}"></script>
-    <script src="{{ url_for('static', filename='js/sha1.js', _external=True) }}"></script>
-    <script src="{{ url_for('static', filename='js/geo.js', _external=True) }}"></script>
+    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-1.9.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='chosen_v1.0.0/chosen.jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sha1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/geo.js') }}"></script>
     <script>
         $( function() {
             $( "#account_info" ).hide();
@@ -76,7 +76,7 @@
                     info = {}
                     info['username'] = $("#username").val()
                     info['password'] = SHA1( $("#password").val() )
-                    $.post( "{{ url_for('user.login', _external=True) }}", info,  function(data) {
+                    $.post( "{{ url_for('user.login') }}", info,  function(data) {
                         if (data['data']['error']) {
                             $("#login_message")
                             .text("Error: Invalid username or password.")
@@ -105,22 +105,25 @@
 </head>
 <body onload="{% block body_onload %}{% endblock %}">
     <div id="header">
-        <a href="{{ url_for('index.home', _external=True) }}" alt="Home" title="Home">
-            <img src="{{ url_for('static', filename='img/geo_logo.png', _external=True) }}" class="logo"/>
-    </a>
-    <div id="toolbar" class="ui-widget-header ui-corner-all">
-        <button id="energy_resources" name="energy_resources">energy resources</button>
-        |
-        <button id="country_summary" name="country_summary">summary by country</button>
-        |
-        <button id="type_summary" name="type_summary">summary by type</button>
-        |
-        <button id="map_data" name="map_data">map data</button>
-        |
-        <button id="analyze" name="analyze">analyze</button>
         <!--
-        <button id="download_data" name="download_data">download data</button>
+        <a href="{{ url_for('index.home') }}" title="Home">
+            <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
+        </a>
         -->
+        <div id="toolbar" class="ui-widget-header ui-corner-all">
+            <button id="energy_resources" name="energy_resources">energy resources</button>
+            |
+            <button id="country_summary" name="country_summary">summary by country</button>
+            |
+            <button id="type_summary" name="type_summary">summary by type</button>
+            |
+            <button id="map_data" name="map_data">map data</button>
+            |
+            <button id="analyze" name="analyze">analyze</button>
+            <!--
+            <button id="download_data" name="download_data">download data</button>
+            -->
+        </div>
     </div>
     <div id="wrapper">
         <div id="leftPane">
@@ -161,7 +164,7 @@
                         <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
                         <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
                         <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
-                        <a href="{{ url_for('user.logout', next=request.url, _external=True) }}">Logout</a>
+                        <a href="{{ url_for('user.logout', next=request.url) }}">Logout</a>
                     {% endif %}
                     </div>
                 </div>
