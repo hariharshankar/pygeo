@@ -105,29 +105,11 @@
 </head>
 <body onload="{% block body_onload %}{% endblock %}">
     <div id="header">
-<<<<<<< HEAD
-=======
         <a href="{{ url_for('index.home', _external=True) }}" alt="Home" title="Home">
             <img src="{{ url_for('static', filename='img/geo_logo.png', _external=True) }}" class="logo"/>
-    </a>
-    <div id="toolbar" class="ui-widget-header ui-corner-all">
-        <button id="energy_resources" name="energy_resources">list of data pages</button>
-        |
-        <button id="country_summary" name="country_summary">summary by country</button>
-        |
-        <button id="type_summary" name="type_summary">summary by type</button>
-        |
-        <button id="map_data" name="map_data">map data</button>
-        |
-        <button id="analyze" name="analyze">analyze</button>
->>>>>>> c372ad025eff74c926c17e8540b51e42d03d82b8
-        <!--
-        <a href="{{ url_for('index.home') }}" title="Home">
-            <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
         </a>
-        -->
         <div id="toolbar" class="ui-widget-header ui-corner-all">
-            <button id="energy_resources" name="energy_resources">energy resources</button>
+            <button id="energy_resources" name="energy_resources">list of data pages</button>
             |
             <button id="country_summary" name="country_summary">summary by country</button>
             |
@@ -136,9 +118,6 @@
             <button id="map_data" name="map_data">map data</button>
             |
             <button id="analyze" name="analyze">analyze</button>
-            <!--
-            <button id="download_data" name="download_data">download data</button>
-            -->
         </div>
     </div>
     <div id="wrapper">
@@ -175,13 +154,13 @@
                         <div id="login_message" style="padding: 5px;"></div>
                     </div>
                     <div id="account_info">
-                    {% if session.username %}
+                        {% if session.username %}
                         <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
                         <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
                         <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
                         <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
                         <a href="{{ url_for('user.logout', next=request.url) }}">Logout</a>
-                    {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
