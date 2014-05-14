@@ -105,6 +105,22 @@
 </head>
 <body onload="{% block body_onload %}{% endblock %}">
     <div id="header">
+<<<<<<< HEAD
+=======
+        <a href="{{ url_for('index.home', _external=True) }}" alt="Home" title="Home">
+            <img src="{{ url_for('static', filename='img/geo_logo.png', _external=True) }}" class="logo"/>
+    </a>
+    <div id="toolbar" class="ui-widget-header ui-corner-all">
+        <button id="energy_resources" name="energy_resources">list of data pages</button>
+        |
+        <button id="country_summary" name="country_summary">summary by country</button>
+        |
+        <button id="type_summary" name="type_summary">summary by type</button>
+        |
+        <button id="map_data" name="map_data">map data</button>
+        |
+        <button id="analyze" name="analyze">analyze</button>
+>>>>>>> c372ad025eff74c926c17e8540b51e42d03d82b8
         <!--
         <a href="{{ url_for('index.home') }}" title="Home">
             <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
@@ -130,7 +146,7 @@
             <div class='leftPane-module-container'>
                 <div class="leftPane-header">
                     <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
-                    <h3>Search</h3>
+                    <h3>Search and Populate</h3>
                 </div>
                 <div id="searchLeftPane" class="leftPane-module">
                     <div id='searchDatabase_Type' class='searchSelectable'></div>
