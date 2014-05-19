@@ -21,6 +21,9 @@ import geo.views.json.menu as menu
 import geo.views.json.summarydata as summarydata
 import geo.views.json.linechart as linechart
 
+# static html
+import geo.views.static.partners as partners
+
 app = flask.Flask(__name__)
 app.secret_key = '\xe1\xf1\x91\x1a8\xd5\xbf\xe2\x84f\xff\xd1D\x9d\x08Q\xff.$#\x1a\x08PNU\r>(\xb5\x92a\x87\xbf\xca3\xc9F\xec\xe3\x06aQ0\x19\xb1\xbf\xd0\xae\x8b\x8a5\xfbW\xab\x18\x08uV\x94)\xa0\x99\xfb\x0b1\x0f\xa2n\xba\xa3mya\xf8\xdfR\'F@\xd9\xb2\x10S\xf4r~\xae\x94\x1c\x7f\xd1J\x86\x1ar.m"\xdc\x18\x85\x80\xb8\x18\x1cG\x81\x1e]\xb3E\x01i\xf4\xd9_\x18\xfar\xbe`\xaa\xa7+3\x92\xe8Q'
 #app.config['SERVER_NAME'] = "http://globalenergyobservatory.org/dev"
@@ -57,3 +60,6 @@ app.register_blueprint(summarydata.mod)
 app.register_blueprint(location.mod)
 app.register_blueprint(menu.mod)
 app.register_blueprint(linechart.mod)
+
+# static html
+app.register_blueprint(partners.mod)

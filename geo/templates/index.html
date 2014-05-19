@@ -4,308 +4,553 @@
 
 {% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block scripts %}
-<script type='text/javascript' src='https://www.google.com/jsapi'></script>
-  <script type='text/javascript'>
-   google.load('visualization', '1', {'packages': ['geomap']});
-   google.setOnLoadCallback(drawMap);
+<script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='d3/topojson.v1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='datamaps/datamaps.world.min.js') }}"></script>
+<script type='text/javascript'>
 
-    function drawMap() {
-      var data = new google.visualization.DataTable();
-      data.addRows(113);
-      data.addColumn('string', 'Country');
-      data.addColumn('number', '% Covered');
-      data.setValue(0, 0, 'Bahrain');
-      data.setValue(0, 1, 90);
-      data.setValue(1, 0, 'United States');
-      data.setValue(1, 1, 80);
-      data.setValue(2, 0, 'Canada');
-      data.setValue(2, 1, 75);
-      data.setValue(3, 0, 'Egypt');
-      data.setValue(3, 1, 90);
-      data.setValue(4, 0, 'France');
-      data.setValue(4, 1, 90);
-      data.setValue(5, 0, 'India');
-      data.setValue(5, 1, 90);
-      data.setValue(6, 0, 'Israel');
-      data.setValue(6, 1, 90);
-      data.setValue(7, 0, 'Japan');
-      data.setValue(7, 1, 50);
-      data.setValue(8, 0, 'Kuwait');
-      data.setValue(8, 1, 90);
-      data.setValue(9, 0, 'Mexico');
-      data.setValue(9, 1, 80);
-      data.setValue(10, 0, 'Oman');
-      data.setValue(10, 1, 90);
-      data.setValue(11, 0, 'Pakistan');
-      data.setValue(11, 1, 90);
-      data.setValue(12, 0, 'Qatar');
-      data.setValue(12, 1, 90);
-      data.setValue(13, 0, 'Saudi Arabia');
-      data.setValue(13, 1, 80);
-      data.setValue(14, 0, 'Singapore');
-      data.setValue(14, 1, 90);
-      data.setValue(15, 0, 'South Africa');
-      data.setValue(15, 1, 90);
-      data.setValue(16, 0, 'South Korea');
-      data.setValue(16, 1, 90);
-      data.setValue(17, 0, 'Taiwan');
-      data.setValue(17, 1, 90);
-      data.setValue(18, 0, 'United Arab Emirates');
-      data.setValue(18, 1, 85);
-      data.setValue(19, 0, 'Tanzania');
-      data.setValue(19, 1, 85);
-      data.setValue(20, 0, 'United Kingdom');
-      data.setValue(20, 1, 80);
-      data.setValue(21, 0, 'Russia');
-      data.setValue(21, 1, 70);
-      data.setValue(22, 0, 'Ghana');
-      data.setValue(22, 1, 80);
-      data.setValue(23, 0, 'Kenya');
-      data.setValue(23, 1, 90);
-      data.setValue(24, 0, 'Mozambique');
-      data.setValue(24, 1, 90);
-      data.setValue(25, 0, 'Uganda');
-      data.setValue(25, 1, 90);
-      data.setValue(26, 0, 'Zambia');
-      data.setValue(26, 1, 90);
-      data.setValue(27, 0, 'Zimbabwe');
-      data.setValue(27, 1, 90);
-      data.setValue(28, 0, 'Malawi');
-      data.setValue(28, 1, 95);
-      data.setValue(29, 0, 'Namibia');
-      data.setValue(29, 1, 95);
-      data.setValue(30, 0, 'Botswana');
-      data.setValue(30, 1, 95);
-      data.setValue(31, 0, 'Sudan');
-      data.setValue(31, 1, 85);
-      data.setValue(32, 0, 'Ethiopia');
-      data.setValue(32, 1, 85);
-      data.setValue(33, 0, 'Bangladesh');
-      data.setValue(33, 1, 80);
-      data.setValue(34, 0, 'Bhutan');
-      data.setValue(34, 1, 80);
-      data.setValue(35, 0, 'Nepal');
-      data.setValue(35, 1, 70);
-      data.setValue(36, 0, 'Sri Lanka');
-      data.setValue(36, 1, 95);
-      data.setValue(37, 0, 'Afghanistan');
-      data.setValue(37, 1, 70);
-      data.setValue(38, 0, 'Poland');
-      data.setValue(38, 1, 85);
-      data.setValue(39, 0, 'Iran');
-      data.setValue(39, 1, 70);
-      data.setValue(40, 0, 'Vietnam');
-      data.setValue(40, 1, 70);
-      data.setValue(41, 0, 'Malaysia');
-      data.setValue(41, 1, 90);
-      data.setValue(42, 0, 'Myanmar');
-      data.setValue(42, 1, 80);
-      data.setValue(43, 0, 'Thailand');
-      data.setValue(43, 1, 80);
-      data.setValue(44, 0, 'Indonesia');
-      data.setValue(44, 1, 60);
-      data.setValue(45, 0, 'Tunisia');
-      data.setValue(45, 1, 60);
-      data.setValue(46, 0, 'Libya');
-      data.setValue(46, 1, 80);
-      data.setValue(47, 0, 'Lebanon');
-      data.setValue(47, 1, 90);
-      data.setValue(48, 0, 'Jordan');
-      data.setValue(48, 1, 80);
-      data.setValue(49, 0, 'Morocco');
-      data.setValue(49, 1, 95);
-      data.setValue(50, 0, 'Syria');
-      data.setValue(50, 1, 90);
-      data.setValue(51, 0, 'Philippines');
-      data.setValue(51, 1, 80);
-      data.setValue(52, 0, 'Algeria');
-      data.setValue(52, 1, 70);
-      data.setValue(53, 0, 'Turkmenistan');
-      data.setValue(53, 1, 90);
-      data.setValue(54, 0, 'Uzbekistan');
-      data.setValue(54, 1, 90);
-      data.setValue(55, 0, 'Kyrgyzstan');
-      data.setValue(55, 1, 90);
-      data.setValue(56, 0, 'Tajikistan');
-      data.setValue(56, 1, 90);
-      data.setValue(57, 0, 'Kazakhstan');
-      data.setValue(57, 1, 60);
-      data.setValue(58, 0, 'Belgium');
-      data.setValue(58, 1, 85);
-      data.setValue(59, 0, 'Laos');
-      data.setValue(59, 1, 50);
-      data.setValue(60, 0, 'Estonia');
-      data.setValue(60, 1, 85);
-      data.setValue(61, 0, 'Latvia');
-      data.setValue(61, 1, 85);
-      data.setValue(62, 0, 'Lithuania');
-      data.setValue(62, 1, 85);
-      data.setValue(63, 0, 'Bulgaria');
-      data.setValue(63, 1, 85);
-      data.setValue(64, 0, 'Argentina');
-      data.setValue(64, 1, 85);
-      data.setValue(65, 0, 'Uruguay');
-      data.setValue(65, 1, 85);
-      data.setValue(66, 0, 'Czech Republic');
-      data.setValue(66, 1, 70);
-      data.setValue(67, 0, 'Romania');
-      data.setValue(67, 1, 70);
-      data.setValue(68, 0, 'Mongolia');
-      data.setValue(68, 1, 90);
-      data.setValue(69, 0, 'Angola');
-      data.setValue(69, 1, 85);
-      data.setValue(70, 0, 'Nigeria');
-      data.setValue(70, 1, 90);
-      data.setValue(71, 0, 'Ghana');
-      data.setValue(71, 1, 85);
-      data.setValue(72, 0, 'Mali');
-      data.setValue(72, 1, 60);
-      data.setValue(73, 0, 'Ivory Coast');
-      data.setValue(73, 1, 80);
-      data.setValue(74, 0, 'Eritrea');
-      data.setValue(74, 1, 90);
-      data.setValue(75, 0, 'CG');
-      data.setValue(75, 1, 90);
-      data.setValue(76, 0, 'Slovakia');
-      data.setValue(76, 1, 90);
-      data.setValue(77, 0, 'Paraguay');
-      data.setValue(77, 1, 90);
-      data.setValue(78, 0, 'Bhutan');
-      data.setValue(78, 1, 90);
-      data.setValue(79, 0, 'Hungary');
-      data.setValue(79, 1, 90);
-      data.setValue(80, 0, 'Montenegro');
-      data.setValue(80, 1, 90);
-      data.setValue(81, 0, 'Albania');
-      data.setValue(81, 1, 90);
-      data.setValue(82, 0, 'CD');
-      data.setValue(82, 1, 90);
-      data.setValue(83, 0, 'Greece');
-      data.setValue(83, 1, 90);
-      data.setValue(84, 0, 'New Zealand');
-      data.setValue(84, 1, 90);
-      data.setValue(85, 0, 'Ukraine');
-      data.setValue(85, 1, 90);
-      data.setValue(86, 0, 'Georgia');
-      data.setValue(86, 1, 90);
-      data.setValue(87, 0, 'Azerbaijan');
-      data.setValue(87, 1, 90);
-      data.setValue(88, 0, 'Moldova');
-      data.setValue(88, 1, 90);
-      data.setValue(89, 0, 'Belarus');
-      data.setValue(89, 1, 95);
-      data.setValue(90, 0, 'Turkey');
-      data.setValue(90, 1, 75);
-      data.setValue(91, 0, 'Australia');
-      data.setValue(91, 1, 90);
-      data.setValue(92, 0, 'Venezuela');
-      data.setValue(92, 1, 85);
-      data.setValue(93, 0, 'Brazil');
-      data.setValue(93, 1, 80);
-      data.setValue(94, 0, 'Colombia');
-      data.setValue(94, 1, 70);
-      data.setValue(95, 0, 'Panama');
-      data.setValue(95, 1, 80);
-      data.setValue(96, 0, 'Costa Rica');
-      data.setValue(96, 1, 75);
-      data.setValue(97, 0, 'Nicaragua');
-      data.setValue(97, 1, 80);
-      data.setValue(98, 0, 'Honduras');
-      data.setValue(98, 1, 80);
-      data.setValue(99, 0, 'El Salvador');
-      data.setValue(99, 1, 75);
-      data.setValue(100, 0, 'Guatemala');
-      data.setValue(100, 1, 60);
-      data.setValue(101, 0, 'Portugal');
-      data.setValue(101, 1, 85);
-      data.setValue(102, 0, 'Spain');
-      data.setValue(102, 1, 70);
-      data.setValue(103, 0, 'Italy');
-      data.setValue(103, 1, 60);
-      data.setValue(104, 0, 'Serbia');
-      data.setValue(104, 1, 90);
-      data.setValue(105, 0, 'Ireland');
-      data.setValue(105, 1, 90);
-      data.setValue(106, 0, 'Germany');
-      data.setValue(106, 1, 40);
-      data.setValue(107, 0, 'China');
-      data.setValue(107, 1, 20);
-      data.setValue(108, 0, 'Denmark');
-      data.setValue(108, 1, 60);
-      data.setValue(109, 0, 'Finland');
-      data.setValue(109, 1, 50);
-      data.setValue(110, 0, 'Sweden');
-      data.setValue(110, 1, 40);
-      data.setValue(111, 0, 'Netherlands');
-      data.setValue(111, 1, 80);
-      data.setValue(112, 0, 'Chile');
-      data.setValue(112, 1, 85);
-      
-      var options = {};
-      options['dataMode'] = 'regions';
-      options['height'] = 400;
-      options['width'] = 800;
-      options['region'] = 'world';
+    $(function() {
 
-      var container = document.getElementById('map_canvas');
-      var geomap = new google.visualization.GeoMap(container);
-      geomap.draw(data, options);
-  };
-  </script>
+        var container = document.getElementById('map_canvas');
+        var map = new Datamap({
+            element: container,
+            fills: {
+                defaultFill: '#CCCCCC',
+                TEN: "#B7C3B9",
+                TWENTY: "#A3BBA6",
+                THIRTY: "#8FB393",
+                FOURTY: "#7BAB80",
+                FIFTY: "#67A36E",
+                SIXTY: "#529A5B",
+                SEVENTY: "#3E9248",
+                EIGHTY: "#2A8A35",
+                NINETY: "#168222",
+                HUNDRED: "#027A10"
+            },
+            data: {
+                CHL: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                BHR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                USA: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                CAN: {
+                    fillKey: "SEVENTY",
+                    coverage: "75%"
+                },
+                EGY: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                FRA: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                IND: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ISR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                JPN: {
+                    fillKey: "FIFTY",
+                    coverage: "50%"
+                },
+                KWT: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MEX: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                OMN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                PAK: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                QAT: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                SAU: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                SGP: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ZAF: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                KOR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                TWN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ARE: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                TZA: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                GBR: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                RUS: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                KEN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MOZ: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                UGA: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ZMB: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ZWE: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MWI: {
+                    fillKey: "HUNDRED",
+                    coverage: "95%"
+                },
+                NAM: {
+                    fillKey: "HUNDRED",
+                    coverage: "95%"
+                },
+                BWA: {
+                    fillKey: "HUNDRED",
+                    coverage: "95%"
+                },
+                SDN: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                ETH: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                BGD: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                BTN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                NPL: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                LKA: {
+                    fillKey: "HUNDRED",
+                    coverage: "95%"
+                },
+                AFG: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                POL: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                IRN: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                VNM: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                MYS: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MMR: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                THA: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                IDN: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                TUN: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                LBY: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                LBN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                JOR: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                MAR: {
+                    fillKey: "HUNDRED",
+                    coverage: "95%"
+                },
+                SYR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                PHL: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                DZA: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                TKM: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                UZB: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                KGZ: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                TJK: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                KAZ: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                BEL: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                EST: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                LVA: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                LTU: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                BGR: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                ARG: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                URY: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                CZE: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                ROU: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                MNG: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                AGO: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                NGA: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                GHA: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                MLI: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                CIV: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                ERI: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                SVK: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                PRY: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                HUN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MNE: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                ALB: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                GRC: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                NZL: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                UKR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                GEO: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                AZE: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MDA: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                BLR: {
+                    fillKey: "HUNDRED",
+                    coverage: "100%"
+                },
+                TUR: {
+                    fillKey: "SEVENTY",
+                    coverage: "75%"
+                },
+                AUS: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                VEN: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                BRA: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                COL: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                PAN: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                CRI: {
+                    fillKey: "SEVENTY",
+                    coverage: "75%"
+                },
+                NIC: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                HND: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                SLV: {
+                    fillKey: "SEVENTY",
+                    coverage: "75%"
+                },
+                GTM: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                PRT: {
+                    fillKey: "EIGHTY",
+                    coverage: "85%"
+                },
+                ESP: {
+                    fillKey: "SEVENTY",
+                    coverage: "70%"
+                },
+                ITA: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                SRB: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                IRL: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                DEU: {
+                    fillKey: "FOURTY",
+                    coverage: "40%"
+                },
+                CHN: {
+                    fillKey: "TWENTY",
+                    coverage: "20%"
+                },
+                DNK: {
+                    fillKey: "SIXTY",
+                    coverage: "60%"
+                },
+                FIN: {
+                    fillKey: "FIFTY",
+                    coverage: "50%"
+                },
+                SWE: {
+                    fillKey: "FOURTY",
+                    coverage: "40%"
+                },
+                NLD: {
+                    fillKey: "EIGHTY",
+                    coverage: "80%"
+                },
+                BIH: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                HRV: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                MKD: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                SVN: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                },
+                NOR: {
+                    fillKey: "NINETY",
+                    coverage: "90%"
+                }
+                //data.setValue(59, 0, 'Laos');
+                //data.setValue(59, 1, 50);
+                //data.setValue(75, 0, 'CG');
+                //data.setValue(75, 1, 90);
+                //data.setValue(82, 0, 'CD');
+                //data.setValue(82, 1, 90);
+            },
+            geographyConfig: {
+                popupTemplate: function(geo, data) {
+                    if (data && data.coverage) {
+                        return [
+                            "<div class='hoverinfo'>",
+                            "<div style='font-weight: bold;border-bottom: 1px solid #ccc;'>",
+                            geo.properties.name, "</div>",
+                            'Coverage: ' + data.coverage,
+                            "</div>"
+                            ].join("");
+                    }
+                    else {
+                        return [
+                            "<div class='hoverinfo'>",
+                            geo.properties.name,
+                            "</div>"
+                            ].join("");
+                    }
+                }
+            },
+            done: function(datamap) {
+                datamap.svg.selectAll(".datamaps-subunit").on('click', function(geography) {
+                    url = "/summary/country/" + geography.id
+                    location.href = url
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}
 {% block body_onload %}{% endblock %}
 {% block content %}
 <div id="homeWrapper">
     <div id="about">
-        <h1>about GEO</h1>
-        Global Energy Observatory, GEO is a set of free interactive databases and tools built collaboratively by people like you. Our goal is to promote an understanding, on a global scale, of the dynamics of change in energy systems, quantify emissions and their impacts, and accelerate the transition to carbon-neutral, environmentally benign energy systems while providing affordable energy to all.
+        <h3>About GEO</h3>
+        Global Energy Observatory, GEO, is a set of free interactive databases and tools built collaboratively by people like you. Our goal is to promote an understanding, on a global scale, of the dynamics of change in energy systems, quantify emissions and their impacts, and accelerate the transition to carbon-neutral, environmentally benign energy systems while providing affordable energy to all.
 
         By providing easy to use and visualize data, models and analysis tools we aim to engage the public and the experts. Data in GEO can be edited from anywhere in the world. We welcome collaborations to help build GEO.
     </div>
 
     <div id="data">
-        <h1>data in GEO</h1>
+        <h3>Data in GEO</h3>
         Our goal is to collect data for individual units and build tools to aggregate and analyze energy systems at regional and national level. The data for individual units/plants are organized into four categories
 
         <ul>
-            <li><b>POWER PLANTS</b>: Coal, Gas, Geothermal, Hydro, Nuclear, Oil, Solar PV, Solar Thermal, Waste and Wind electric generation plants.</li>
-            <li><b>FUELS AND RESOURCES</b>: Oil and Gas Fields; Coal and Uranium mines; Crude Oil Refineries; Solar, Wind and Biomass Potential; CO2 sequestration, Water Resources.</li>
-            <li><b>ENERGY TRANSMISSION</b>: Oil and Gas Pipelines; Coal, LNG, Oil Ports; Rail and Road links; Shipping Lanes; Electric Power Grid.</li>
-            <li><b>ENERGY CONSUMERS</b>: Industries, Population, Economic Activity, Towns and Cities.</li>
+            <li><b>Power Plants</b>: Coal, Gas, Geothermal, Hydro, Nuclear, Oil, Solar PV, Solar Thermal, Waste and Wind electric generation plants.</li>
+            <li><b>Fuels And Resources</b>: Oil and Gas Fields; Coal and Uranium mines; Crude Oil Refineries; Solar, Wind and Biomass Potential; CO2 sequestration, Water Resources.</li>
+            <li><b>Energy Transmission</b>: Oil and Gas Pipelines; Coal, LNG, Oil Ports; Rail and Road links; Shipping Lanes; Electric Power Grid.</li>
+            <li><b>Energy Consumers</b>: Industries, Population, Economic Activity, Towns and Cities.</li>
         </ul>
     </div>
     <div id="data_coverage">
-        <h1>Coverage of Power Generating Capacity</h1>
-         <div id='map_canvas'></div>
+        <h3>Coverage of Power Generating Capacity</h3>
+        <div id='map_canvas' style="position: relative; width: 800px; height: 400px;"></div>
     </div>
 
     <div id="analysis">
-        <h1>analysis</h1>
+        <h3>analysis</h3>
     </div>
 
     <div id="mapping">
-        <h1>mapping energy resources</h1>
+        <h3>mapping energy resources</h3>
     </div>
 
-    <div id="partners">
-        <h1>partners and collaborators</h1>
-        <p>
-        <ul>
-            <li><a href="http://newmexicoconsortium.org/">New Mexico Consortium:</a> Home organization</lI>
-            <li> Department of Electrical and Computer Engineering,University of New Mexico: Profs. Chaouki Abdallah and Greg Heileman. </li>
-            <li> <a href="http://www.istec.org/">Ibero American Science and Technology Education Consortium (ISTEC:)</a>
-            To foster scientific, engineering, and technology education, joint international research and development efforts throughout the Americas and the Iberian Peninsula. Prof. Ramiro Jordan at UNM</li>
-            <li> Graduate School of Education, University of California, Berkeley: Profs. Michael Ranney, Stanley Klein, Bernard Sadoulet, and David Zilberman. </li>
-            <li> Physics Department, Carnegie Mellon University: Prof. John Nagle  </li>
-            <li> Physics Department, York University, Canada: Prof. Carl Wolfe  </li>
-            <li> Observer Reserach Foundation (ORF), India: Dr. Sunjoy Joshi </li>
-            <li> Brian Bush: Energy Systems and Analysis, NREL, USA</li>
-            <li> Alison Wise: Senior Strategic Analyst, NREL, USA</li>
-            <li> John Carr: Physicist, Centre de physique des particules de Marseille (CNRS), France</li>
-            <li> Abdel Tawfik, ECTP Founding Director, MTI University, Mukattam, Cairo-Egypt</li>
-            <li> Stephen Hubbard: GIS professional and an energy and sustainability analyst</li>
-        </ul>
-        </p>
-    </div>
+
 </div>
 {% endblock %}

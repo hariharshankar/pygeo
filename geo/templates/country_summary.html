@@ -1,10 +1,11 @@
 {% extends "search.html" %}
 {% block title %}{{ title }}{% endblock %}
+{% block body_onload %}{{ body_onload }}{% endblock %}
 {% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block right_pane_content %}
 <div id="summary-results ui-widget ui-helper-reset" class='summary-results'>
 
-    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>Overview for {{ country }}</h3>
+    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>Overview of {{ country }}</h3>
     <div>
         {{ overview|safe }}
     </div>
@@ -17,6 +18,5 @@
           </div>
         </div>
     {% endfor %}
-
 </div>
 {% endblock %}

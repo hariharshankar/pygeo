@@ -53,6 +53,8 @@ class Select(object):
                         and len(whe) == 3\
                         and whe[1].lower() in\
                         ['<', '>', '<=', '>=', '=', 'like', 'in']:
+                    if whe[1].lower() == 'in' and len(whe[2]) == 0:
+                        return []
                     # the prepare stmt throws an error if "in" is used
                     # with only one value. converting it into "=" instead.
                     if whe[1].lower() == 'in' and len(whe[2]) == 1:

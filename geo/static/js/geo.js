@@ -48,6 +48,9 @@ Search = {
         else
             k = data['keys'][0]
 
+        if (k == "Database_Type") {
+            k = "Category";
+        }
         var elementContentClass = element + "Content";
 
         var disableSelect = false
@@ -567,7 +570,7 @@ Chart = {
 
         // create a line function that can convert data[] into x and y points
         var line = d3.svg.line()
-                    .interpolate('cardinal')
+                    .interpolate('monotone')
                     // assign the X function to plot our line as we wish
                     .x(function(d,i) { 
                         //console.log(d, i)
@@ -624,6 +627,7 @@ Chart = {
         // add lines
         series.append("svg:path")
             .attr("d", function(d, i) {return line(d.yvalues)})
+            .attr("class", "linepath")
             .style("stroke", function(d, i) { return colors[lineCount]})
             .style("stroke-width", "4px")
         series.selectAll(".point")
@@ -709,6 +713,206 @@ Chart = {
         })
         .fail( function() { return null; } );
     },
+    
+    plotPieChart: function(data, container) {
+        width = $("#" + container).width();
+        height = $("#" + container).height();
+        radius = Math.min(width, height) / 2;
+
+
+        var dataset = {
+            apples: [53245, 28479, 19697, 24037, 40245],
+        };
+
+        //var width = 300,
+        //    height = 300,
+        //    radius = Math.min(width, height) / 2;
+
+        var color = d3.scale.category20();
+
+        var pie = d3.layout.pie()
+        .sort(null);
+
+        //pie_data = []
+        pie_data = {}
+        pie_data['values'] = []
+        pie_data['labels'] = []
+        $(".pie_chart_values").each(function(i, v) {
+            //pie_data.push({'labels': v.id, 'values': +v.value})
+            pie_data['values'].push(+v.value)
+            pie_data['labels'].push(v.id)
+        });
+        console.log(pie_data)
+        var piedata = pie(pie_data.values);
+
+        var arc = d3.svg.arc()
+        .innerRadius(radius - 100)
+        .outerRadius(radius - 50);
+
+        var svg = d3.select("#" + container).append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        var path = svg.selectAll("path")
+        .data(piedata)
+        .enter().append("path")
+        .attr("fill", function(d, i) { return color(i); })
+        .attr("class", "donut")
+        .attr("d", arc);
+
+        svg.selectAll("text").data(piedata)
+        .enter()
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", function(d) {
+            var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+            d.cx = Math.cos(a) * (radius - 75);
+            return d.x = Math.cos(a) * (radius - 20);
+        })
+        .attr("y", function(d) {
+            var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+            d.cy = Math.sin(a) * (radius - 75);
+            return d.y = Math.sin(a) * (radius - 20);
+        })
+        .text(function(d, i) { return pie_data.labels[i] + " - " + d.value + " MWe"; })
+        .each(function(d) {
+            var bbox = this.getBBox();
+            d.sx = d.x - bbox.width/2 - 2;
+            d.ox = d.x + bbox.width/2 + 2;
+            d.sy = d.oy = d.y + 5;
+        });
+
+        svg.append("defs").append("marker")
+        .attr("id", "circ")
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("refX", 3)
+        .attr("refY", 3)
+        .append("circle")
+        .attr("cx", 3)
+        .attr("cy", 3)
+        .attr("r", 3);
+
+        svg.selectAll("path.pointer").data(piedata).enter()
+        .append("path")
+        .attr("class", "pointer")
+        .style("fill", "none")
+        .style("stroke", "black")
+        .attr("marker-end", "url(#circ)")
+        .attr("d", function(d) {
+            if(d.cx > d.ox) {
+                return "M" + d.sx + "," + d.sy + "L" + d.ox + "," + d.oy + " " + d.cx + "," + d.cy;
+            } else {
+                return "M" + d.ox + "," + d.oy + "L" + d.sx + "," + d.sy + " " + d.cx + "," + d.cy;
+            }
+        });
+
+    }
+
+    /*
+    plotPieChart: function(data, container) {
+        width = $("#" + container).width();
+        height = $("#" + container).height();
+        radius = Math.min(width, height) / 2;
+
+        var color = d3.scale.ordinal()
+                    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+        var arc = d3.svg.arc()
+                    .outerRadius(radius - 10)
+                    .innerRadius(0);
+
+        var pie = d3.layout.pie()
+                    .sort(null)
+                    .value(function(d) { return d.values; });
+
+        //var pie = function(d) { console.log(d); }
+
+        var svg = d3.select("#" + container).append('svg')
+                    .attr("width", width)
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+        pie_data = []
+
+        $(".pie_chart_values").each(function(i, v) {
+            pie_data.push({'labels': v.id, 'values': +v.value})
+        });
+
+        console.log(pie_data)
+        piedata = pie(pie_data)
+    
+        var g = svg.selectAll(".arc")
+                .data(piedata)
+                .enter().append("g")
+                .attr("class", "arc");
+
+        g.append("path")
+            .attr("d", arc)
+            .style("fill", function(d, i) { return color(i % 7); });
+
+        //
+        g.append("text")
+            .attr("transform", function(d, i) { return "translate(" + arc.centroid(d) + i + ")"; })
+            .attr("dy", ".35em")
+            .style("text-anchor", "middle")
+            .text(function(d) { return d.data.labels; });
+        //
+svg.selectAll("text").data(piedata)
+    .enter()
+    .append("text")
+    .attr("text-anchor", "middle")
+    .attr("x", function(d) {
+        var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+        d.cx = Math.cos(a) * (radius - 75);
+        return d.x = Math.cos(a) * (radius - 20);
+    })
+    .attr("y", function(d) {
+        var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+        d.cy = Math.sin(a) * (radius - 75);
+        return d.y = Math.sin(a) * (radius - 20);
+    })
+    .text(function(d) { return d.labels; })
+    .each(function(d) {
+        var bbox = this.getBBox();
+        d.sx = d.x - bbox.width/2 - 2;
+        d.ox = d.x + bbox.width/2 + 2;
+        d.sy = d.oy = d.y + 5;
+    });
+
+svg.append("defs").append("marker")
+    .attr("id", "circ")
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("refX", 3)
+    .attr("refY", 3)
+    .append("circle")
+    .attr("cx", 3)
+    .attr("cy", 3)
+    .attr("r", 3);
+
+
+svg.selectAll("path.pointer").data(piedata).enter()
+    .append("path")
+    .attr("class", "pointer")
+    .style("fill", "none")
+    .style("stroke", "black")
+    .attr("marker-end", "url(#circ)")
+    .attr("d", function(d) {
+        //console.log(d)
+        if(d.cx > d.ox) {
+            x = "M" + d.sx + "," + d.sy + "L" + d.ox + "," + d.oy + " " + d.cx + "," + d.cy;
+            console.log(x)
+            return x
+        } else {
+            return "M" + d.ox + "," + d.oy + "L" + d.sx + "," + d.sy + " " + d.cx + "," + d.cy;
+        }
+    });
+    }
+    */
 }
 
 Map = {
@@ -956,16 +1160,17 @@ Summary = {
         html += "<table style='width: 50%; height: 100%; overflow: auto; margin: auto;' class='line-html-table'>";
         html += "<tr>";
         html += "<td class='line-html-table-years'>Total Number of Plants: </td>";
-        html += "<td align='right'>"+numberOfPlants+"</td>";
+        html += "<td align='right'><b>"+numberOfPlants+"</b></td>";
         html += "</tr>";
         
         html += "<tr>";
-        html += "<td class='line-html-table-years'>Total Cumulative Capacity: </td>";
-        html += "<td align='right'>"+cumulativeCapacity+"</td>";
+        html += "<td class='line-html-table-years'>Total Cumulative Capacity (MWe): </td>";
+        html += "<td align='right'><b>"+cumulativeCapacity+"</b></td>";
         html += "</tr>";
         html += "<tr style='height: 10px;' />";
         html += "<tr/>";
 
+        /*
         html += "<tr>";
         html += "<td colspan='2' class='line-html-table-years' style='font-weight: bold; font-size: 1.2em;'>Cumulative Capacity by Type (in MWe)</td>";
         html += "</tr>";
@@ -1004,6 +1209,9 @@ Summary = {
             html += "</table>";
             $("#"+tableContainer).append(html)
         })
+        */
+        html += "</table>";
+        $("#"+tableContainer).append(html)
     },
 
     typeValues: {},
@@ -1061,6 +1269,7 @@ Summary = {
 
             var perfCumulativeChartData = []
             var perfCumulativeChartKeys = []
+
             var annCO2Em = $.parseJSON(d.values[0][annCO2EmIndex])
             var annGWhGen = $.parseJSON(d.values[0][annGWhGenIndex])
             perfCumulativeChartKeys = annGWhGen.keys
@@ -1069,6 +1278,8 @@ Summary = {
             for (v in annGWhGen.values) {
                 perfCumulativeChartData.push([annGWhGen.values[v][0], annGWhGen.values[v][1], annCO2Em.values[v][1]])
             }
+
+            console.log(perfCumulativeChartData)
 
             arr = Chart.parseChartData({"keys": perfCumulativeChartKeys, "values": perfCumulativeChartData})
             cumKeys = arr[0]

@@ -34,6 +34,10 @@
                 return false;
             });
             */
+            $( "#home" ).button()
+            .click( function() {
+                window.location = "/";
+            });
             $( "#country_summary" ).button()
             .click( function() {
                 window.location = "/summary/country/";
@@ -105,19 +109,25 @@
 </head>
 <body onload="{% block body_onload %}{% endblock %}">
     <div id="header">
-        <a href="{{ url_for('index.home', _external=True) }}" alt="Home" title="Home">
-            <img src="{{ url_for('static', filename='img/geo_logo.png', _external=True) }}" class="logo"/>
+        <!--
+        <a href="{{ url_for('index.home') }}" alt="Home" title="Home">
+            <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
         </a>
+        -->
         <div id="toolbar" class="ui-widget-header ui-corner-all">
-            <button id="energy_resources" name="energy_resources">list of data pages</button>
+            <button id="home" name="home">Home</button>
             |
-            <button id="country_summary" name="country_summary">summary by country</button>
+            <button id="energy_resources" name="energy_resources">List of Data Pages</button>
             |
-            <button id="type_summary" name="type_summary">summary by type</button>
+            <button id="country_summary" name="country_summary">Summary by Country</button>
             |
-            <button id="map_data" name="map_data">map data</button>
+            <button id="type_summary" name="type_summary">Summary by Type</button>
+            |
+            <button id="map_data" name="map_data">Map Data</button>
+            <!--
             |
             <button id="analyze" name="analyze">analyze</button>
+            -->
         </div>
     </div>
     <div id="wrapper">
@@ -164,12 +174,16 @@
                     </div>
                 </div>
             </div>
-            <div class="leftPane-link">
-                <button id="moderation" name="moderation">Submissions awaiting moderation</button>
+            <div id="helpful-links">
+                <h3>Helpful Links</h3>
+                <a href="/moderation">Submissions awaiting moderation</a>
+                <a href="/partners">Partners and collaborators</a>
             </div>
             {% block user_pref %}{% endblock %}
         </div>
-        {% block content %}{% endblock %}
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
     </div>
 </body>
 </html>

@@ -52,7 +52,6 @@ class Moderation(object):
                                       )
 
         keys = ["Description_ID", "Name"]
-        values = []
 
         # get the latest description id for all resources
         resources = {}
@@ -66,7 +65,7 @@ class Moderation(object):
                                    resources.values()]
                                    ])
 
-        values = zip(resources.values(), [name[0] for name in names])
+        values = zip(resources.values(), [unicode(name[0], "utf-8") for name in names])
         return keys, values
 
     def get_resources_to_moderate(self):

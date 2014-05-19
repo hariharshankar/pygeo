@@ -10,15 +10,20 @@ db = None
 
 @mod.route("/summary/country/")
 @mod.route("/summary/country/<int:country_id>")
-def view(country_id=None):
+@mod.route("/summary/country/<string:country_abbr>")
+def view(country_id=None, country_abbr=None):
 
     main = Main(db)
     pref = main.get_user_pref()
-    if not country_id:
+
+    if not country_id and not country_abbr:
         url = "/".join(["/summary/country", pref[2]])
         #url = main.get_search_redirect_url("summary/country",
         #                                   return_type='country_summary')
         return flask.redirect(url)
+    elif country_abbr:
+        country_id = main.get_country_id_from_abbr(country_abbr)
+        return flask.redirect("/summary/country/" + str(country_id))
 
     country_name = main.get_country_name(country_id)
 
@@ -40,6 +45,10 @@ def view(country_id=None):
         <td>{total}</td>
     </tr>
     <tr>
+        <td style="width: 70%">Total Cumulative Capacity (MWe):</td>
+        <td>{cumulative_capacity}</td>
+    </tr>
+    <tr>
         <td style="width: 70%">Map All {type_name} {db}:</td>
         <td>{map_link}</td>
     </tr>
@@ -48,7 +57,17 @@ def view(country_id=None):
         <td>{summary_link}</td>
     </tr>
 </table>
+<input type='hidden' id={pie_id} class='pie_chart_values' value={pie_value} />
 """
+
+    module = {}
+    module['heading'] = "Cumulative Capacity by Category"
+    module['content'] = []
+    module['content'].append("<p style='text-align: center'><b>Total Cumulative Capacity: %s MWe</b></p>"
+                             % sum([t['Cumulative_Capacity'] for t in types]))
+    module['content'].append("<div id='pie_chart' style='width: 900px; height: 500px;'></div>")
+    module['content'] = "".join(module['content'])
+    modules.append(module)
 
     #keys, types = main.get_types_for_country(country_id)
     for t in types:
@@ -79,8 +98,11 @@ def view(country_id=None):
         module['content'] = module_content.format(type_name=type_name,
                                                   db=dbn,
                                                   total=t['Number_of_Plants'],
+                                                  cumulative_capacity=t['Cumulative_Capacity'],
                                                   summary_link="".join(s_link),
-                                                  map_link="".join(map_link))
+                                                  map_link="".join(map_link),
+                                                  pie_id=type_name,
+                                                  pie_value=t['Cumulative_Capacity'])
 
         modules.append(module)
 
@@ -91,4 +113,5 @@ def view(country_id=None):
     return flask.render_template("country_summary.html",
                                  modules=modules, title=title,
                                  country=country_name,
-                                 user_pref=user_pref)
+                                 user_pref=user_pref,
+                                 body_onload="Chart.plotPieChart('', 'pie_chart')")

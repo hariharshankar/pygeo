@@ -108,6 +108,18 @@ class Main(object):
         if result.returns_rows:
             return result.first()['Country']
 
+    def get_country_id_from_abbr(self, country_abbr):
+        """
+        Returns the country_id or None for the five 3-letter abbr.
+        """
+
+        result = self.select.read("Country",
+                                  columns=["Country_ID"],
+                                  where=[["Country_Code", "=",
+                                          country_abbr.lower()]])
+        if result.returns_rows:
+            return result.first()['Country_ID']
+
     def get_country_id(self, country_name):
         """
         Returns the country id or None given a country name.
@@ -142,25 +154,22 @@ class Main(object):
             ['k1', 'k2'], [(type_id, type),..]
         """
 
-        type_result = self.select.read("History",
-                                       columns=["distinct(Type_ID)"],
-                                       where=[["Country_ID", "=",
-                                               country_id]],
-                                       order_by=["Type_ID", "asc"])
+        type_ids = self.select.read("History",
+                                    columns=["distinct(Type_ID)"],
+                                    where=[["Country_ID", "=",
+                                               country_id],
+                                              ["AND"],
+                                              ["Accepted", "=", "1"]],
+                                    order_by=["Type_ID", "asc"])
 
-        types = type_result.fetchall()
         keys = ['Type_ID', 'Type']
-        values = []
+        types = self.select.read("Country",
+                                  columns=keys,
+                                  where=[["Type_ID", "in",
+                                          [type_id[0] for type_id in type_ids]]]
+                                  )
 
-        for typ in types:
-            tid = typ['Type_ID']
-            result = self.select.read("Type",
-                                      columns=["Type_ID", "Type"],
-                                      where=[["Type_ID", "=", tid]]
-                                      )
-            values.append(result.first().values())
-
-        return keys, values
+        return keys, [list(typ) for typ in types.fetchall()]
 
     def get_countries(self, typ):
         """
@@ -223,9 +232,20 @@ class Main(object):
 
         return (self.session.get('pref_db_type', 'powerplants'),
                 self.session.get('pref_type', '1'),
-                self.session.get('pref_country', '1'),
+                self.session.get('pref_country',
+                                 self.get_first_country_for_type(
+                                     self.session.get('pref_type')
+                                 )
+                                 ),
                 self.session.get('pref_state', '0')
-        )
+                )
+
+    def get_first_country_for_type(self, type_id):
+        """
+        Returns the first country for the requested type.
+        Used in setting default user pref.
+        """
+        return str(10)
 
     def store_user_pref(self, db_type, country, typ, state):
         """

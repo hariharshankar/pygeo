@@ -21,7 +21,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-        <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form" style="margin-left: 305px;">
+        <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form">
         <div class="all-modules ui-widget ui-helper-reset">
             {% for m in modules %}
                 <div class="module-container ui-corner-bottom ui-widget-content">
