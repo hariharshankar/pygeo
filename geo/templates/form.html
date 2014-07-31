@@ -35,8 +35,18 @@
                 </div>
             {% endfor %}
             
-            {% if session.username %}
-                <input type="submit" id="submit" name="submit" value="Submit" style="margin: 10px;"/>
+            {% if session.moderator_user and not is_moderated %}
+                <div id='moderate' style="margin: 10px;">
+                    <div class="ui-state-highlight ui-corner-all" style="padding: 10px; margin: 10px;">
+                        NOTE: None of the changes made to this fact sheet by the moderator will be saved.<br/>
+                        After accepting the moderation, edit the accepted fact sheet for making changes.
+                    </div>
+                    <button id="accept_moderate" name="accept_moderate">Accept</button>
+                    <button id="reject_moderate" name="reject_moderate">Reject</button>
+                    Comments: <input type="text" id="comments_moderate" name="comments_moderate" size="50" />
+                </div>
+            {% elif session.username %}
+            <input type="submit" id="submit" name="submit" value="Submit" style="margin: 10px;"/>
             {% else %}
                 <div class="ui-state-highlight ui-corner-all" style="padding: 10px; margin: 10px;">
                     Please sign in to submit your changes to this fact sheet. 

@@ -5,6 +5,7 @@ __author__ = 'harihar'
 import sys
 import os
 import json
+import math
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 
@@ -45,36 +46,45 @@ class Metadata(object):
         # units
         units = self.select.read(typ[1] + self.unit_fields[0],
                             columns=["`" + self.unit_fields[1] + "`",
-                                     "`" + self.unit_fields[2] + "`"],
+                                     "`" + self.unit_fields[2] + "`", "Description_ID"],
                             where=[["Description_ID", "in",
                                     [plant[0] for plant in plants]]])
 
-        cumulative_capacity = 0
+        cumulative_capacity_total = 0
+        cumulative_capacity = {}
         new_capacity = {}
         new_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
+        cumulative_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
         cap_values = {}
+        cum_cap_values = {}
         for unit in units:
             if not unit[1] or not unit[0]:
                 continue
 
-            cumulative_capacity += unit[1]
+            unit_val = math.ceil(unit[1])
+            cumulative_capacity_total += unit_val
 
             year = unit[0].year
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
-            cap_values[year] += unit[1]
+            cap_values[year] += unit_val
+
+        prev_year = 0
+        for year in sorted(cap_values.keys()):
+            cum_cap_values[year] = cap_values[year] + cum_cap_values.get(prev_year, 0)
+            prev_year = year
 
         new_capacity['values'] = sorted([list(values) for values in
                                          zip(cap_values.keys(),
                                              cap_values.values())]
                                         )
+        cumulative_capacity['values'] = sorted([list(values) for values in
+                                         zip(cum_cap_values.keys(),
+                                             cum_cap_values.values())]
+        )
 
-        #print(typ[1], country[1])
-        #print("Number of Plants: %d" % len(plants))
-        #print("Cumulative Capacity: %d" % cumulative_capacity)
-        #print("New Capacity: \n%s" % repr(new_capacity))
-        return cumulative_capacity, new_capacity
+        return cumulative_capacity_total, cumulative_capacity, new_capacity
 
     def get_wind_unit_data(self, typ, plants):
         # units
@@ -85,7 +95,7 @@ class Metadata(object):
                                  where=[["Description_ID", "in",
                                          [plant[0] for plant in plants]]])
 
-        cumulative_capacity = 0
+        cumulative_capacity_total = 0
         new_capacity = {}
         new_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
         cap_values = {}
@@ -93,23 +103,33 @@ class Metadata(object):
             if not unit[1] or not unit[0]:
                 continue
 
-            cumulative_capacity += unit[1]
+            unit_val = math.ceil(unit[1])
+            cumulative_capacity_total += unit_val
 
             year = unit[0].year
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
-            cap_values[year] += unit[1] * unit[2]
+            if unit[2] and float(unit[2]):
+                cap_values[year] += unit_val * math.ceil(unit[2])
+
+        cum_cap_values = {}
+        prev_year = 0
+        for year in sorted(cap_values.keys()):
+            cum_cap_values[year] = cap_values[year] + cum_cap_values.get(prev_year, 0)
+            prev_year = year
 
         new_capacity['values'] = sorted([list(values) for values in
                                          zip(cap_values.keys(),
                                              cap_values.values())])
 
-        #print(typ[1], country[1])
-        #print("Number of Plants: %d" % len(plants))
-        #print("Cumulative Capacity: %d" % cumulative_capacity)
-        #print("New Capacity: \n%s" % repr(new_capacity))
-        return cumulative_capacity, new_capacity
+        cumulative_capacity = {}
+        cumulative_capacity['values'] = sorted([list(values) for values in
+                                                zip(cum_cap_values.keys(),
+                                                    cum_cap_values.values())]
+        )
+
+        return cumulative_capacity_total, cumulative_capacity, new_capacity
 
     def get_general_performance_data(self, typ, plants):
         # performance
@@ -118,28 +138,27 @@ class Metadata(object):
             cols.extend(["`" + p_col + "`" for p_col in self.alt_perf_fields[2]])
         else:
             cols.extend(["`" + p_col + "`" for p_col in self.perf_fields[2]])
+
         performances = self.select.read(typ[1] + self.perf_fields[0],
                                    columns=cols,
                                    where=[["Description_ID", "in",
                                            [plant[0] for plant in plants]]])
-        #print()
         co2 = {}
         ghg = {}
         for perf in performances:
-            #print(perf)
             year = perf[0]
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
                 if g_val == -1:
                     ghg[year] = 0
-                ghg[year] += perf[1]
+                ghg[year] += math.ceil(perf[1])
 
             if perf[2]:
                 c_val = co2.get(year, -1)
                 if c_val == -1:
                     co2[year] = 0
-                co2[year] += perf[2]
+                co2[year] += math.ceil(perf[2])
 
         # for plotting purposes, the years in both the dicts must
         # be the same. so adding zeros to missing years.
@@ -162,8 +181,6 @@ class Metadata(object):
         co2_values = {"keys": [self.perf_fields[1], self.perf_fields[2][1]],
                       "values": sorted([list(values) for values in
                                         zip(co2.keys(), co2.values())])}
-        #print("co2: %s" % repr(co2))
-        #print("ghg: %s" % repr(ghg))
 
         return ghg_values, co2_values
 
@@ -171,7 +188,6 @@ class Metadata(object):
         # performance
         cols = [self.perf_fields[1]]
         cols.append("`" + self.nuclear_ghg_fields[2][0] + "`")
-        print(cols)
         ghg_perf = self.select.read(typ[1] + self.nuclear_ghg_fields[0],
                                         columns=cols,
                                         where=[["Description_ID", "in",
@@ -183,25 +199,23 @@ class Metadata(object):
                                     columns=cols,
                                     where=[["Description_ID", "in",
                                             [plant[0] for plant in plants]]])
-        #print()
         co2 = {}
         ghg = {}
         for perf in ghg_perf:
-            #print(perf)
             year = perf[0]
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
                 if g_val == -1:
                     ghg[year] = 0
-                ghg[year] += perf[1]
+                ghg[year] += math.ceil(perf[1])
 
         for perf in reg_perf:
             if perf[1]:
                 c_val = co2.get(year, -1)
                 if c_val == -1:
                     co2[year] = 0
-                co2[year] += perf[1]
+                co2[year] += math.ceil(perf[1])
 
         # for plotting purposes, the years in both the dicts must
         # be the same. so adding zeros to missing years.
@@ -224,31 +238,24 @@ class Metadata(object):
                       "values": sorted([list(values) for values in
                                         zip(co2.keys(), co2.values())]
                                        )}
-        #print("co2: %s" % repr(co2))
-        #print("ghg: %s" % repr(ghg))
-
         return ghg_values, co2_values
 
     def compute(self):
         t_keys, types = self.main.get_types("PowerPlants")
-        #print(types)
-        #types = [[10, "Wind"]]
+        #types = [[1, "Coal"]]
         session = self.conn.session
         for typ in types:
             c_keys, countries = self.main.get_countries(typ[0])
-            #print()
-            #print(typ)
-            #countries = [[99, "India"]]
+            #countries = [[38, "Canada"]]
 
             for country in countries:
-                print(country)
                 p_keys, plants = self.moderation.get_all_resources(country_id=country[0], type_id=typ[0])
 
                 # unit data
                 if typ[0] == 10:
-                    cumulative_capacity, new_capacity = self.get_wind_unit_data(typ, plants)
+                    cumulative_capacity_total, cumulative_capacity, new_capacity = self.get_wind_unit_data(typ, plants)
                 else:
-                    cumulative_capacity, new_capacity = self.get_unit_data(typ, plants)
+                    cumulative_capacity_total, cumulative_capacity, new_capacity = self.get_unit_data(typ, plants)
 
                 # perf data
                 if typ[0] == 5:
@@ -258,19 +265,21 @@ class Metadata(object):
 
                 sql = "INSERT INTO metadata SET Country_ID=:country_id, \
                  Type_ID=:type_id, Number_of_Plants=:number_of_plants, \
-                 Cumulative_Capacity=:cum_cap, New_Capacity_Added=:new_cap, \
+                 Cumulative_Capacity=:cum_cap, \
+                 Cumulative_Capacity_Total=:cum_cap_tot, New_Capacity_Added=:new_cap, \
                  Annual_Gigawatt_Hours_Generated=:ghg, Annual_CO2_Emitted=:co2"
 
                 session.execute(sql, {
                     "country_id": country[0],
                     "type_id": typ[0],
                     "number_of_plants": str(len(plants)),
-                    "cum_cap": str(cumulative_capacity),
+                    "cum_cap": json.dumps(cumulative_capacity),
+                    "cum_cap_tot": str(cumulative_capacity_total),
                     "new_cap": json.dumps(new_capacity),
                     "ghg": json.dumps(ghg),
                     "co2": json.dumps(co2)
                 })
-        session.commit()
+                session.commit()
         session.close()
 
 if __name__ == "__main__":

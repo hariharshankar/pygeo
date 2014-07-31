@@ -4,6 +4,7 @@ from geo.db.insert import InsertFactSheet
 from geo.db.query import Select
 
 mod = flask.Blueprint("formsubmit", __name__)
+db = None
 
 @mod.route("/formsubmit", methods=['POST'], endpoint="formsubmit")
 def view():
@@ -46,8 +47,8 @@ def view():
 
     select = Select(db)
     res_modules = select.read("Type_Features",
-                                    where=[["Type_ID", "=", geo_resource.type_id]]
-                                    )
+                              where=[["Type_ID", "=", geo_resource.type_id]]
+                              )
     modules = res_modules.first()
 
     for f in modules.Features.split(","):

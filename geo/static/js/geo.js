@@ -2,7 +2,8 @@ var Form;
 var Search;
 var Map;
 var Chart;
-var Summary;
+var TypeSummary;
+var CountrySummary;
 var Geo;
 
 jQuery.fn.center = function () {
@@ -316,6 +317,19 @@ Form = {
     init: function() {
 
         $("#submit").button().center();
+        $("#moderate").center();
+
+        $("#accept_moderate").button()
+        .click(function(event) {
+            event.preventDefault();
+            window.location.href = "/moderationsubmit/?geoid="+$("#Description_ID").val()+"&moderation=1&moderation_comment=" + $("#comments_moderate").val()
+        });
+        $("#reject_moderate").button()
+        .click(function(event) {
+            event.preventDefault();
+            window.location.href = "/moderationsubmit/?geoid="+$("#Description_ID").val()+"&moderation=0&moderation_comment=" + $("#comments_moderate").val()
+        });
+
         $(".module-header").click( function(event) {
             var panel = $(this).next();
             var isOpen = panel.is(":visible");
@@ -714,101 +728,112 @@ Chart = {
         .fail( function() { return null; } );
     },
     
-    plotPieChart: function(data, container) {
-        width = $("#" + container).width();
-        height = $("#" + container).height();
-        radius = Math.min(width, height) / 2;
+    plotPieChart: function(data, container_id) {
 
+        traditional = ['coal', 'oil', 'gas', 'nuclear', 'waste'];
+        renewable = ['geothermal', 'solar_pv', 'solar_thermal', 'wind', 'hydro'];
 
-        var dataset = {
-            apples: [53245, 28479, 19697, 24037, 40245],
-        };
-
-        //var width = 300,
-        //    height = 300,
-        //    radius = Math.min(width, height) / 2;
-
-        var color = d3.scale.category20();
-
-        var pie = d3.layout.pie()
-        .sort(null);
-
-        //pie_data = []
-        pie_data = {}
-        pie_data['values'] = []
-        pie_data['labels'] = []
+        traditional_data = {}
+        traditional_data['values'] = []
+        traditional_data['labels'] = []
+        renewable_data = {}
+        renewable_data['values'] = []
+        renewable_data['labels'] = []
         $(".pie_chart_values").each(function(i, v) {
-            //pie_data.push({'labels': v.id, 'values': +v.value})
-            pie_data['values'].push(+v.value)
-            pie_data['labels'].push(v.id)
-        });
-        console.log(pie_data)
-        var piedata = pie(pie_data.values);
-
-        var arc = d3.svg.arc()
-        .innerRadius(radius - 100)
-        .outerRadius(radius - 50);
-
-        var svg = d3.select("#" + container).append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-        var path = svg.selectAll("path")
-        .data(piedata)
-        .enter().append("path")
-        .attr("fill", function(d, i) { return color(i); })
-        .attr("class", "donut")
-        .attr("d", arc);
-
-        svg.selectAll("text").data(piedata)
-        .enter()
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("x", function(d) {
-            var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
-            d.cx = Math.cos(a) * (radius - 75);
-            return d.x = Math.cos(a) * (radius - 20);
-        })
-        .attr("y", function(d) {
-            var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
-            d.cy = Math.sin(a) * (radius - 75);
-            return d.y = Math.sin(a) * (radius - 20);
-        })
-        .text(function(d, i) { return pie_data.labels[i] + " - " + d.value + " MWe"; })
-        .each(function(d) {
-            var bbox = this.getBBox();
-            d.sx = d.x - bbox.width/2 - 2;
-            d.ox = d.x + bbox.width/2 + 2;
-            d.sy = d.oy = d.y + 5;
-        });
-
-        svg.append("defs").append("marker")
-        .attr("id", "circ")
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("refX", 3)
-        .attr("refY", 3)
-        .append("circle")
-        .attr("cx", 3)
-        .attr("cy", 3)
-        .attr("r", 3);
-
-        svg.selectAll("path.pointer").data(piedata).enter()
-        .append("path")
-        .attr("class", "pointer")
-        .style("fill", "none")
-        .style("stroke", "black")
-        .attr("marker-end", "url(#circ)")
-        .attr("d", function(d) {
-            if(d.cx > d.ox) {
-                return "M" + d.sx + "," + d.sy + "L" + d.ox + "," + d.oy + " " + d.cx + "," + d.cy;
-            } else {
-                return "M" + d.ox + "," + d.oy + "L" + d.sx + "," + d.sy + " " + d.cx + "," + d.cy;
+            if (traditional.indexOf(v.id.toLowerCase()) >= 0) {
+                traditional_data['values'].push(+v.value);
+                traditional_data['labels'].push(v.id);
+            }
+            else if (renewable.indexOf(v.id.toLowerCase()) >= 0) {
+                renewable_data['values'].push(+v.value);
+                renewable_data['labels'].push(v.id);
             }
         });
 
+        for (i=1; i<=2; i++) {
+            var container = container_id + "_" + i;
+            width = $("#" + container).width();
+            height = $("#" + container).height();
+            radius = Math.min(width, height) / 2;
+
+            var color = d3.scale.category20();
+
+            var pie = d3.layout.pie()
+                .sort(null);
+
+            var pie_data;
+            if (i == 1) {
+                pie_data = traditional_data;
+            }
+            else if (i == 2) {
+                pie_data = renewable_data;
+            }
+            var piedata = pie(pie_data.values);
+
+            var arc = d3.svg.arc()
+                .innerRadius(radius - 100)
+                .outerRadius(radius - 50);
+
+            var svg = d3.select("#" + container).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+            var path = svg.selectAll("path")
+                .data(piedata)
+                .enter().append("path")
+                .attr("fill", function(d, i) { return color(i); })
+                .attr("class", "donut")
+                .attr("d", arc);
+
+            svg.selectAll("text").data(piedata)
+                .enter()
+                .append("text")
+                .attr("text-anchor", "middle")
+                .attr("x", function(d) {
+                    var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+                    d.cx = Math.cos(a) * (radius - 75);
+                    return d.x = Math.cos(a) * (radius - 20);
+                })
+            .attr("y", function(d) {
+                var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
+                d.cy = Math.sin(a) * (radius - 75);
+                return d.y = Math.sin(a) * (radius - 20);
+            })
+            .text(function(d, i) { return pie_data.labels[i] + " - " + d.value + " MWe"; })
+                .each(function(d) {
+                    var bbox = this.getBBox();
+                    d.sx = d.x - bbox.width/2 - 2;
+                    d.ox = d.x + bbox.width/2 + 2;
+                    d.sy = d.oy = d.y + 5;
+                });
+
+            svg.append("defs").append("marker")
+                .attr("id", "circ")
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("refX", 3)
+                .attr("refY", 3)
+                .append("circle")
+                .attr("cx", 3)
+                .attr("cy", 3)
+                .attr("r", 3);
+
+            svg.selectAll("path.pointer").data(piedata).enter()
+                .append("path")
+                .attr("class", "pointer")
+                .style("fill", "none")
+                .style("stroke", "black")
+                .attr("marker-end", "url(#circ)")
+                .attr("d", function(d) {
+                    if(d.cx > d.ox) {
+                        return "M" + d.sx + "," + d.sy + "L" + d.ox + "," + d.oy + " " + d.cx + "," + d.cy;
+                    } else {
+                        return "M" + d.ox + "," + d.oy + "L" + d.sx + "," + d.sy + " " + d.cx + "," + d.cy;
+                    }
+                });
+        }
     }
 
     /*
@@ -1034,7 +1059,7 @@ Map = {
             var overlay = overlays[o]
             var pointsString = overlay.points
 
-            console.log(pointsString)
+            //console.log(pointsString)
             var points = eval(pointsString)
             var pointsArray = []
             
@@ -1150,9 +1175,15 @@ Map = {
     }
 }
 
-Summary = {
+CountrySummary = {
+    init: function() {
+        Chart.plotPieChart('', 'pie_chart');
+    }
+},
 
-    displaySummaryResults: function(numberOfPlants, cumulativeCapacity, tableContainer) {
+TypeSummary = {
+
+    displayTypeSummaryResults: function(numberOfPlants, cumulativeCapacityTotal, tableContainer) {
 
         var w = $("#"+tableContainer).width();
 
@@ -1165,7 +1196,7 @@ Summary = {
         
         html += "<tr>";
         html += "<td class='line-html-table-years'>Total Cumulative Capacity (MWe): </td>";
-        html += "<td align='right'><b>"+cumulativeCapacity+"</b></td>";
+        html += "<td align='right'><b>"+cumulativeCapacityTotal+"</b></td>";
         html += "</tr>";
         html += "<tr style='height: 10px;' />";
         html += "<tr/>";
@@ -1229,19 +1260,20 @@ Summary = {
             dataType: "json",
             contentType: "application/json; charset=utf-8",            
             success: function(data, textStatus, jqXHR) {
-                Summary.typeValues = data
+                TypeSummary.typeValues = data
             }
         })    
 
 
         $.getJSON($("#summary_json").attr("value"), function(d) {
             var numberOfPlants = 0
-            var cumulativeCapacity = 0
+            var cumulativeCapacityTotal = 0
             var newCapAddedIndex = 0
+            var cumulativeCapAddedIndex = 0
             var annGWhGenIndex = 0
             var annCO2EmIndex = 0
-            d = d.data
 
+            //d = d.data
             for (var i=0, k; k=d.keys[i]; i++) {
                 if (k.search("New_Capacity_Added") == 0) {
                     newCapAddedIndex = i
@@ -1252,34 +1284,41 @@ Summary = {
                 else if (k.search("Annual_CO2_Emitted") == 0) {
                     annCO2EmIndex = i
                 }
+                else if (k.search("Cumulative_Capacity_Total") == 0) {
+                    cumulativeCapacityTotal = d.values[i]
+                }
                 else if (k.search("Cumulative_Capacity") == 0) {
-                    cumulativeCapacity = d.values[0][i]
+                    cumulativeCapAddedIndex = i
                 }
                 else if (k.search("Number_of_Plants") == 0) {
-                    numberOfPlants = d.values[0][i]
+                    numberOfPlants = d.values[i]
                 }
             }
 
-            Summary.displaySummaryResults(numberOfPlants, cumulativeCapacity, "summary-overview")
+            TypeSummary.displayTypeSummaryResults(numberOfPlants, cumulativeCapacityTotal, "summary-overview")
 
-            newCapArr = Chart.parseChartData($.parseJSON(d.values[0][newCapAddedIndex]))
+            newCapArr = Chart.parseChartData(d.values[newCapAddedIndex])
             newCapKeys = newCapArr[0]
             newCapYears = newCapArr[1]
             newCapData = newCapArr[2]
 
+            cumCapArr = Chart.parseChartData(d.values[cumulativeCapAddedIndex])
+            console.log(cumCapArr)
+            cumCapKeys = cumCapArr[0]
+            cumCapYears = cumCapArr[1]
+            cumCapData = cumCapArr[2]
+
             var perfCumulativeChartData = []
             var perfCumulativeChartKeys = []
 
-            var annCO2Em = $.parseJSON(d.values[0][annCO2EmIndex])
-            var annGWhGen = $.parseJSON(d.values[0][annGWhGenIndex])
+            var annCO2Em = d.values[annCO2EmIndex]
+            var annGWhGen = d.values[annGWhGenIndex]
             perfCumulativeChartKeys = annGWhGen.keys
             perfCumulativeChartKeys.push(annCO2Em.keys[1])
 
             for (v in annGWhGen.values) {
                 perfCumulativeChartData.push([annGWhGen.values[v][0], annGWhGen.values[v][1], annCO2Em.values[v][1]])
             }
-
-            console.log(perfCumulativeChartData)
 
             arr = Chart.parseChartData({"keys": perfCumulativeChartKeys, "values": perfCumulativeChartData})
             cumKeys = arr[0]
@@ -1292,8 +1331,11 @@ Summary = {
             Chart.plotLineDataTable(arr, "performance_linechart_cumulative_table")
             
             lineData = { "years": newCapYears, "data": newCapData, "keys": newCapKeys };
-            Chart.plotLineChart(newCapArr, "unit_linechart_cumulative_chart")
-            Chart.plotLineDataTable(newCapArr, "unit_linechart_cumulative_table")
+            Chart.plotLineChart(newCapArr, "unit_linechart_capacity_chart")
+            Chart.plotLineDataTable(newCapArr, "unit_linechart_capacity_table")
+
+            lineData = { "years": cumCapYears, "data": cumCapData, "keys": cumCapKeys };
+            Chart.plotLineChart(cumCapArr, "unit_linechart_cumulative_chart")
         })
         .fail( function() { return null; } );
     }

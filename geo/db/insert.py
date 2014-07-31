@@ -17,6 +17,13 @@ class InsertFactSheet(object):
         """
         self.db_conn = db_conn
 
+    def __del__(self):
+        """
+        Closing the open sessions.
+        :return:
+        """
+        self.db_conn.session.close()
+
     def insert(self, table_name, form_data, module_type, description_id=0):
         """
         The public method that determines how the data should be prepared
@@ -52,7 +59,7 @@ class InsertFactSheet(object):
         sql_fields = []
         sql_fields.extend(["`User_ID`=:user_id",
                           "`Moderated`=:moderated",
-                          "`Moderator_ID`=:moderated",
+                          "`Moderator_ID`=:moderator_id",
                           "`Type_ID`=:type_id",
                           "`Country_ID`=:country_id",
                           "`State_ID`=:state_id",
@@ -68,9 +75,9 @@ class InsertFactSheet(object):
 
         sql_statement = "INSERT INTO History SET " + ",".join(sql_fields)
 
-        sql_values['user_id'] = form_data.get('User_ID', 0)
+        sql_values['user_id'] = str(form_data.get('User_ID', 0))
         sql_values['moderated'] = form_data.get('Moderated', 0)
-        sql_values['moderated_id'] = form_data.get('Moderator_ID')
+        sql_values['moderator_id'] = form_data.get('Moderator_ID', None)
         sql_values['type_id'] = form_data.get('Type_ID')
         sql_values['country_id'] = form_data.get('Country_ID')
         sql_values['state_id'] = form_data.get('State_ID')

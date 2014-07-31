@@ -29,6 +29,8 @@ class GeoUser(object):
         self.__password = user['Password_require']
         self.firstname = user['First_Name_require']
         self.lastname = user['Last_Name_require']
+        self.moderator_user = True if \
+            user['Privilege_omit'] in ['Moderator', 'Administrator'] else False
 
     @staticmethod
     def get_user_info(select, user_id=None, username=None):
@@ -44,7 +46,7 @@ class GeoUser(object):
         elif username:
             result = select.read("User",
                                  where=[["Username_require", "LIKE",
-                                         "'" + username + "'"]])
+                                         username]])
             if result.rowcount == 0:
                 raise LookupError("Username %s does not exist." % username)
         if not result:
@@ -56,4 +58,5 @@ class GeoUser(object):
         """
         Validates a user's password.
         """
+        print(self.__password)
         return self.__password == password

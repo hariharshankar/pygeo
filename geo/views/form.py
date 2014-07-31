@@ -7,9 +7,9 @@ mod = flask.Blueprint("form", __name__)
 db = None
 
 
-@mod.route("/form.php", alias=True)
+@mod.route("/form.php")
 @mod.route("/geoid/<int:description_id>", endpoint='factsheet')
-def view(description_id):
+def view(description_id=None):
 
     if not description_id:
         description_id = flask.request.args.get("pid", 0)
@@ -21,4 +21,4 @@ def view(description_id):
     main = Main(db)
     user_pref = main.make_html_user_pref()
     return flask.render_template("form.html", modules=html, title=title,
-                                 user_pref=user_pref)
+                                 user_pref=user_pref, is_moderated=geo_resource.is_moderated)

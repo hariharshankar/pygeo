@@ -32,7 +32,7 @@ class Moderation(object):
         if not type_name:
             return ([], [])
 
-        select = Select(self.db_conn)
+        """
         parent_ids = select.read("History",
                                  columns=["distinct(Parent_Plant_ID)"],
                                  where=[["Country_ID", "=", country_id],
@@ -41,15 +41,33 @@ class Moderation(object):
                                         ["and"], ["Accepted", "=", 1]
                                         ]
                                  )
-
         description_ids = select.read("History",
                                       columns=["Parent_Plant_ID",
                                                "Description_ID"],
                                       where=[["Parent_Plant_ID",
                                               "in",
                                               [x[0] for x in parent_ids]]
-                                             ]
-                                      )
+                                      ]
+        )
+        """
+
+        select = Select(self.db_conn)
+        sql = "SELECT Parent_Plant_ID,Description_ID FROM History WHERE \
+                Parent_Plant_ID in \
+                    (SELECT distinct(Parent_Plant_ID) \
+                    FROM History \
+                    WHERE Country_ID=:country_id \
+                    and Type_ID=:type_id \
+                    and Accepted=:accepted \
+                    ) \
+              and Accepted=1;"
+        data = {
+            "country_id": country_id,
+            "type_id": type_id,
+            "accepted": 1
+        }
+        description_ids = self.db_conn.session.execute(sql, data)
+        self.db_conn.session.close()
 
         keys = ["Description_ID", "Name"]
 
@@ -60,12 +78,14 @@ class Moderation(object):
                 resources[did['Parent_Plant_ID']] = did['Description_ID']
 
         names = select.read(type_name + "_Description",
-                            columns=["Name_omit"],
+                            columns=["Description_ID", "Name_omit"],
                             where=[["Description_ID", "in",
-                                   resources.values()]
-                                   ])
+                                   list(resources.values())]
+                                   ],
+                            order_by=["Name_omit", "ASC"])
 
-        values = zip(resources.values(), [unicode(name[0], "utf-8") for name in names])
+
+        values = [name for name in names if name[0] is not None]
         return keys, values
 
     def get_resources_to_moderate(self):
@@ -101,14 +121,14 @@ class Moderation(object):
                 new_submits.append({
                     'type_name': type_name,
                     'country_name': country_name,
-                    'geo_name': unicode(geo_name, "utf-8"),
+                    'geo_name': geo_name,
                     'description_id': str(description_id['Description_ID'])
                 })
             else:
                 edits.append({
                     'type_name': type_name,
                     'country_name': country_name,
-                    'geo_name': unicode(geo_name, "utf-8"),
+                    'geo_name': geo_name,
                     'description_id': str(description_id['Description_ID'])
                 })
         return new_submits, edits

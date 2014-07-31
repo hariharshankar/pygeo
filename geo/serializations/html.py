@@ -22,7 +22,7 @@ class Html(object):
         """
 
         html = []
-        if self.description_id > 0:
+        if int(self.description_id) > 0:
             html = self.__generate_resource_modules()
 
         return html
@@ -37,12 +37,21 @@ class Html(object):
                                        )
         modules = res_modules.first()
         module_names = []
+        full_feature_list = self.select.read_column_names("Type_Features", where='Features')[0][1]
 
         if type(modules.Features) == str:
             module_names = modules.Features.split(',')
         else:
-            module_names = modules.Features
+            full_feature_list = full_feature_list.replace("set(", "")
+            full_feature_list = full_feature_list.replace(")", "")
+            full_feature_list = full_feature_list.replace("\"", "")
+            full_feature_list = full_feature_list.replace("'", "")
 
+            module_names = [str(module)
+                            for module in full_feature_list.split(",")
+                            if module in modules.Features]
+
+        print(module_names)
         html = []
 
         for module in module_names:

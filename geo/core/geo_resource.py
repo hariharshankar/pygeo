@@ -36,6 +36,7 @@ class GeoResource(Html):
         self.state_id = state_id
         self.parent_plant_id = 0
         self.latest_revision_id = 0
+        self.is_moderated = 0
         self.name = ""
 
         self.select = Select(self.connection)
@@ -64,6 +65,7 @@ class GeoResource(Html):
         self.country_id = ids['Country_ID']
         self.state_id = ids['State_ID']
         self.parent_plant_id = ids['Parent_Plant_ID']
+        self.is_moderated = ids['Moderated']
 
     def get_latest_revision_id(self, moderated=True):
         """

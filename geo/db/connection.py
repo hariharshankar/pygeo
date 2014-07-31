@@ -32,6 +32,14 @@ class Db(object):
         except Exception:
             raise
 
+    def __del__(self):
+        """
+        Close sessions and connections.
+        """
+        if self.__session:
+            self.__session.close()
+
+
     def __get_session(self):
         """
         Returns the private session var.

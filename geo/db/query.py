@@ -15,6 +15,13 @@ class Select(object):
         """
         self.db_conn = db
 
+    def __del__(self):
+        """
+        Close the open sessions.
+        :return:
+        """
+        self.db_conn.session.close()
+
     def read(self, table_name,
              columns=None,
              where=None,
@@ -60,6 +67,15 @@ class Select(object):
                     if whe[1].lower() == 'in' and len(whe[2]) == 1:
                         sql.extend([whe[0], "=", ":wh"+str(i)])
                         params["wh"+str(i)] = whe[2][0]
+                    elif whe[1].lower() == 'in':
+                        sql.extend([whe[0], whe[1], "("])
+                        vals = []
+                        for v, val in enumerate(whe[2]):
+                            vals.append(":wh" + str(v))
+                            params["wh"+str(v)] = str(val)
+                        sql.append(",".join(vals))
+                        sql.append(")")
+                        #params["wh"+str(i)] = ",".join([str(val) for val in whe[2]])
                     else:
                         sql.extend([whe[0], whe[1], ":wh"+str(i)])
                         params["wh"+str(i)] = whe[2]
@@ -93,7 +109,7 @@ class Select(object):
     def process_result_set(self, result):
         """
         Convert the returned values from result obj into lists for
-        easy json serizlization.
+        easy json serialization.
         """
 
         keys = result.keys()
@@ -104,5 +120,4 @@ class Select(object):
         rows = result.fetchall()
         values = [r.values() for r in rows]
         values.sort()
-
         return keys, values

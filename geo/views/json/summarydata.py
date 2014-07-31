@@ -1,5 +1,6 @@
 import flask
 from geo.db.query import Select
+import json
 
 mod = flask.Blueprint("summarydata", __name__)
 db = None
@@ -17,7 +18,7 @@ def view():
 
     where = [["Country_ID", "=", country_id]]
     columns = []
-    if type_id > 0:
+    if int(type_id) > 0:
         where.append(["AND"])
         where.append(["Type_ID", "=", type_id])
     else:
@@ -26,6 +27,18 @@ def view():
     select = Select(db)
     result = select.read("metadata", columns=columns, where=where)
 
-    keys, values = select.process_result_set(result)
+    keys = result.keys()
+    values = []
+    if not result.returns_rows:
+        return flask.jsonify({'keys': keys, 'values': values})
 
-    return flask.jsonify(data={'keys': keys, 'values': values})
+    rows = result.fetchall()
+    for r in rows[0]:
+        print(r)
+        values.append(json.loads(str(r)))
+    #values = [json.loads(str(r)) for r in rows]
+    #keys, values = select.process_result_set(result)
+
+    data = {'keys': keys, 'values': values}
+
+    return flask.jsonify(data)

@@ -33,7 +33,7 @@ def view(country_id=None, country_abbr=None):
     res = select.read("metadata",
                       columns=["Type_ID",
                                "Number_of_Plants",
-                               "Cumulative_Capacity"],
+                               "Cumulative_Capacity_Total"],
                       where=[["Country_ID", "=", country_id]],
                       order_by=["Type_ID", "asc"])
     types = res.fetchall()
@@ -57,15 +57,24 @@ def view(country_id=None, country_abbr=None):
         <td>{summary_link}</td>
     </tr>
 </table>
-<input type='hidden' id={pie_id} class='pie_chart_values' value={pie_value} />
+<input type='hidden' id='{pie_id}' class='pie_chart_values' value='{pie_value}' />
 """
 
     module = {}
-    module['heading'] = "Cumulative Capacity by Category"
+    module['heading'] = "Installed Capacity by Category"
     module['content'] = []
     module['content'].append("<p style='text-align: center'><b>Total Cumulative Capacity: %s MWe</b></p>"
-                             % sum([t['Cumulative_Capacity'] for t in types]))
-    module['content'].append("<div id='pie_chart' style='width: 900px; height: 500px;'></div>")
+                             % sum([t['Cumulative_Capacity_Total'] for t in types]))
+    module['content'].extend(["<div id='pie_chart'>",
+                              "<div id='pie_chart_1'>",
+                              "<div id='pie_chart_1_title' style='text-align: center'>",
+                              "<b>Traditional Energy Sources</b></div>",
+                              "</div>",
+                              "<div id='pie_chart_2'>",
+                              "<div id='pie_chart_2_title' style='text-align: center'>",
+                              "<b>Renewable Energy Sources</b></div>",
+                              "</div>",
+                              "</div>"])
     module['content'] = "".join(module['content'])
     modules.append(module)
 
@@ -98,11 +107,11 @@ def view(country_id=None, country_abbr=None):
         module['content'] = module_content.format(type_name=type_name,
                                                   db=dbn,
                                                   total=t['Number_of_Plants'],
-                                                  cumulative_capacity=t['Cumulative_Capacity'],
+                                                  cumulative_capacity=t['Cumulative_Capacity_Total'],
                                                   summary_link="".join(s_link),
                                                   map_link="".join(map_link),
                                                   pie_id=type_name,
-                                                  pie_value=t['Cumulative_Capacity'])
+                                                  pie_value=t['Cumulative_Capacity_Total'])
 
         modules.append(module)
 
@@ -114,4 +123,4 @@ def view(country_id=None, country_abbr=None):
                                  modules=modules, title=title,
                                  country=country_name,
                                  user_pref=user_pref,
-                                 body_onload="Chart.plotPieChart('', 'pie_chart')")
+                                 body_onload="CountrySummary.init()")

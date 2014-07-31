@@ -1,0 +1,836 @@
+grant select, update, insert on `database`.* to 'geo'@'localhost' identified by '0p3nM0d3!';
+
+drop database geoDev;
+create database geoDev;
+use geoDev;
+
+source ./GEO_DB.sql;
+
+/*combining moderated_history table */
+alter table History add (Moderated_Time_Stamp timestamp null, Moderator_ID int, Accepted tinyint, Comments text);
+update History as h, Moderated_History as mh set h.Moderated_Time_Stamp=mh.Time_Stamp, h.Moderator_ID=mh.Moderator_ID, h.Accepted=mh.Accepted, h.Comments=mh.Comments where h.Description_ID=mh.Description_ID;
+
+/* combining main table */
+alter table History add (Type_ID int, Country_ID int, State_ID int);
+update History as h, Main as m set h.Type_ID=m.Type_ID, h.Country_ID=m.Country_ID, h.State_ID=m.State_ID where m.Description_ID=h.Description_ID;
+
+ALTER TABLE  `History` CHANGE  `Description_ID`  `Description_ID` INT( 11 ) NOT NULL AUTO_INCREMENT;
+ALTER TABLE  `History` CHANGE  `Parent_Plant_ID`  `Parent_Plant_ID` INT( 11 ) NULL;
+
+alter table History drop index History_Description_fk;
+alter table History drop foreign key History_Description_fk;
+
+alter table History drop FOREIGN KEY History_User_fk;
+alter table History drop index History_User_fk;
+
+alter table History drop FOREIGN KEY History_Parent_Plant_fk;
+alter table History drop index History_Parent_Plant_fk;
+
+create index Parent_Plant_ID_Index on History (Parent_Plant_ID) using BTREE;
+create index Country_ID_Index on History (Country_ID) using BTREE;
+create index Type_ID_Index on History (Type_ID) using BTREE;
+
+/* fix for a bug introduced during manual edits */
+update History set Moderated_Time_Stamp = Time_Stamp where Moderated_Time_Stamp='0000-00-00 00:00:00';
+
+/* global analysis metadata */
+/*create table */
+create table metadata (Country_ID int NOT NULL, Type_ID int NOT NULL, Number_of_Plants int, Cumulative_Capacity_Total double, Cumulative_Capacity text, New_Capacity_Added text, Annual_Gigawatt_Hours_Generated text, Annual_CO2_Emitted text);
+
+/* change major upgrades to upgrade, owner_info to owner_details and remove accuracy_rating in features... matches the type table names */
+
+ALTER IGNORE TABLE  `Type_Features` CHANGE  `Features`  `Features` SET(  'Identifiers',  'Dual_Node_Identifiers',  'Location',  'Dual_Node_Locations',  'Modeling',  'Description', 'Dual_Node_Description',  'Associated_Infrastructure',  'Unit_Description',  'Annual_Capacity',  'Refinery_Products',  'Environmental_Issues',  'Upgrades',  'Owner_Information', 'Wind_Potential_Height',  'Annual_Performance',  'Comments',  'References',  'History' );
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 7; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 2; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 6; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 3; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 9; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 4; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 8; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 1; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 10; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 5; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 12; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 11; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 13; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 14; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 18; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 16; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Wind_Potential_Height,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 17; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Refinery_Products,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 15; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Modeling,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 28; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 19; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 21; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 20; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 22; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 24; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 25; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 26; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 27; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 23; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 29; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Annual_Capacity,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 30;
+UPDATE  `Type_Features` SET  `Features` =  'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` =31;
+UPDATE  `Type_Features` SET  `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Information,Annual_Performance,Comments,References,History' WHERE  `Type_Features`.`Type_ID` =32;
+UPDATE  `Type_Features` SET  `Features` =  'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` =33;
+
+
+/* change owner_information to owner_details */
+
+ALTER IGNORE TABLE  `Type_Features` CHANGE  `Features`  `Features` SET(  'Identifiers',  'Dual_Node_Identifiers',  'Location',  'Dual_Node_Locations',  'Modeling',  'Description', 'Dual_Node_Description',  'Associated_Infrastructure',  'Unit_Description',  'Annual_Capacity',  'Refinery_Products',  'Environmental_Issues',  'Upgrades',  'Owner_Details', 'Wind_Potential_Height',  'Annual_Performance',  'Comments',  'References',  'History' );
+
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 7; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 2; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 6; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 3; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 9; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 4; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 8; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 1; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 10; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 5; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 12; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 11; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 13; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 14; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 18; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 16; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Wind_Potential_Height,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 17; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Refinery_Products,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 15; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Modeling,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 28; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 19; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 21; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 20; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 22; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 24; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 25; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 26; 
+UPDATE `Type_Features` SET `Features` = 'Dual_Node_Identifiers,Dual_Node_Locations,Dual_Node_Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 27; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 23; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 29; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Annual_Capacity,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 30; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 31; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Unit_Description,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 32; 
+UPDATE `Type_Features` SET `Features` = 'Identifiers,Location,Description,Associated_Infrastructure,Environmental_Issues,Upgrades,Owner_Details,Annual_Performance,Comments,References,History' WHERE `Type_Features`.`Type_ID` = 33;
+
+
+/* COAL specific changes */
+
+alter table Coal_Overlays drop foreign key Coal_Overlays_fk;
+alter table Coal_Description drop foreign key Coal_Description_fk;
+alter table Coal_Location drop foreign key Coal_Location_fk;
+alter table Coal_Upgrade drop foreign key Coal_Upgrade_fk;
+alter table Coal_Owner_Details drop foreign key Coal_Owner_Details_fk;
+alter table Coal_Environmental_Issues drop foreign key Coal_Environmental_Issues_fk;
+alter table Coal_References drop foreign key Coal_References_fk;
+alter table Coal_Comments drop foreign key Coal_Comments_fk;
+alter table Coal_Owners drop foreign key Coal_Owners_fk;
+alter table Coal_Unit_Description drop foreign key Coal_Unit_fk;
+alter table Coal_Performance drop foreign key Coal_Performance_ibfk_1;
+
+/* remove om_description_id from description tables */
+alter table Coal_Description drop OM_Description_ID ;
+alter table Coal_Upgrade drop OM_Description_ID;
+
+
+/* make _itf fields nullable */
+ALTER TABLE  `Coal_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Coal_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Coal_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Coal_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Coal_Environmental_Issues change Description Description text null;
+
+/* GAS changes */
+
+alter table Gas_Overlays drop foreign key Gas_Overlays_fk;
+alter table Gas_Description drop foreign key Gas_Description_fk;
+alter table Gas_Location drop foreign key Gas_Location_fk;
+alter table Gas_Upgrade drop foreign key Gas_Upgrade_fk;
+alter table Gas_Owner_Details drop foreign key Gas_Owner_Details_fk;
+alter table Gas_Environmental_Issues drop foreign key Gas_Environmental_Issues_fk;
+alter table Gas_References drop foreign key Gas_References_fk;
+alter table Gas_Comments drop foreign key Gas_Comments_fk;
+alter table Gas_Owners drop foreign key Gas_Owners_fk;
+alter table Gas_Unit_Description drop foreign key Gas_Unit_fk;
+alter table Gas_Performance drop foreign key Gas_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Gas_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Gas_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Gas_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Gas_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Gas_Environmental_Issues change Description Description text null;
+
+
+/* Oil_ changes */
+
+alter table Oil_Overlays drop foreign key Oil_Overlays_fk;
+alter table Oil_Description drop foreign key Oil_Description_fk;
+alter table Oil_Location drop foreign key Oil_Location_fk;
+alter table Oil_Upgrade drop foreign key Oil_Upgrade_fk;
+alter table Oil_Owner_Details drop foreign key Oil_Owner_Details_fk;
+alter table Oil_Environmental_Issues drop foreign key Oil_Environmental_Issues_fk;
+alter table Oil_References drop foreign key Oil_References_fk;
+alter table Oil_Comments drop foreign key Oil_Comments_fk;
+alter table Oil_Owners drop foreign key Oil_Owners_fk;
+alter table Oil_Unit_Description drop foreign key Oil_Unit_fk;
+alter table Oil_Performance drop foreign key Oil_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Oil_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Oil_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Oil_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Oil_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Oil_Environmental_Issues change Description Description text null;
+
+
+/* Hydro_ changes */
+
+alter table Hydro_Overlays drop foreign key Hydro_Overlays_fk;
+alter table Hydro_Description drop foreign key Hydro_Description_fk;
+alter table Hydro_Location drop foreign key Hydro_Location_fk;
+alter table Hydro_Upgrade drop foreign key Hydro_Upgrade_fk;
+alter table Hydro_Owner_Details drop foreign key Hydro_Owner_Details_fk;
+alter table Hydro_Environmental_Issues drop foreign key Hydro_Environmental_Issues_fk;
+alter table Hydro_References drop foreign key Hydro_References_fk;
+alter table Hydro_Comments drop foreign key Hydro_Comments_fk;
+alter table Hydro_Owners drop foreign key Hydro_Owners_fk;
+alter table Hydro_Unit_Description drop foreign key Hydro_Unit_fk;
+alter table Hydro_Performance drop foreign key Hydro_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Hydro_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Hydro_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Hydro_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Hydro_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Hydro_Environmental_Issues change Description Description text null;
+
+/* Geothermal_ changes */
+
+alter table Geothermal_Overlays drop foreign key Geothermal_Overlays_fk;
+alter table Geothermal_Description drop foreign key Geothermal_Description_fk;
+alter table Geothermal_Location drop foreign key Geothermal_Location_fk;
+alter table Geothermal_Upgrade drop foreign key Geothermal_Upgrade_fk;
+alter table Geothermal_Owner_Details drop foreign key Geothermal_Owner_Details_fk;
+alter table Geothermal_Environmental_Issues drop foreign key Geothermal_Environmental_Issues_fk;
+alter table Geothermal_References drop foreign key Geothermal_References_fk;
+alter table Geothermal_Comments drop foreign key Geothermal_Comments_fk;
+alter table Geothermal_Owners drop foreign key Geothermal_Owners_fk;
+alter table Geothermal_Unit_Description drop foreign key Geothermal_Unit_fk;
+alter table Geothermal_Performance drop foreign key Geothermal_Performance_ibfk_1;
+
+
+/* make _itf fields nullable */
+ALTER TABLE  `Geothermal_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Geothermal_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Geothermal_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Geothermal_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Geothermal_Environmental_Issues change Description Description text null;
+
+/* Nuclear_ changes */
+
+alter table Nuclear_Overlays drop foreign key Nuclear_Overlays_fk;
+alter table Nuclear_Description drop foreign key Nuclear_Description_fk;
+alter table Nuclear_Location drop foreign key Nuclear_Location_fk;
+alter table Nuclear_Upgrade drop foreign key Nuclear_Upgrade_fk;
+alter table Nuclear_Owner_Details drop foreign key Nuclear_Owner_Details_fk;
+alter table Nuclear_Environmental_Issues drop foreign key Nuclear_Environmental_Issues_fk;
+alter table Nuclear_References drop foreign key Nuclear_References_fk;
+alter table Nuclear_Comments drop foreign key Nuclear_Comments_fk;
+alter table Nuclear_Owners drop foreign key Nuclear_Owners_fk;
+alter table Nuclear_Unit_Description drop foreign key Nuclear_Unit_fk;
+alter table Nuclear_Performance drop foreign key Nuclear_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Nuclear_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Nuclear_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Nuclear_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+alter table Nuclear_Environmental_Issues change Description Description text null;
+
+
+
+/* Solar_PV_ changes */
+
+alter table Solar_PV_Overlays drop foreign key Solar_PV_Overlays_fk;
+alter table Solar_PV_Description drop foreign key Solar_PV_Description_fk;
+alter table Solar_PV_Location drop foreign key Solar_PV_Location_fk;
+alter table Solar_PV_Upgrade drop foreign key Solar_PV_Upgrade_fk;
+alter table Solar_PV_Owner_Details drop foreign key Solar_PV_Owner_Details_fk;
+alter table Solar_PV_Environmental_Issues drop foreign key Solar_PV_Environmental_Issues_fk;
+alter table Solar_PV_References drop foreign key Solar_PV_References_fk;
+alter table Solar_PV_Comments drop foreign key Solar_PV_Comments_fk;
+alter table Solar_PV_Owners drop foreign key Solar_PV_Owners_fk;
+alter table Solar_PV_Unit_Description drop foreign key Solar_PV_Unit_fk;
+alter table Solar_PV_Performance drop foreign key Solar_PV_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Solar_PV_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Solar_PV_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Solar_PV_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+
+alter table Solar_PV_Environmental_Issues change Description Description text null;
+
+
+/* Solar_Thermal_ changes */
+
+alter table Solar_Thermal_Overlays drop foreign key Solar_Thermal_Overlays_fk;
+alter table Solar_Thermal_Description drop foreign key Solar_Thermal_Description_fk;
+alter table Solar_Thermal_Location drop foreign key Solar_Thermal_Location_fk;
+alter table Solar_Thermal_Upgrade drop foreign key Solar_Thermal_Upgrade_fk;
+alter table Solar_Thermal_Owner_Details drop foreign key Solar_Thermal_Owner_Details_fk;
+alter table Solar_Thermal_Environmental_Issues drop foreign key Solar_Thermal_Environmental_Issues_fk;
+alter table Solar_Thermal_References drop foreign key Solar_Thermal_References_fk;
+alter table Solar_Thermal_Comments drop foreign key Solar_Thermal_Comments_fk;
+alter table Solar_Thermal_Owners drop foreign key Solar_Thermal_Owners_fk;
+alter table Solar_Thermal_Unit_Description drop foreign key Solar_Thermal_Unit_fk;
+alter table Solar_Thermal_Performance drop foreign key Solar_Thermal_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Solar_Thermal_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Solar_Thermal_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Solar_Thermal_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+alter table Solar_Thermal_Environmental_Issues change Description Description text null;
+
+
+/* Waste_ changes */
+
+alter table Waste_Overlays drop foreign key Waste_Overlays_fk;
+alter table Waste_Description drop foreign key Waste_Description_fk;
+alter table Waste_Location drop foreign key Waste_Location_fk;
+alter table Waste_Upgrade drop foreign key Waste_Upgrade_fk;
+alter table Waste_Owner_Details drop foreign key Waste_Owner_Details_fk;
+alter table Waste_Environmental_Issues drop foreign key Waste_Environmental_Issues_fk;
+alter table Waste_References drop foreign key Waste_References_fk;
+alter table Waste_Comments drop foreign key Waste_Comments_fk;
+alter table Waste_Owners drop foreign key Waste_Owners_fk;
+alter table Waste_Unit_Description drop foreign key Waste_Unit_fk;
+alter table Waste_Performance drop foreign key Waste_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Waste_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Waste_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Waste_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+ALTER TABLE  `Waste_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+
+alter table Waste_Environmental_Issues change Description Description text null;
+
+
+
+/* Wind_ changes */
+
+alter table Wind_Overlays drop foreign key Wind_Overlays_fk;
+alter table Wind_Description drop foreign key Wind_Description_fk;
+alter table Wind_Location drop foreign key Wind_Location_fk;
+alter table Wind_Upgrade drop foreign key Wind_Upgrade_fk;
+alter table Wind_Owner_Details drop foreign key Wind_Owner_Details_fk;
+alter table Wind_Environmental_Issues drop foreign key Wind_Environmental_Issues_fk;
+alter table Wind_References drop foreign key Wind_References_fk;
+alter table Wind_Comments drop foreign key Wind_Comments_fk;
+alter table Wind_Owners drop foreign key Wind_Owners_fk;
+alter table Wind_Unit_Description drop foreign key Wind_Unit_fk;
+alter table Wind_Performance drop foreign key Wind_Performance_ibfk_1;
+
+/* make _itf fields nullable */
+ALTER TABLE  `Wind_Description` CHANGE  `Status_of_Plant_enumfield_itf`  `Status_of_Plant_enumfield_itf` ENUM(  'Please Select',  'Operating Fully',  'Operating Partially', 'Built and In Test Stage',  'Under Construction',  'Final Bid and Approval Stage',  'Design and Planning Stage',  'Mothballed Partial',  'Mothballed Full',  'Decommissioned' );
+
+ALTER TABLE  `Wind_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_itf`  `Plant_Efficiency_and_Impact_enumfield_itf` ENUM(  'Please Select', 'High Efficiency and Low Enivronmental Imapct',  'High Efficiency and Medium Environmental Impact',  'High Effciency and High Environmental Impact', 'Medium Efficiency and Low Environmental Impact',  'Medium Efficiency and Medium Environmental Impact',  'Medium Efficiency and High Environmental Impact', 'Low Efficiency and Low Environmental Impact',  'Low Efficiency and Medium Environmental Impact',  'Low Efficiency and High Environmental Imapct' );
+
+ALTER TABLE  `Wind_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
+alter table Wind_Environmental_Issues change Description Description text null;
+
+
+/* Gas_Fields_ changes */
+
+alter table Gas_Fields_Overlays drop foreign key Gas_Fields_Overlays_fk;
+alter table Gas_Fields_Description drop foreign key Gas_Fields_Description_fk;
+alter table Gas_Fields_Location drop foreign key Gas_Fields_Location_fk;
+alter table Gas_Fields_Upgrade drop foreign key Gas_Fields_Upgrade_fk;
+alter table Gas_Fields_Owner_Details drop foreign key Gas_Fields_Owner_Details_fk;
+alter table Gas_Fields_Environmental_Issues drop foreign key Gas_Fields_Environmental_Issues_fk;
+alter table Gas_Fields_References drop foreign key Gas_Fields_References_fk;
+alter table Gas_Fields_Comments drop foreign key Gas_Fields_Comments_fk;
+alter table Gas_Fields_Owners drop foreign key Gas_Fields_Owners_fk;
+alter table Gas_Fields_Unit_Description drop foreign key Gas_Fields_Unit_fk;
+alter table Gas_Fields_Performance drop foreign key Gas_Fields_Performance_ibfk_1;
+
+alter table Gas_Fields_Environmental_Issues change Description Description text null;
+
+
+/* Oil_Fields_ changes */
+
+alter table Oil_Fields_Overlays drop foreign key Oil_Fields_Overlays_fk;
+alter table Oil_Fields_Description drop foreign key Oil_Fields_Description_fk;
+alter table Oil_Fields_Location drop foreign key Oil_Fields_Location_fk;
+alter table Oil_Fields_Upgrade drop foreign key Oil_Fields_Upgrade_fk;
+alter table Oil_Fields_Owner_Details drop foreign key Oil_Fields_Owner_Details_fk;
+alter table Oil_Fields_Environmental_Issues drop foreign key Oil_Fields_Environmental_Issues_fk;
+alter table Oil_Fields_References drop foreign key Oil_Fields_References_fk;
+alter table Oil_Fields_Comments drop foreign key Oil_Fields_Comments_fk;
+alter table Oil_Fields_Owners drop foreign key Oil_Fields_Owners_fk;
+alter table Oil_Fields_Unit_Description drop foreign key Oil_Fields_Unit_fk;
+alter table Oil_Fields_Performance drop foreign key Oil_Fields_Performance_ibfk_1;
+
+alter table Oil_Fields_Environmental_Issues change Description Description text null;
+
+
+/* Coal_Mines_ changes */
+
+alter table Coal_Mines_Overlays drop foreign key Coal_Mines_Overlays_fk;
+alter table Coal_Mines_Description drop foreign key Coal_Mines_Description_fk;
+alter table Coal_Mines_Location drop foreign key Coal_Mines_Location_fk;
+alter table Coal_Mines_Upgrade drop foreign key Coal_Mines_Upgrade_fk;
+alter table Coal_Mines_Owner_Details drop foreign key Coal_Mines_Owner_Details_fk;
+alter table Coal_Mines_Environmental_Issues drop foreign key Coal_Mines_Environmental_Issues_fk;
+alter table Coal_Mines_References drop foreign key Coal_Mines_References_fk;
+alter table Coal_Mines_Comments drop foreign key Coal_Mines_Comments_fk;
+alter table Coal_Mines_Owners drop foreign key Coal_Mines_Owners_fk;
+alter table Coal_Mines_Unit_Description drop foreign key Coal_Mines_Unit_fk;
+alter table Coal_Mines_Performance drop foreign key Coal_Mines_Performance_ibfk_1;
+
+alter table Coal_Mines_Environmental_Issues change Description Description text null;
+
+
+
+/* Uranium_Mines_ changes */
+
+alter table Uranium_Mines_Overlays drop foreign key Uranium_Mines_Overlays_fk;
+alter table Uranium_Mines_Description drop foreign key Uranium_Mines_Description_fk;
+alter table Uranium_Mines_Location drop foreign key Uranium_Mines_Location_fk;
+alter table Uranium_Mines_Upgrade drop foreign key Uranium_Mines_Upgrade_fk;
+alter table Uranium_Mines_Owner_Details drop foreign key Uranium_Mines_Owner_Details_fk;
+alter table Uranium_Mines_Environmental_Issues drop foreign key Uranium_Mines_Environmental_Issues_fk;
+alter table Uranium_Mines_References drop foreign key Uranium_Mines_References_fk;
+alter table Uranium_Mines_Comments drop foreign key Uranium_Mines_Comments_fk;
+alter table Uranium_Mines_Owners drop foreign key Uranium_Mines_Owners_fk;
+alter table Uranium_Mines_Unit_Description drop foreign key Uranium_Mines_Unit_fk;
+alter table Uranium_Mines_Performance drop foreign key Uranium_Mines_Performance_ibfk_1;
+
+alter table Uranium_Mines_Environmental_Issues change Description Description text null;
+
+
+
+/* Crude_Oil_Refineries_ changes */
+
+alter table Crude_Oil_Refineries_Overlays drop foreign key Crude_Oil_Refineries_Overlays_fk;
+alter table Crude_Oil_Refineries_Description drop foreign key Crude_Oil_Refineries_Description_fk;
+alter table Crude_Oil_Refineries_Location drop foreign key Crude_Oil_Refineries_Location_fk;
+alter table Crude_Oil_Refineries_Upgrade drop foreign key Crude_Oil_Refineries_Upgrade_fk;
+alter table Crude_Oil_Refineries_Owner_Details drop foreign key Crude_Oil_Refineries_Owner_Details_fk;
+alter table Crude_Oil_Refineries_Environmental_Issues drop foreign key Crude_Oil_Refineries_Environmental_Issues_fk;
+alter table Crude_Oil_Refineries_References drop foreign key Crude_Oil_Refineries_References_fk;
+alter table Crude_Oil_Refineries_Comments drop foreign key Crude_Oil_Refineries_Comments_fk;
+alter table Crude_Oil_Refineries_Owners drop foreign key Crude_Oil_Refineries_Owners_fk;
+alter table Crude_Oil_Refineries_Unit_Description drop foreign key Crude_Oil_Refineries_Unit_fk;
+alter table Crude_Oil_Refineries_Performance drop foreign key Crude_Oil_Refineries_Performance_ibfk_1;
+
+alter table Crude_Oil_Refineries_Environmental_Issues change Description Description text null;
+
+
+
+/* Solar_Potential_ changes */
+
+alter table Solar_Potential_Overlays drop foreign key Solar_Potential_Overlays_fk;
+alter table Solar_Potential_Description drop foreign key Solar_Potential_Description_fk;
+alter table Solar_Potential_Location drop foreign key Solar_Potential_Location_fk;
+alter table Solar_Potential_Upgrade drop foreign key Solar_Potential_Upgrade_fk;
+alter table Solar_Potential_Owner_Details drop foreign key Solar_Potential_Owner_Details_fk;
+alter table Solar_Potential_Environmental_Issues drop foreign key Solar_Potential_Environmental_Issues_fk;
+alter table Solar_Potential_References drop foreign key Solar_Potential_References_fk;
+alter table Solar_Potential_Comments drop foreign key Solar_Potential_Comments_fk;
+alter table Solar_Potential_Owners drop foreign key Solar_Potential_Owners_fk;
+alter table Solar_Potential_Performance drop foreign key Solar_Potential_Performance_ibfk_1;
+
+alter table Solar_Potential_Environmental_Issues change Description Description text null;
+
+
+
+/* Wind_Potential_ changes */
+
+alter table Wind_Potential_Overlays drop foreign key Wind_Potential_Overlays_fk;
+alter table Wind_Potential_Description drop foreign key Wind_Potential_Description_fk;
+alter table Wind_Potential_Location drop foreign key Wind_Potential_Location_fk;
+alter table Wind_Potential_Upgrade drop foreign key Wind_Potential_Upgrade_fk;
+alter table Wind_Potential_Owner_Details drop foreign key Wind_Potential_Owner_Details_fk;
+alter table Wind_Potential_Environmental_Issues drop foreign key Wind_Potential_Environmental_Issues_fk;
+alter table Wind_Potential_References drop foreign key Wind_Potential_References_fk;
+alter table Wind_Potential_Comments drop foreign key Wind_Potential_Comments_fk;
+alter table Wind_Potential_Owners drop foreign key Wind_Potential_Owners_fk;
+
+
+alter table Wind_Potential_Environmental_Issues change Description Description text null;
+
+
+
+/* Biomass_Potential_ changes */
+
+alter table Biomass_Potential_Overlays drop foreign key Biomass_Potential_Overlays_fk;
+alter table Biomass_Potential_Description drop foreign key Biomass_Potential_Description_fk;
+alter table Biomass_Potential_Location drop foreign key Biomass_Potential_Location_fk;
+alter table Biomass_Potential_Upgrade drop foreign key Biomass_Potential_Upgrade_fk;
+alter table Biomass_Potential_Owner_Details drop foreign key Biomass_Potential_Owner_Details_fk;
+alter table Biomass_Potential_Environmental_Issues drop foreign key Biomass_Potential_Environmental_Issues_fk;
+alter table Biomass_Potential_References drop foreign key Biomass_Potential_References_fk;
+alter table Biomass_Potential_Comments drop foreign key Biomass_Potential_Comments_fk;
+alter table Biomass_Potential_Owners drop foreign key Biomass_Potential_Owners_fk;
+alter table Biomass_Potential_Performance drop foreign key Biomass_Potential_Performance_ibfk_1;
+
+alter table Biomass_Potential_Environmental_Issues change Description Description text null;
+
+
+
+/* Gas_Pipelines_ changes */
+
+alter table Gas_Pipelines_Overlays drop foreign key Gas_Pipelines_Overlays_fk;
+alter table Gas_Pipelines_Description drop foreign key Gas_Pipelines_Description_fk;
+alter table Gas_Pipelines_Location drop foreign key Gas_Pipelines_Location_fk;
+alter table Gas_Pipelines_Upgrade drop foreign key Gas_Pipelines_Upgrade_fk;
+alter table Gas_Pipelines_Owner_Details drop foreign key Gas_Pipelines_Owner_Details_fk;
+alter table Gas_Pipelines_Environmental_Issues drop foreign key Gas_Pipelines_Environmental_Issues_fk;
+alter table Gas_Pipelines_References drop foreign key Gas_Pipelines_References_fk;
+alter table Gas_Pipelines_Comments drop foreign key Gas_Pipelines_Comments_fk;
+alter table Gas_Pipelines_Owners drop foreign key Gas_Pipelines_Owners_fk;
+alter table Gas_Pipelines_Performance drop foreign key Gas_Pipelines_Performance_ibfk_1;
+
+alter table Gas_Pipelines_Environmental_Issues change Description Description text null;
+
+
+
+/* Oil_Pipelines_ changes */
+
+alter table Oil_Pipelines_Overlays drop foreign key Oil_Pipelines_Overlays_fk;
+alter table Oil_Pipelines_Description drop foreign key Oil_Pipelines_Description_fk;
+alter table Oil_Pipelines_Location drop foreign key Oil_Pipelines_Location_fk;
+alter table Oil_Pipelines_Upgrade drop foreign key Oil_Pipelines_Upgrade_fk;
+alter table Oil_Pipelines_Owner_Details drop foreign key Oil_Pipelines_Owner_Details_fk;
+alter table Oil_Pipelines_Environmental_Issues drop foreign key Oil_Pipelines_Environmental_Issues_fk;
+alter table Oil_Pipelines_References drop foreign key Oil_Pipelines_References_fk;
+alter table Oil_Pipelines_Comments drop foreign key Oil_Pipelines_Comments_fk;
+alter table Oil_Pipelines_Owners drop foreign key Oil_Pipelines_Owners_fk;
+alter table Oil_Pipelines_Performance drop foreign key Oil_Pipelines_Performance_ibfk_1;
+
+alter table Oil_Pipelines_Environmental_Issues change Description Description text null;
+
+
+
+/* Coal_Ports_ changes */
+
+alter table Coal_Ports_Overlays drop foreign key Coal_Ports_Overlays_fk;
+alter table Coal_Ports_Description drop foreign key Coal_Ports_Description_fk;
+alter table Coal_Ports_Location drop foreign key Coal_Ports_Location_fk;
+alter table Coal_Ports_Upgrade drop foreign key Coal_Ports_Upgrade_fk;
+alter table Coal_Ports_Owner_Details drop foreign key Coal_Ports_Owner_Details_fk;
+alter table Coal_Ports_Environmental_Issues drop foreign key Coal_Ports_Environmental_Issues_fk;
+alter table Coal_Ports_References drop foreign key Coal_Ports_References_fk;
+alter table Coal_Ports_Comments drop foreign key Coal_Ports_Comments_fk;
+alter table Coal_Ports_Owners drop foreign key Coal_Ports_Owners_fk;
+alter table Coal_Ports_Unit_Description drop foreign key Coal_Ports_Unit_fk;
+alter table Coal_Ports_Performance drop foreign key Coal_Ports_Performance_ibfk_1;
+
+alter table Coal_Ports_Environmental_Issues change Description Description text null;
+
+
+/* Oil_Ports_ changes */
+
+alter table Oil_Ports_Overlays drop foreign key Oil_Ports_Overlays_fk;
+alter table Oil_Ports_Description drop foreign key Oil_Ports_Description_fk;
+alter table Oil_Ports_Location drop foreign key Oil_Ports_Location_fk;
+alter table Oil_Ports_Upgrade drop foreign key Oil_Ports_Upgrade_fk;
+alter table Oil_Ports_Owner_Details drop foreign key Oil_Ports_Owner_Details_fk;
+alter table Oil_Ports_Environmental_Issues drop foreign key Oil_Ports_Environmental_Issues_fk;
+alter table Oil_Ports_References drop foreign key Oil_Ports_References_fk;
+alter table Oil_Ports_Comments drop foreign key Oil_Ports_Comments_fk;
+alter table Oil_Ports_Owners drop foreign key Oil_Ports_Owners_fk;
+alter table Oil_Ports_Unit_Description drop foreign key Oil_Ports_Unit_fk;
+alter table Oil_Ports_Performance drop foreign key Oil_Ports_Performance_ibfk_1;
+
+alter table Oil_Ports_Environmental_Issues change Description Description text null;
+
+
+
+/* LNG_Ports_ changes */
+
+alter table LNG_Ports_Overlays drop foreign key LNG_Ports_Overlays_fk;
+alter table LNG_Ports_Description drop foreign key LNG_Ports_Description_fk;
+alter table LNG_Ports_Location drop foreign key LNG_Ports_Location_fk;
+alter table LNG_Ports_Upgrade drop foreign key LNG_Ports_Upgrade_fk;
+alter table LNG_Ports_Owner_Details drop foreign key LNG_Ports_Owner_Details_fk;
+alter table LNG_Ports_Environmental_Issues drop foreign key LNG_Ports_Environmental_Issues_fk;
+alter table LNG_Ports_References drop foreign key LNG_Ports_References_fk;
+alter table LNG_Ports_Comments drop foreign key LNG_Ports_Comments_fk;
+alter table LNG_Ports_Owners drop foreign key LNG_Ports_Owners_fk;
+alter table LNG_Ports_Unit_Description drop foreign key LNG_Ports_Unit_fk;
+alter table LNG_Ports_Performance drop foreign key LNG_Ports_Performance_ibfk_1;
+
+alter table LNG_Ports_Environmental_Issues change Description Description text null;
+
+
+/* Rail_Links_ changes */
+
+alter table Rail_Links_Overlays drop foreign key Rail_Links_Overlays_fk;
+alter table Rail_Links_Description drop foreign key Rail_Links_Description_fk;
+alter table Rail_Links_Location drop foreign key Rail_Links_Location_fk;
+alter table Rail_Links_Upgrade drop foreign key Rail_Links_Upgrade_fk;
+alter table Rail_Links_Owner_Details drop foreign key Rail_Links_Owner_Details_fk;
+alter table Rail_Links_Environmental_Issues drop foreign key Rail_Links_Environmental_Issues_fk;
+alter table Rail_Links_References drop foreign key Rail_Links_References_fk;
+alter table Rail_Links_Comments drop foreign key Rail_Links_Comments_fk;
+alter table Rail_Links_Owners drop foreign key Rail_Links_Owners_fk;
+
+alter table Rail_Links_Environmental_Issues change Description Description text null;
+
+
+/* Road_Links_ changes */
+
+alter table Road_Links_Overlays drop foreign key Road_Links_Overlays_fk;
+alter table Road_Links_Description drop foreign key Road_Links_Description_fk;
+alter table Road_Links_Location drop foreign key Road_Links_Location_fk;
+alter table Road_Links_Upgrade drop foreign key Road_Links_Upgrade_fk;
+alter table Road_Links_Owner_Details drop foreign key Road_Links_Owner_Details_fk;
+alter table Road_Links_Environmental_Issues drop foreign key Road_Links_Environmental_Issues_fk;
+alter table Road_Links_References drop foreign key Road_Links_References_fk;
+alter table Road_Links_Comments drop foreign key Road_Links_Comments_fk;
+alter table Road_Links_Owners drop foreign key Road_Links_Owners_fk;
+
+alter table Road_Links_Environmental_Issues change Description Description text null;
+
+
+/* Shipping_Lanes_ changes */
+
+alter table Shipping_Lanes_Overlays drop foreign key Shipping_Lanes_Overlays_fk;
+alter table Shipping_Lanes_Description drop foreign key Shipping_Lanes_Description_fk;
+alter table Shipping_Lanes_Location drop foreign key Shipping_Lanes_Location_fk;
+alter table Shipping_Lanes_Upgrade drop foreign key Shipping_Lanes_Upgrade_fk;
+alter table Shipping_Lanes_Owner_Details drop foreign key Shipping_Lanes_Owner_Details_fk;
+alter table Shipping_Lanes_Environmental_Issues drop foreign key Shipping_Lanes_Environmental_Issues_fk;
+alter table Shipping_Lanes_References drop foreign key Shipping_Lanes_References_fk;
+alter table Shipping_Lanes_Comments drop foreign key Shipping_Lanes_Comments_fk;
+alter table Shipping_Lanes_Owners drop foreign key Shipping_Lanes_Owners_fk;
+alter table Shipping_Lanes_Performance drop foreign key Shipping_Lanes_Performance_ibfk_1;
+
+alter table Shipping_Lanes_Environmental_Issues change Description Description text null;
+
+
+/* Electric_Power_Grid_ changes */
+
+alter table Electric_Power_Grid_Overlays drop foreign key Electric_Power_Grid_Overlays_fk;
+alter table Electric_Power_Grid_Description drop foreign key Electric_Power_Grid_Description_fk;
+alter table Electric_Power_Grid_Location drop foreign key Electric_Power_Grid_Location_fk;
+alter table Electric_Power_Grid_Upgrade drop foreign key Electric_Power_Grid_Upgrade_fk;
+alter table Electric_Power_Grid_Owner_Details drop foreign key Electric_Power_Grid_Owner_Details_fk;
+alter table Electric_Power_Grid_Environmental_Issues drop foreign key Electric_Power_Grid_Environmental_Issues_fk;
+alter table Electric_Power_Grid_References drop foreign key Electric_Power_Grid_References_fk;
+alter table Electric_Power_Grid_Comments drop foreign key Electric_Power_Grid_Comments_fk;
+alter table Electric_Power_Grid_Owners drop foreign key Electric_Power_Grid_Owners_fk;
+
+alter table Electric_Power_Grid_Environmental_Issues change Description Description text null;
+
+
+/* CO2_Storage_ changes */
+
+alter table CO2_Storage_Overlays drop foreign key CO2_Storage_Overlays_fk;
+alter table CO2_Storage_Description drop foreign key CO2_Storage_Description_fk;
+alter table CO2_Storage_Location drop foreign key CO2_Storage_Location_fk;
+alter table CO2_Storage_Upgrade drop foreign key CO2_Storage_Upgrade_fk;
+alter table CO2_Storage_Owner_Details drop foreign key CO2_Storage_Owner_Details_fk;
+alter table CO2_Storage_Environmental_Issues drop foreign key CO2_Storage_Environmental_Issues_fk;
+alter table CO2_Storage_References drop foreign key CO2_Storage_References_fk;
+alter table CO2_Storage_Comments drop foreign key CO2_Storage_Comments_fk;
+alter table CO2_Storage_Owners drop foreign key CO2_Storage_Owners_fk;
+alter table CO2_Storage_Unit_Description drop foreign key CO2_Storage_Unit_fk;
+alter table CO2_Storage_Performance drop foreign key CO2_Storage_Performance_ibfk_1;
+
+alter table CO2_Storage_Environmental_Issues change Description Description text null;
+
+
+/* Water_Resources_ changes */
+
+alter table Water_Resources_Overlays drop foreign key Water_Resources_Overlays_fk;
+alter table Water_Resources_Description drop foreign key Water_Resources_Description_fk;
+alter table Water_Resources_Location drop foreign key Water_Resources_Location_fk;
+alter table Water_Resources_Upgrade drop foreign key Water_Resources_Upgrade_fk;
+alter table Water_Resources_Owner_Details drop foreign key Water_Resources_Owner_Details_fk;
+alter table Water_Resources_Environmental_Issues drop foreign key Water_Resources_Environmental_Issues_fk;
+alter table Water_Resources_References drop foreign key Water_Resources_References_fk;
+alter table Water_Resources_Comments drop foreign key Water_Resources_Comments_fk;
+alter table Water_Resources_Owners drop foreign key Water_Resources_Owners_fk;
+alter table Water_Resources_Performance drop foreign key Water_Resources_Performance_ibfk_1;
+
+alter table Water_Resources_Environmental_Issues change Description Description text null;
+
+
+/* Industries_ changes */
+
+alter table Industries_Overlays drop foreign key Industries_Overlays_fk;
+alter table Industries_Description drop foreign key Industries_Description_fk;
+alter table Industries_Location drop foreign key Industries_Location_fk;
+alter table Industries_Upgrade drop foreign key Industries_Upgrade_fk;
+alter table Industries_Owner_Details drop foreign key Industries_Owner_Details_fk;
+alter table Industries_Environmental_Issues drop foreign key Industries_Environmental_Issues_fk;
+alter table Industries_References drop foreign key Industries_References_fk;
+alter table Industries_Comments drop foreign key Industries_Comments_fk;
+alter table Industries_Owners drop foreign key Industries_Owners_fk;
+alter table Industries_Unit_Description drop foreign key Industries_Unit_fk;
+alter table Industries_Performance drop foreign key Industries_Performance_ibfk_1;
+
+alter table Industries_Environmental_Issues change Description Description text null;
+
+
+/* Population_ changes */
+
+alter table Population_Overlays drop foreign key Population_Overlays_fk;
+alter table Population_Description drop foreign key Population_Description_fk;
+alter table Population_Location drop foreign key Population_Location_fk;
+alter table Population_Upgrade drop foreign key Population_Upgrade_fk;
+alter table Population_Owner_Details drop foreign key Population_Owner_Details_fk;
+alter table Population_Environmental_Issues drop foreign key Population_Environmental_Issues_fk;
+alter table Population_References drop foreign key Population_References_fk;
+alter table Population_Comments drop foreign key Population_Comments_fk;
+alter table Population_Owners drop foreign key Population_Owners_fk;
+alter table Population_Unit_Description drop foreign key Population_Unit_fk;
+alter table Population_Performance drop foreign key Population_Performance_ibfk_1;
+
+alter table Population_Environmental_Issues change Description Description text null;
+
+
+/* Economic_Activity_ changes */
+
+alter table Economic_Activity_Overlays drop foreign key Economic_Activity_Overlays_fk;
+alter table Economic_Activity_Description drop foreign key Economic_Activity_Description_fk;
+alter table Economic_Activity_Location drop foreign key Economic_Activity_Location_fk;
+alter table Economic_Activity_Upgrade drop foreign key Economic_Activity_Upgrade_fk;
+alter table Economic_Activity_Owner_Details drop foreign key Economic_Activity_Owner_Details_fk;
+alter table Economic_Activity_Environmental_Issues drop foreign key Economic_Activity_Environmental_Issues_fk;
+alter table Economic_Activity_References drop foreign key Economic_Activity_References_fk;
+alter table Economic_Activity_Comments drop foreign key Economic_Activity_Comments_fk;
+alter table Economic_Activity_Owners drop foreign key Economic_Activity_Owners_fk;
+alter table Economic_Activity_Unit_Description drop foreign key Economic_Activity_Unit_fk;
+alter table Economic_Activity_Performance drop foreign key Economic_Activity_Performance_ibfk_1;
+
+alter table Economic_Activity_Environmental_Issues change Description Description text null;
+
+
+/* Towns_and_Cities_ changes */
+
+alter table Towns_and_Cities_Overlays drop foreign key Towns_and_Cities_Overlays_fk;
+alter table Towns_and_Cities_Description drop foreign key Towns_and_Cities_Description_fk;
+alter table Towns_and_Cities_Location drop foreign key Towns_and_Cities_Location_fk;
+alter table Towns_and_Cities_Upgrade drop foreign key Towns_and_Cities_Upgrade_fk;
+alter table Towns_and_Cities_Owner_Details drop foreign key Towns_and_Cities_Owner_Details_fk;
+alter table Towns_and_Cities_Environmental_Issues drop foreign key Towns_and_Cities_Environmental_Issues_fk;
+alter table Towns_and_Cities_References drop foreign key Towns_and_Cities_References_fk;
+alter table Towns_and_Cities_Comments drop foreign key Towns_and_Cities_Comments_fk;
+alter table Towns_and_Cities_Owners drop foreign key Towns_and_Cities_Owners_fk;
+alter table Towns_and_Cities_Unit_Description drop foreign key Towns_and_Cities_Unit_fk;
+alter table Towns_and_Cities_Performance drop foreign key Towns_and_Cities_Performance_ibfk_1;
+
+alter table Towns_and_Cities_Environmental_Issues change Description Description text null;
+
+
+/* 
+<path-to>/resources/metadata.sh
+converting overlays from encoded string to points.
+<path-to>/resources/decodePoly.sh
+*/
+
+/* rename all _Upgrade tables to _Upgrades */
+alter table Biomass_Potential_Upgrade rename Biomass_Potential_Upgrades;
+alter table CO2_Storage_Upgrade rename CO2_Storage_Upgrades;
+alter table Coal_Mines_Upgrade rename Coal_Mines_Upgrades;
+alter table Coal_Ports_Upgrade rename Coal_Ports_Upgrades;
+alter table Coal_Upgrade rename Coal_Upgrades;
+alter table Crude_Oil_Refineries_Upgrade rename Crude_Oil_Refineries_Upgrades;
+alter table Economic_Activity_Upgrade rename Economic_Activity_Upgrades;
+alter table Electric_Power_Grid_Upgrade rename Electric_Power_Grid_Upgrades;
+alter table Gas_Fields_Upgrade rename Gas_Fields_Upgrades;
+alter table Gas_Pipelines_Upgrade rename Gas_Pipelines_Upgrades;
+alter table Gas_Upgrade rename Gas_Upgrades;
+alter table Geothermal_Upgrade rename Geothermal_Upgrades;
+alter table Hydro_Upgrade rename Hydro_Upgrades;
+alter table Industries_Upgrade rename Industries_Upgrades;
+alter table LNG_Ports_Upgrade rename LNG_Ports_Upgrades;
+alter table Nuclear_Upgrade rename Nuclear_Upgrades;
+alter table Oil_Fields_Upgrade rename Oil_Fields_Upgrades;
+alter table Oil_Pipelines_Upgrade rename Oil_Pipelines_Upgrades;
+alter table Oil_Ports_Upgrade rename Oil_Ports_Upgrades;
+alter table Oil_Upgrade rename Oil_Upgrades;
+alter table Population_Upgrade rename Population_Upgrades;
+alter table Rail_Links_Upgrade rename Rail_Links_Upgrades;
+alter table Road_Links_Upgrade rename Road_Links_Upgrades;
+alter table Shipping_Lanes_Upgrade rename Shipping_Lanes_Upgrades;
+alter table Solar_PV_Upgrade rename Solar_PV_Upgrades;
+alter table Solar_Potential_Upgrade rename Solar_Potential_Upgrades;
+alter table Solar_Thermal_Upgrade rename Solar_Thermal_Upgrades;
+alter table Towns_and_Cities_Upgrade rename Towns_and_Cities_Upgrades;
+alter table Uranium_Mines_Upgrade rename Uranium_Mines_Upgrades;
+alter table Waste_Upgrade rename Waste_Upgrades;
+alter table Water_Resources_Upgrade rename Water_Resources_Upgrades;
+alter table Wind_Potential_Upgrade rename Wind_Potential_Upgrades;
+alter table Wind_Upgrade rename Wind_Upgrades;
+
+
+alter table Biomass_Potential_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table CO2_Storage_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Coal_Mines_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Coal_Ports_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Coal_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Crude_Oil_Refineries_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Economic_Activity_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Electric_Power_Grid_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Gas_Fields_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Gas_Pipelines_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Gas_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Geothermal_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Hydro_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Industries_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table LNG_Ports_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Nuclear_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Oil_Fields_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Oil_Pipelines_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Oil_Ports_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Oil_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Population_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Rail_Links_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Road_Links_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Shipping_Lanes_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Solar_PV_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Solar_Potential_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Solar_Thermal_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Towns_and_Cities_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Uranium_Mines_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Waste_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Water_Resources_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Wind_Potential_Upgrades modify Upgrade text null AFTER `Description_ID`;
+alter table Wind_Upgrades modify Upgrade text null AFTER `Description_ID`;

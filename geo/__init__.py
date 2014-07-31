@@ -8,6 +8,7 @@ from geo.db import connection
 import geo.views.form as form
 import geo.views.resources as resources
 import geo.views.moderation as moderation
+import geo.views.moderation_submit as moderationsubmit
 import geo.views.map
 import geo.views.form_submit as formsubmit
 import geo.views.type_summary as type_summary
@@ -43,6 +44,7 @@ linechart.db = conn
 user.db = conn
 index.db = conn
 moderation.db = conn
+moderationsubmit.db = conn
 
 # html
 app.register_blueprint(form.mod)
@@ -54,6 +56,7 @@ app.register_blueprint(type_summary.mod)
 app.register_blueprint(country_summary.mod)
 app.register_blueprint(user.mod)
 app.register_blueprint(index.mod)
+app.register_blueprint(moderationsubmit.mod)
 
 # json services
 app.register_blueprint(summarydata.mod)
