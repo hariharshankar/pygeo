@@ -1,7 +1,7 @@
 grant select, update, insert on `database`.* to 'geo'@'localhost' identified by '0p3nM0d3!';
 
 drop database geoDev;
-create database geoDev;
+create database geoDev DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
 use geoDev;
 
 source ./GEO_DB.sql;
@@ -14,9 +14,6 @@ update History as h, Moderated_History as mh set h.Moderated_Time_Stamp=mh.Time_
 alter table History add (Type_ID int, Country_ID int, State_ID int);
 update History as h, Main as m set h.Type_ID=m.Type_ID, h.Country_ID=m.Country_ID, h.State_ID=m.State_ID where m.Description_ID=h.Description_ID;
 
-ALTER TABLE  `History` CHANGE  `Description_ID`  `Description_ID` INT( 11 ) NOT NULL AUTO_INCREMENT;
-ALTER TABLE  `History` CHANGE  `Parent_Plant_ID`  `Parent_Plant_ID` INT( 11 ) NULL;
-
 alter table History drop index History_Description_fk;
 alter table History drop foreign key History_Description_fk;
 
@@ -25,6 +22,9 @@ alter table History drop index History_User_fk;
 
 alter table History drop FOREIGN KEY History_Parent_Plant_fk;
 alter table History drop index History_Parent_Plant_fk;
+
+ALTER TABLE  `History` CHANGE  `Description_ID`  `Description_ID` INT( 11 ) NOT NULL AUTO_INCREMENT;
+ALTER TABLE  `History` CHANGE  `Parent_Plant_ID`  `Parent_Plant_ID` INT( 11 ) NULL;
 
 create index Parent_Plant_ID_Index on History (Parent_Plant_ID) using BTREE;
 create index Country_ID_Index on History (Country_ID) using BTREE;
@@ -217,14 +217,16 @@ ALTER TABLE  `Hydro_Description` CHANGE  `Plant_Efficiency_and_Impact_enumfield_
 
 ALTER TABLE  `Hydro_Description` CHANGE  `Plant_Overall_Rating_setfield_itf`  `Plant_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
 
-ALTER TABLE  `Hydro_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );
+ALTER TABLE  `Hydro_Description` CHANGE  `Project_Benefits_setfield`  `Project_Benefits_setfield` SET(  'Power Generation',  'Irrigation', 'Water / Flood Management',  'Recreation and Sports',  'Tourism',  'City Water',  'Fish' ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL;
+
+/*ALTER TABLE  `Hydro_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power_Plant_Used_For_enumfield` ENUM(  'Please Select',  'Base Load',  'Base/Intermediate Load', 'Intermediate Load',  'Intermediate/Peak Load',  'Peaking Load',  'Peaking Load and Backup',  'Voltage Stabilization',  'Cogeneration' );*/
 
 alter table Hydro_Environmental_Issues change Description Description text null;
 
 /* Geothermal_ changes */
 
 alter table Geothermal_Overlays drop foreign key Geothermal_Overlays_fk;
-alter table Geothermal_Description drop foreign key Geothermal_Description_fk;
+/*alter table Geothermal_Description drop foreign key Geothermal_Description_fk;*/
 alter table Geothermal_Location drop foreign key Geothermal_Location_fk;
 alter table Geothermal_Upgrade drop foreign key Geothermal_Upgrade_fk;
 alter table Geothermal_Owner_Details drop foreign key Geothermal_Owner_Details_fk;
@@ -514,7 +516,7 @@ alter table Biomass_Potential_Environmental_Issues change Description Descriptio
 /* Gas_Pipelines_ changes */
 
 alter table Gas_Pipelines_Overlays drop foreign key Gas_Pipelines_Overlays_fk;
-alter table Gas_Pipelines_Description drop foreign key Gas_Pipelines_Description_fk;
+/*alter table Gas_Pipelines_Description drop foreign key Gas_Pipelines_Description_fk;*/
 alter table Gas_Pipelines_Location drop foreign key Gas_Pipelines_Location_fk;
 alter table Gas_Pipelines_Upgrade drop foreign key Gas_Pipelines_Upgrade_fk;
 alter table Gas_Pipelines_Owner_Details drop foreign key Gas_Pipelines_Owner_Details_fk;
@@ -531,7 +533,7 @@ alter table Gas_Pipelines_Environmental_Issues change Description Description te
 /* Oil_Pipelines_ changes */
 
 alter table Oil_Pipelines_Overlays drop foreign key Oil_Pipelines_Overlays_fk;
-alter table Oil_Pipelines_Description drop foreign key Oil_Pipelines_Description_fk;
+/*alter table Oil_Pipelines_Description drop foreign key Oil_Pipelines_Description_fk;*/
 alter table Oil_Pipelines_Location drop foreign key Oil_Pipelines_Location_fk;
 alter table Oil_Pipelines_Upgrade drop foreign key Oil_Pipelines_Upgrade_fk;
 alter table Oil_Pipelines_Owner_Details drop foreign key Oil_Pipelines_Owner_Details_fk;
@@ -600,7 +602,7 @@ alter table LNG_Ports_Environmental_Issues change Description Description text n
 /* Rail_Links_ changes */
 
 alter table Rail_Links_Overlays drop foreign key Rail_Links_Overlays_fk;
-alter table Rail_Links_Description drop foreign key Rail_Links_Description_fk;
+/*alter table Rail_Links_Description drop foreign key Rail_Links_Description_fk;*/
 alter table Rail_Links_Location drop foreign key Rail_Links_Location_fk;
 alter table Rail_Links_Upgrade drop foreign key Rail_Links_Upgrade_fk;
 alter table Rail_Links_Owner_Details drop foreign key Rail_Links_Owner_Details_fk;
@@ -615,7 +617,7 @@ alter table Rail_Links_Environmental_Issues change Description Description text 
 /* Road_Links_ changes */
 
 alter table Road_Links_Overlays drop foreign key Road_Links_Overlays_fk;
-alter table Road_Links_Description drop foreign key Road_Links_Description_fk;
+/*alter table Road_Links_Description drop foreign key Road_Links_Description_fk;*/
 alter table Road_Links_Location drop foreign key Road_Links_Location_fk;
 alter table Road_Links_Upgrade drop foreign key Road_Links_Upgrade_fk;
 alter table Road_Links_Owner_Details drop foreign key Road_Links_Owner_Details_fk;
@@ -630,7 +632,7 @@ alter table Road_Links_Environmental_Issues change Description Description text 
 /* Shipping_Lanes_ changes */
 
 alter table Shipping_Lanes_Overlays drop foreign key Shipping_Lanes_Overlays_fk;
-alter table Shipping_Lanes_Description drop foreign key Shipping_Lanes_Description_fk;
+/*alter table Shipping_Lanes_Description drop foreign key Shipping_Lanes_Description_fk;*/
 alter table Shipping_Lanes_Location drop foreign key Shipping_Lanes_Location_fk;
 alter table Shipping_Lanes_Upgrade drop foreign key Shipping_Lanes_Upgrade_fk;
 alter table Shipping_Lanes_Owner_Details drop foreign key Shipping_Lanes_Owner_Details_fk;
@@ -646,7 +648,7 @@ alter table Shipping_Lanes_Environmental_Issues change Description Description t
 /* Electric_Power_Grid_ changes */
 
 alter table Electric_Power_Grid_Overlays drop foreign key Electric_Power_Grid_Overlays_fk;
-alter table Electric_Power_Grid_Description drop foreign key Electric_Power_Grid_Description_fk;
+/*alter table Electric_Power_Grid_Description drop foreign key Electric_Power_Grid_Description_fk;*/
 alter table Electric_Power_Grid_Location drop foreign key Electric_Power_Grid_Location_fk;
 alter table Electric_Power_Grid_Upgrade drop foreign key Electric_Power_Grid_Upgrade_fk;
 alter table Electric_Power_Grid_Owner_Details drop foreign key Electric_Power_Grid_Owner_Details_fk;

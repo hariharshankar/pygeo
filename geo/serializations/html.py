@@ -51,7 +51,6 @@ class Html(object):
                             for module in full_feature_list.split(",")
                             if module in modules.Features]
 
-        print(module_names)
         html = []
 
         for module in module_names:
@@ -634,7 +633,6 @@ class Html(object):
         """
         Creates enum field for drop down menus.
         """
-        print(key, value)
         db_key = key.split("_###_")[0]
         result = self.select.read_column_names(table_name, where=db_key)
 

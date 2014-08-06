@@ -84,18 +84,31 @@ class InsertFactSheet(object):
         sql_values['accepted'] = form_data.get('Accepted')
 
         session = self.db_conn.session
-        result = session.execute(sql_statement, sql_values)
-        session.commit()
+        try:
+            result = session.execute(sql_statement, sql_values)
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
         description_id = result.lastrowid
 
         if int(parent_plant_id) == 0:
             parent_update_stmt = "UPDATE HISTORY SET \
                 Parent_Plant_ID=:parent_plant_id \
                 WHERE Description_ID=:description_id"
-            session.execute(parent_update_stmt,
-                            {'parent_plant_id': description_id,
-                             'description_id': description_id})
-            session.commit()
+            try:
+                session.execute(parent_update_stmt,
+                                {'parent_plant_id': description_id,
+                                 'description_id': description_id})
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                session.close()
 
         return description_id
 
@@ -107,12 +120,17 @@ class InsertFactSheet(object):
 
         sql_values = {}
         sql_fields = []
+        alt_sql_fields = []
 
+        alt_sql_statement = []
         sql_statement = []
         sql_statement.append("INSERT INTO " + table_name + " SET ")
+        alt_sql_statement.append("INSERT INTO " + table_name + " SET ")
 
         sql_fields.append("`Description_ID`=:description_id")
         sql_values['description_id'] = description_id
+
+        alt_sql_fields.append("`Description_ID`=%(description_id)s")
 
         select = Select(self.db_conn)
         column_names = select.read_column_names(table_name)
@@ -129,13 +147,32 @@ class InsertFactSheet(object):
                 key = key.replace(":", "")
                 key = key.replace("%", "")
                 sql_fields.append("`" + k[0] + "`=:" + key.lower())
+                alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
                 sql_values[key.lower()] = value.strip()
 
         sql_statement.append(",".join(sql_fields))
+        alt_sql_statement.append(",".join(alt_sql_fields))
 
         session = self.db_conn.session
-        session.execute("".join(sql_statement), sql_values)
-        session.commit()
+        try:
+            session.execute("".join(sql_statement), sql_values)
+            session.commit()
+        except Exception:
+            try:
+                # may be there is a spl char in the sql stmt
+                # using connection().execute will not quote the sql stmt
+                # and some messy hack is needed to avoid param execution
+                sql_stmt = " ".join(alt_sql_statement)
+                sql_stmt = sql_stmt.replace("(%)", "(##)")
+                sql_stmt = sql_stmt % sql_values
+                sql_stmt = sql_stmt.replace("(##)", "(%)")
+                session.connection().execute(sql_stmt)
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+        finally:
+            session.close()
 
         return 1
 
@@ -155,12 +192,17 @@ class InsertFactSheet(object):
         for year in range(start_decade, end_decade):
             sql_values = {}
             sql_fields = []
+            alt_sql_fields = []
             sql_statement = []
+            alt_sql_statement = []
 
             sql_statement.append("INSERT INTO " + table_name + " SET ")
+            alt_sql_statement.append("INSERT INTO " + table_name + " SET ")
 
             sql_fields.extend(["`Description_ID`=:description_id",
                                "`Year_yr`=:year_yr"])
+            alt_sql_fields.extend(["`Description_ID`=%(description_id)s",
+                                   "`Year_yr`=%(year_yr)"])
             sql_values['description_id'] = description_id
             sql_values['year_yr'] = year
 
@@ -177,16 +219,35 @@ class InsertFactSheet(object):
                     key = key.replace(":", "")
                     key = key.replace("%", "")
                     sql_fields.append("`" + k[0] + "`=:" + key.lower())
+                    alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
                     sql_values[key.lower()] = value.strip()
 
             if len(sql_values) == 0:
                 continue
 
             sql_statement.append(",".join(sql_fields))
+            alt_sql_statement.append(",".join(alt_sql_fields))
 
             session = self.db_conn.session
-            session.execute("".join(sql_statement), sql_values)
-            session.commit()
+            try:
+                session.execute("".join(sql_statement), sql_values)
+                session.commit()
+            except Exception:
+                try:
+                    # may be there is a spl char in the sql stmt
+                    # using connection().execute will not quote the sql stmt
+                    # and some messy hack is needed to avoid param execution
+                    sql_stmt = " ".join(alt_sql_statement)
+                    sql_stmt = sql_stmt.replace("(%)", "(##)")
+                    sql_stmt = sql_stmt % sql_values
+                    sql_stmt = sql_stmt.replace("(##)", "(%)")
+                    session.connection().execute(sql_stmt)
+                    session.commit()
+                except Exception:
+                    session.rollback()
+                    raise
+            finally:
+                session.close()
 
         return 1
 
@@ -209,9 +270,13 @@ class InsertFactSheet(object):
             sql_values = {}
             sql_statement = []
             sql_fields = []
+            alt_sql_statement = []
+            alt_sql_fields = []
 
             sql_statement.append("INSERT INTO " + table_name + " SET ")
+            alt_sql_statement.append("INSERT INTO " + table_name + " SET ")
             sql_fields.append("`Description_ID`=:description_id")
+            alt_sql_fields.append("`Description_ID`=%(description_id)s")
             sql_values['description_id'] = description_id
 
             for k in column_names:
@@ -227,13 +292,32 @@ class InsertFactSheet(object):
                     key = key.replace(":", "")
                     key = key.replace("%", "")
                     sql_fields.append("`" + k[0] + "`=:" + key.lower())
+                    alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
                     sql_values[key.lower()] = value.strip()
 
             sql_statement.append(",".join(sql_fields))
+            alt_sql_statement.append(",".join(alt_sql_fields))
 
             session = self.db_conn.session
-            session.execute("".join(sql_statement), sql_values)
-            session.commit()
+            try:
+                session.execute("".join(sql_statement), sql_values)
+                session.commit()
+            except Exception:
+                try:
+                    # may be there is a spl char in the sql stmt
+                    # using connection().execute will not quote the sql stmt
+                    # and some messy hack is needed to avoid param execution
+                    sql_stmt = " ".join(alt_sql_statement)
+                    sql_stmt = sql_stmt.replace("(%)", "(##)")
+                    sql_stmt = sql_stmt % sql_values
+                    sql_stmt = sql_stmt.replace("(##)", "(%)")
+                    session.connection().execute(sql_stmt)
+                    session.commit()
+                except Exception:
+                    session.rollback()
+                    raise
+            finally:
+                session.close()
 
         return 1
 

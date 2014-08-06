@@ -51,7 +51,7 @@ def view():
                               )
     modules = res_modules.first()
 
-    for f in modules.Features.split(","):
+    for f in modules.Features:
         module_id = f
 
         table_name = geo_resource.type_name + "_" + f
