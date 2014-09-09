@@ -5,6 +5,7 @@
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
     <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry,projection"></script>
 {% endblock %}
 
@@ -21,7 +22,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-        <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form">
+        <form action="{{ url_for('formsubmit.formsubmit') }}" method="POST" id="form" onsubmit="return validateForm()">
         <div class="all-modules ui-widget ui-helper-reset">
             {% for m in modules %}
                 <div class="module-container ui-corner-bottom ui-widget-content">
@@ -46,7 +47,7 @@
                     Comments: <input type="text" id="comments_moderate" name="comments_moderate" size="50" />
                 </div>
             {% elif session.username %}
-            <input type="submit" id="submit" name="submit" value="Submit" style="margin: 10px;"/>
+            <input type="submit" id="submit" name="submit" value="Submit" style="margin: 10px;" />
             {% else %}
                 <div class="ui-state-highlight ui-corner-all" style="padding: 10px; margin: 10px;">
                     Please sign in to submit your changes to this fact sheet. 

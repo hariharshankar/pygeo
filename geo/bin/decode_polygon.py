@@ -8,6 +8,11 @@ http://cartometric.com/blog/2012/10/20/decode-google-map-encoded-points-as-well-
 
 __author__ = 'Harihar Shankar'
 
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
+
 from geo.db.query import Select
 from geo.db import connection
 from geo.core.main import Main
