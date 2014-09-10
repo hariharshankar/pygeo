@@ -17,11 +17,11 @@
             $( "#account_info" ).hide();
             $( "#login_page" ).hide();
             //$( "#energy_resources_type" ).hide().menu();
+            /*
             $( "#energy_resources" ).button()
             .click( function() {
                 window.location = "/resources/";
             });
-            /*
             .click( function() {
                 var menu = $("#energy_resources_type").show().position({
                     my: "right top",
@@ -33,7 +33,6 @@
                 });
                 return false;
             });
-            */
             $( "#home" ).button()
             .click( function() {
                 window.location = "/";
@@ -54,6 +53,7 @@
             .click( function() {
                 window.location = "/map/";
             });
+            */
             //$( "#download_data" ).button();
             $( "#moderation" ).button()
             .click( function() {
@@ -113,15 +113,15 @@
             <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
         </a>
         <div id="toolbar" class="ui-widget-header ui-corner-all">
-            <button id="home" name="home">Home</button>
+            <a id="home" href="/">Home</a>
             |
-            <button id="energy_resources" name="energy_resources">List of Data Pages</button>
+            <a id="energy_resources" href="/resources/">List of Data Pages</a>
             |
-            <button id="country_summary" name="country_summary">Summary by Country</button>
+            <a id="country_summary" href="/summary/country/">Summary by Country</a>
             |
-            <button id="type_summary" name="type_summary">Summary by Type</button>
+            <a id="type_summary" href="/summary/type/">Summary by Type</a>
             |
-            <button id="map_data" name="map_data">Map Data</button>
+            <a id="map_data" href="/map/">Map Data</a>
             <!--
             |
             <button id="analyze" name="analyze">analyze</button>

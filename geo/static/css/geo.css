@@ -42,14 +42,13 @@ body {
     border: 0;
 }
 
-#toolbar .ui-button {
+#toolbar a {
     background: none;
     border: 0;
-}
-
-#toolbar .ui-button-text {
     padding-left: 3px;
     padding-right: 3px;
+    font-size: 0.8em;
+    text-decoration: none;
 }
 
 #toolbar .ui-icon {
@@ -57,10 +56,11 @@ body {
     padding: 2px;
 }
 
-#toolbar .ui-state-hover {
+#toolbar a:hover {
     border: 1px solid #999999;
     background: #dadada 50% 50% repeat-x;
     color: #212121;
+    padding: 2px 2px 2px 2px;
 }
 
 #helpful-links a {

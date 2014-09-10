@@ -1,0 +1,1 @@
+nohup uwsgi --http :5000 --wsgi-file flask.wsgi --master --processes 4 --threads 2 &

@@ -365,7 +365,9 @@ class Html(object):
             if not k.find("Control_") >= 0 and not k.find("Monitor_") >= 0:
                 unit_keys.append(k)
             else:
-                control_keys.append(k)
+                key = k.replace("Control_", "")
+                key = key.replace("Monitor_", "")
+                control_keys.append(key)
 
         for value in values:
             unit_values.append(value[0:len(unit_keys)])
@@ -383,6 +385,7 @@ class Html(object):
         )
         html.append("</table>")
         html.append("<table>")
+        html.append("<tr><th></th><th></th></tr>")
         html.append(
             self.__create_spreadsheet_row(
                 control_keys,

@@ -309,8 +309,11 @@ class InsertFactSheet(object):
                     # and some messy hack is needed to avoid param execution
                     sql_stmt = " ".join(alt_sql_statement)
                     sql_stmt = sql_stmt.replace("(%)", "(##)")
+                    sql_stmt = sql_stmt.replace("%_", "##_")
+                    print(sql_stmt, sql_values)
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
+                    sql_stmt = sql_stmt.replace("##_", "%_")
                     session.connection().execute(sql_stmt)
                     session.commit()
                 except Exception:
