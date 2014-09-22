@@ -952,32 +952,33 @@ Map = {
     addOverlayDetails: function(overlayType, overlayArea, overlayLength, overlayNumber, points) {
         var overlayColor = Map.mapColors[overlayNumber-1]
         var details = "";
-        overlayNumber = parseInt(overlayNumber) - 1
-        if (overlayNumber >= Map.overlaysCount) {
+        overlayNumber = parseInt(overlayNumber)
+        if (overlayNumber > Map.overlaysCount) {
             details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
             details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
             details += "<span id='overlay_area_"+overlayNumber+"'>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;</span>"
             details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' /></span>";
             details += "</div>";
-            details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
-            details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
-            details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
-            overlayCounter = Map.overlaysCount + 1
-            if (!document.getElementById("numberOfCoal_Overlays")) {
+            if (!document.getElementById("Points_###_"+overlayNumber)) {
+                details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
+                details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
+                details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
+                overlayCounter = Map.overlaysCount + 1
                 details += this.createHiddenHtmlElement("numberOfCoal_Overlays", overlayCounter)
             }
             else {
-                $("numberOfCoal_Overlays").attr("value", overlayCounter)
+                //$(document.getElementById("Color_###_"+overlayNumber)).attr("value", overlayColor)
+                //$(document.getElementById("Points_###_"+overlayNumber)).attr("value", points)
+                //$(document.getElementById("Overlay_Type_###_"+overlayNumber)).attr("value", overlayType)
+                overlayCounter = Map.overlaysCount + 1
+                $("#numberOfCoal_Overlays").attr("value", overlayCounter)
             }
 
             $("#overlay-details").append(details);
         }
         else {
             $("#overlay_area_"+overlayNumber).html("Area : <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;");
-            console.log(document.getElementById("Points_###_0").getAttribute("value"))
-            console.log(points)
             document.getElementById("Points_###_"+overlayNumber).setAttribute("value", points)
-            console.log(document.getElementById("Points_###_0").getAttribute("value"))
         }
 
     },
@@ -1313,7 +1314,6 @@ TypeSummary = {
             newCapData = newCapArr[2]
 
             cumCapArr = Chart.parseChartData(d.values[cumulativeCapAddedIndex])
-            console.log(cumCapArr)
             cumCapKeys = cumCapArr[0]
             cumCapYears = cumCapArr[1]
             cumCapData = cumCapArr[2]
