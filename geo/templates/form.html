@@ -39,8 +39,9 @@
             {% if session.moderator_user and not is_moderated %}
                 <div id='moderate' style="margin: 10px;">
                     <div class="ui-state-highlight ui-corner-all" style="padding: 10px; margin: 10px;">
-                        NOTE: None of the changes made to this fact sheet by the moderator will be saved.<br/>
-                        After accepting the moderation, edit the accepted fact sheet for making changes.
+                        NOTE: This edited version of the fact sheet is locked until accepted/rejected by moderator.<br/>
+                        New edits to this version will be recorded only after this page is Accepted and becomes the <br/>
+                        default page on GEO.
                     </div>
                     <button id="accept_moderate" name="accept_moderate">Accept</button>
                     <button id="reject_moderate" name="reject_moderate">Reject</button>

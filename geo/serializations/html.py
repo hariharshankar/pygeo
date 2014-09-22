@@ -385,7 +385,8 @@ class Html(object):
         )
         html.append("</table>")
         html.append("<table>")
-        html.append("<tr><th></th><th></th></tr>")
+        html.append("<tr><th colspan='6' style='padding-left: 100px;'>Year (YYYY) in which controls added</th>\
+                    <th colspan='6' style='padding-left: 200px;'> Year (YYYY) in which monitors added</th></tr>")
         html.append(
             self.__create_spreadsheet_row(
                 control_keys,

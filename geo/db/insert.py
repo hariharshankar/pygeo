@@ -202,7 +202,7 @@ class InsertFactSheet(object):
             sql_fields.extend(["`Description_ID`=:description_id",
                                "`Year_yr`=:year_yr"])
             alt_sql_fields.extend(["`Description_ID`=%(description_id)s",
-                                   "`Year_yr`=%(year_yr)"])
+                                   "`Year_yr`=%(year_yr)s"])
             sql_values['description_id'] = description_id
             sql_values['year_yr'] = year
 
@@ -239,6 +239,7 @@ class InsertFactSheet(object):
                     # and some messy hack is needed to avoid param execution
                     sql_stmt = " ".join(alt_sql_statement)
                     sql_stmt = sql_stmt.replace("(%)", "(##)")
+                    print(sql_stmt, sql_values)
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     session.connection().execute(sql_stmt)

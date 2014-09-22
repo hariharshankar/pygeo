@@ -49,6 +49,7 @@ body {
     padding-right: 3px;
     font-size: 0.8em;
     text-decoration: none;
+    padding: 2px 2px 2px 2px;
 }
 
 #toolbar .ui-icon {
@@ -57,9 +58,10 @@ body {
 }
 
 #toolbar a:hover {
-    border: 1px solid #999999;
+    /*border: 1px solid #999999;
     background: #dadada 50% 50% repeat-x;
-    color: #212121;
+    color: #212121;*/
+    text-decoration: underline;
     padding: 2px 2px 2px 2px;
 }
 
@@ -408,12 +410,12 @@ table.line-html-table {
 }
 
 .odd-row {
+  background-color: #f1f1f1;
   padding-top: 7px;
   padding-bottom: 3px;
 }
 
 .even-row {
-  background-color: #f1f1f1;
   padding-top: 7px;
   padding-bottom: 3px;
 }

@@ -1,7 +1,8 @@
 grant select, update, insert on `database`.* to 'geo'@'localhost' identified by '0p3nM0d3!';
 
 drop database if exists geoDev;
-create database geoDev DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+/*create database geoDev DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;*/
+create database geoDev DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;
 use geoDev;
 
 source ./GEO_DB.sql;

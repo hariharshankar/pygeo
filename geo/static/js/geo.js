@@ -950,26 +950,36 @@ Map = {
     overlaysArray: [],
 
     addOverlayDetails: function(overlayType, overlayArea, overlayLength, overlayNumber, points) {
-        var overlayColor = Map.mapColors[overlayNumber]
+        var overlayColor = Map.mapColors[overlayNumber-1]
         var details = "";
-        overlayNumber = parseInt(overlayNumber) + 1
-        details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
-        details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
-        details += "<span>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;"
-        details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' />";
-        details += "</div>";
-        details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
-        details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
-        details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
-        overlayCounter = Map.overlaysCount + 1
-        if (!document.getElementById("numberOfCoal_Overlays")) {
-            details += this.createHiddenHtmlElement("numberOfCoal_Overlays", overlayCounter)
+        overlayNumber = parseInt(overlayNumber) - 1
+        if (overlayNumber >= Map.overlaysCount) {
+            details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
+            details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
+            details += "<span id='overlay_area_"+overlayNumber+"'>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;</span>"
+            details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' /></span>";
+            details += "</div>";
+            details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
+            details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
+            details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
+            overlayCounter = Map.overlaysCount + 1
+            if (!document.getElementById("numberOfCoal_Overlays")) {
+                details += this.createHiddenHtmlElement("numberOfCoal_Overlays", overlayCounter)
+            }
+            else {
+                $("numberOfCoal_Overlays").attr("value", overlayCounter)
+            }
+
+            $("#overlay-details").append(details);
         }
         else {
-            $("numberOfCoal_Overlays").attr("value", overlayCounter)
+            $("#overlay_area_"+overlayNumber).html("Area : <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;");
+            console.log(document.getElementById("Points_###_0").getAttribute("value"))
+            console.log(points)
+            document.getElementById("Points_###_"+overlayNumber).setAttribute("value", points)
+            console.log(document.getElementById("Points_###_0").getAttribute("value"))
         }
 
-        $("#overlay-details").append(details);
     },
 
     updateOverlayData: function(overlay, overlayType, overlayNumber) {
@@ -986,7 +996,7 @@ Map = {
         overlayArea = Math.round(google.maps.geometry.spherical.computeArea(overlay.getPath()) / 10000) / 100
         overlayLength = google.maps.geometry.spherical.computeLength(overlay.getPath())
 
-        Map.addOverlayDetails(overlayType, overlayArea, overlayLength, Map.overlaysCount, points)
+        Map.addOverlayDetails(overlayType, overlayArea, overlayLength, overlayNumber, points)
     },
 
     addOverlayEvents: function(overlay, overlayType, overlayNumber) {
@@ -1074,7 +1084,7 @@ Map = {
                 map: Map.map
             })
             var overlayNumber = parseInt(o) + 1
-            Map.addOverlayEvents(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType)
+            Map.addOverlayEvents(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
             Map.updateOverlayData(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
             Map.overlaysCount++;
         }

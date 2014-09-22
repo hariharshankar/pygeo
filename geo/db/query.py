@@ -140,6 +140,7 @@ class Select(object):
         without knowing the table columns.
         """
 
+
         sql = "SHOW COLUMNS FROM %s" % table_name
         if where:
             sql = sql + " LIKE '%s'" % where
