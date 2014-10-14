@@ -208,6 +208,12 @@ class Html(object):
                     "value='" + str(self.state_id) + "'",
                      "/>"
                      ])
+        html.extend(["<input type='hidden'",
+                     "name='Type_Name'",
+                     "id='Type_Name'",
+                     "value='" + self.type_name + "'",
+                     "/>"
+        ])
         html.append("<table>")
 
         for k in keys:
@@ -384,17 +390,18 @@ class Html(object):
                 "unit")
         )
         html.append("</table>")
-        html.append("<table>")
-        html.append("<tr><th colspan='6' style='padding-left: 100px;'>Year (YYYY) in which controls added</th>\
-                    <th colspan='6' style='padding-left: 200px;'> Year (YYYY) in which monitors added</th></tr>")
-        html.append(
-            self.__create_spreadsheet_row(
-                control_keys,
-                control_values,
-                self.type_name + "_" + feature,
-                "unit_control")
-        )
-        html.append("</table>")
+        if len(control_keys) > 0:
+            html.append("<table>")
+            html.append("<tr><th colspan='6' style='padding-left: 100px;'>Year (YYYY) in which controls added</th>\
+                        <th colspan='6' style='padding-left: 200px;'> Year (YYYY) in which monitors added</th></tr>")
+            html.append(
+                self.__create_spreadsheet_row(
+                    control_keys,
+                    control_values,
+                    self.type_name + "_" + feature,
+                    "unit_control")
+            )
+            html.append("</table>")
         return "".join(html)
 
     def __create_spreadsheet_row(self, keys, values, table_name,
@@ -414,7 +421,12 @@ class Html(object):
             row.append("<th>#</th>")
 
         null_vals = []
-        for key in keys:
+        #rng_indexes = {}
+        for index, key in enumerate(keys):
+            if key.find('Year_rng1') >= 0:
+                key = key.replace("Year_rng1", "Year_From_rng1")
+            if key.find('Year_rng2') >= 0:
+                key = key.replace("Year_rng2_-", "Year_To_rng2")
             null_vals.append(None)
             if self.__display_key(key):
                 row.append("<th>" + Html.__make_readable(key) + "</th>")
@@ -595,7 +607,7 @@ class Html(object):
         for val in values:
             option_value = str(val[0])
             option_text = val[1]
-            if option_value == value:
+            if option_value == str(value):
                 row.extend(["<option value='", option_value,
                             "' selected='selected'>", option_text,
                             "</option>"])

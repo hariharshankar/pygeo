@@ -949,7 +949,8 @@ Map = {
     mapStrokeWeight: 1,
     overlaysArray: [],
 
-    addOverlayDetails: function(overlayType, overlayArea, overlayLength, overlayNumber, points) {
+    addOverlayDetails: function(overlayType, overlayArea, overlayLength, overlayNumber, points, overlayName) {
+        var type_name = $("#Type_Name").val()
         var overlayColor = Map.mapColors[overlayNumber-1]
         var details = "";
         overlayNumber = parseInt(overlayNumber)
@@ -957,21 +958,26 @@ Map = {
             details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
             details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
             details += "<span id='overlay_area_"+overlayNumber+"'>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;</span>"
-            details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' /></span>";
+            if (document.getElementById("Overlay_Name_###_"+overlayNumber) != "") {
+                details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' value='"+overlayName+"' /></span>";
+            }
+            else {
+                details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' /></span>";
+            }
             details += "</div>";
             if (!document.getElementById("Points_###_"+overlayNumber)) {
                 details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
                 details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
                 details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
                 overlayCounter = Map.overlaysCount + 1
-                details += this.createHiddenHtmlElement("numberOfCoal_Overlays", overlayCounter)
+                details += this.createHiddenHtmlElement("numberOf"+type_name+"_Overlays", overlayCounter)
             }
             else {
                 //$(document.getElementById("Color_###_"+overlayNumber)).attr("value", overlayColor)
                 //$(document.getElementById("Points_###_"+overlayNumber)).attr("value", points)
                 //$(document.getElementById("Overlay_Type_###_"+overlayNumber)).attr("value", overlayType)
                 overlayCounter = Map.overlaysCount + 1
-                $("#numberOfCoal_Overlays").attr("value", overlayCounter)
+                $("#numberOf"+type_name+"_Overlays").attr("value", overlayCounter)
             }
 
             $("#overlay-details").append(details);
@@ -983,7 +989,7 @@ Map = {
 
     },
 
-    updateOverlayData: function(overlay, overlayType, overlayNumber) {
+    updateOverlayData: function(overlay, overlayType, overlayNumber, overlayName) {
         var overlayPoints = overlay.getPath().getArray()
         var points = ""
         for (var i=0,p; p=overlayPoints[i]; i++) {
@@ -997,7 +1003,7 @@ Map = {
         overlayArea = Math.round(google.maps.geometry.spherical.computeArea(overlay.getPath()) / 10000) / 100
         overlayLength = google.maps.geometry.spherical.computeLength(overlay.getPath())
 
-        Map.addOverlayDetails(overlayType, overlayArea, overlayLength, overlayNumber, points)
+        Map.addOverlayDetails(overlayType, overlayArea, overlayLength, overlayNumber, points, overlayName)
     },
 
     addOverlayEvents: function(overlay, overlayType, overlayNumber) {
@@ -1008,10 +1014,10 @@ Map = {
             overlay.setEditable(false)
         })
         google.maps.event.addListener(overlay.getPath(), "insert_at", function() {
-            Map.updateOverlayData(overlay, overlayType, overlayNumber)
+            Map.updateOverlayData(overlay, overlayType, overlayNumber, "")
         })
         google.maps.event.addListener(overlay.getPath(), "set_at", function() {
-            Map.updateOverlayData(overlay, overlayType, overlayNumber)
+            Map.updateOverlayData(overlay, overlayType, overlayNumber, "")
         })
     },
 
@@ -1042,9 +1048,10 @@ Map = {
             }
             event.overlay.setOptions({'options': options})
             overlayType = drawingManager.getDrawingMode()
+            overlayType = overlayType[0].toUpperCase() + overlayType.substr(1, overlayType.length)
         
-            Map.addOverlayEvents(event.overlay, overlayType, Map.overlaysCount)
-            Map.updateOverlayData(event.overlay, overlayType, Map.overlaysCount)
+            Map.addOverlayEvents(event.overlay, overlayType, Map.overlaysCount+1)
+            Map.updateOverlayData(event.overlay, overlayType, Map.overlaysCount+1, "")
 
             Map.overlaysCount++
         })
@@ -1086,7 +1093,7 @@ Map = {
             })
             var overlayNumber = parseInt(o) + 1
             Map.addOverlayEvents(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
-            Map.updateOverlayData(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
+            Map.updateOverlayData(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber, overlays[o].overlayName)
             Map.overlaysCount++;
         }
     },

@@ -3,6 +3,7 @@ Handles all insert statements to the database.
 """
 
 from geo.db.query import Select
+import re
 
 
 class InsertFactSheet(object):
@@ -164,8 +165,11 @@ class InsertFactSheet(object):
                 # and some messy hack is needed to avoid param execution
                 sql_stmt = " ".join(alt_sql_statement)
                 sql_stmt = sql_stmt.replace("(%)", "(##)")
+                sql_stmt = re.sub(r"(\d+)%", "\g<1>##", sql_stmt)
                 sql_stmt = sql_stmt % sql_values
                 sql_stmt = sql_stmt.replace("(##)", "(%)")
+                sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
+
                 session.connection().execute(sql_stmt)
                 session.commit()
             except Exception:
@@ -239,7 +243,6 @@ class InsertFactSheet(object):
                     # and some messy hack is needed to avoid param execution
                     sql_stmt = " ".join(alt_sql_statement)
                     sql_stmt = sql_stmt.replace("(%)", "(##)")
-                    print(sql_stmt, sql_values)
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     session.connection().execute(sql_stmt)
@@ -311,7 +314,6 @@ class InsertFactSheet(object):
                     sql_stmt = " ".join(alt_sql_statement)
                     sql_stmt = sql_stmt.replace("(%)", "(##)")
                     sql_stmt = sql_stmt.replace("%_", "##_")
-                    print(sql_stmt, sql_values)
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     sql_stmt = sql_stmt.replace("##_", "%_")
