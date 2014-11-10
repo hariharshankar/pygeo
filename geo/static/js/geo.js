@@ -305,10 +305,13 @@ Form = {
 
         // adjust performance value/label height to be in sync
         //$(".performance-label").offset({top: $(".performance-values").offset().top})
-        $(".performance-values").width($("#Annual_Performance").width() 
+        /*$(".performance-values").width($("#Annual_Performance").width() 
                                             - $(".performance-label").width()
                                            - 20); 
-
+        */
+        $(".performance-values").width($("#Annual_Performance").width() 
+                                            - $(".performance-label").width()
+                                            - 20); 
         // setting the scrollbar to point to 2010
         // TODO: try to calculate this dynamically
         $(".performance-values").scrollLeft(2868);

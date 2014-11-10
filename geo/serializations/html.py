@@ -296,6 +296,7 @@ class Html(object):
                 row_count += 1
             vals.append(None)
 
+        table.append("<tr class='perf-row even-row'></tr>")
         table.append("</table>")
         table.append("</td>")
 
