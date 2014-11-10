@@ -26,7 +26,7 @@ class Db(object):
         try:
             self.__db_conn = create_engine(
                 connection_string,
-                echo=True)
+                echo=False)
             session = sessionmaker(bind=self.__db_conn)
             self.__session = session()
         except Exception:

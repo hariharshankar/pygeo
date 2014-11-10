@@ -33,8 +33,13 @@ def view(db_type=None, typ=None, country=None, state=None):
     # storing the prefs to a cookie
     main.store_user_pref(db_type, country, typ, state)
 
+    type_name = main.get_type_name(typ)
+    country_name = main.get_country_name(country)
+
     user_pref = main.make_html_user_pref()
 
     return flask.render_template("resources.html",
                                  values=values, baseurl=baseurl,
-                                 user_pref=user_pref)
+                                 user_pref=user_pref, type=type_name, country=country_name,
+                                 state=state if state > 0 else False,
+                                 category=db_type)

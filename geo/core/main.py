@@ -225,6 +225,22 @@ class Main(object):
                                   )
         return self.select.process_result_set(result)
 
+    def get_state_name(self, state_id):
+        """
+        Returns the state name given a state id.
+
+        :@param country_id: the state id
+        :@returns state name as a string
+        """
+
+        result = self.select.read("State",
+                                  columns=["State"],
+                                  where=[["State_ID", "=", state_id]]
+        )
+
+        if result.returns_rows:
+            return result.first()['State']
+
     def get_user_pref(self):
         """
         Return the user preferences for the search parameters.

@@ -22,8 +22,8 @@ class Html(object):
         """
 
         html = []
-        if int(self.description_id) > 0:
-            html = self.__generate_resource_modules()
+        #if int(self.description_id) > 0:
+        html = self.__generate_resource_modules()
 
         return html
 
@@ -91,8 +91,8 @@ class Html(object):
             return "single-row-module", self.__make_single_row_module(feature)
         elif feature.startswith("Owner_Details"):
             owner = []
-            owner.append(self.__make_single_row_module("Owners"))
             owner.append(self.__make_generic_module(feature))
+            owner.append(self.__make_single_row_module("Owners"))
             return "single-row-module", "".join(owner)
         elif feature.startswith("Associated_Infrastructure") or \
                 feature.startswith("History"):
@@ -116,6 +116,8 @@ class Html(object):
 
         keys = result.keys()
         values = result.first()
+        if not values:
+            values = dict((k, None) for k in keys)
 
         html.append("<table>")
         for k in keys:
@@ -183,6 +185,8 @@ class Html(object):
 
         keys = result.keys()
         values = result.first()
+        if not values:
+            values = dict((k, None) for k in keys)
         html = []
         html.extend(["<input type='hidden'",
                     "name='Description_ID'",
@@ -339,6 +343,12 @@ class Html(object):
                 table.append("</tr>\n")
                 row_count += 1
             key_count += 1
+
+        table.append("<tr class='perf-row'>")
+
+        for year in range(decade_start, decade_end):
+            table.append("<th>" + str(year) + "</th>")
+        table.append("</tr>")
 
         table.append("</table>")
         table.append("</td>")

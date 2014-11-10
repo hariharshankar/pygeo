@@ -27,7 +27,8 @@ class GeoResource(Html):
         Html.__init__(self)
 
         if not description_id or int(description_id) == 0:
-            raise AttributeError("Description ID must be an int > 0")
+            if not type_id and not country_id and not state_id:
+                raise AttributeError("Invalid request. Necessary details were not provided.")
 
         self.description_id = description_id
         self.connection = connection
@@ -75,6 +76,10 @@ class GeoResource(Html):
         if self.latest_revision_id > 0:
             return self.latest_revision_id
 
+        if self.description_id == 0:
+            # new plant creation
+            return None
+
         if self.parent_plant_id == 0:
             self.__get_ids()
 
@@ -94,6 +99,9 @@ class GeoResource(Html):
         Get the name of the resource. Requires type name to be passed
         as the name is in the description table.
         """
+
+        if self.description_id == 0:
+            return None
 
         if self.name:
             return self.name

@@ -943,6 +943,7 @@ svg.selectAll("path.pointer").data(piedata).enter()
 Map = {
     bounds: null,
     map: null,
+    geoCodeLatLng: null,
     mapColors: ["#FF0000", "#0008FF", "#187F00", "#9F9C00", "#FAA701", "#01DDD9"],
     overlaysCount: 0,
     mapOpacity: 0.4,
@@ -954,6 +955,9 @@ Map = {
         var overlayColor = Map.mapColors[overlayNumber-1]
         var details = "";
         overlayNumber = parseInt(overlayNumber)
+        if (overlayName == "null") {
+            overlayName = "";
+        }
         if (overlayNumber > Map.overlaysCount) {
             details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
             details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
@@ -1061,6 +1065,8 @@ Map = {
     getMapBounds: function(point, status) {
         if( point && point.length > 0 ) {
             Map.bounds = point[0].geometry.viewport
+            Map.geoCodeLatLng = point[0].geometry.location
+            console.log(Map.geoCodeLatLng)
             if (Map.bounds) {
                 Map.map.fitBounds(Map.bounds)
             }
@@ -1118,8 +1124,10 @@ Map = {
             data = data.data
             var searchLocation = data.boundLocation;
 
+            var geoCodeSearch = false;
             if (searchLocation != null || searchLocation != "") {
                 var geoCoder = new google.maps.Geocoder();
+                geoCodeSearch = true;
                 geoCoder.geocode({'address': searchLocation, 'partialmatch':true}, Map.getMapBounds);
             }
 
@@ -1148,6 +1156,20 @@ Map = {
             }
 
             var marker;
+            if (!data.locations && geoCodeSearch) {
+                setTimeout(function() {
+                    lat = Map.geoCodeLatLng.lat()
+                    lng = Map.geoCodeLatLng.lng()
+
+                    Map.showLatLng(lat, lng)
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(lat,lng),
+                        map: Map.map
+                    });
+                }, 500);
+
+                return;
+            }
             $.each(data.locations, function(location) {
                 var lat,lng,name;
                 if (data.locations[location][0] != undefined) {
