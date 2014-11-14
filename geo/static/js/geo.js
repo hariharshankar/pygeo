@@ -249,6 +249,7 @@ Form = {
     initPerformance: function() {
 
         $("#Annual_Performance").prepend("<button id='plot_performance_parmeters'>Plot selected parameters vs years</button>");
+        $("#Annual_Performance").prepend("<button id='plot_performance_ratio'>Plot ratio of 2 selected parameters</button>");
         $("#Annual_Performance").prepend("<div id='performance_chart' style='width: 650px; height: 400px; overflow: hidden;'></div>")
         $("#performance_chart").dialog({
             height: 420,
@@ -262,6 +263,53 @@ Form = {
             }
         });
         
+        $("#plot_performance_ratio").button()
+            .click( function(event) {
+                event.preventDefault();
+                data = {}
+                data['keys'] = []
+                data['values'] = []
+                data['keys'].push('Year')
+                checkedFields = []
+                keyText = "Ratio of "
+                $(".performance-label input").each( function() {
+                    if (this.checked) {
+                        checkedFields.push(this)
+                        var id = $(this).attr("id").split('_###_')[0];
+                        keyText += id + " ";
+                    }
+                });
+                data['keys'].push(keyText);
+                if (checkedFields.length != 2) {
+                    return;
+                }
+                for (var year=1950; year<2020; year++) {
+                    d = []
+                    for (f in checkedFields) {
+                        var id = $(checkedFields[f]).attr("id").split('_###_')[0];
+                        id = id.replace(/[^\w\*\s]/g, "\\$&")
+
+                        id += "_\\#\\#\\#_";
+                        v = $("#" + id + year).val();
+                        if (v.trim() != "") {
+                            if (d.length == 0) {
+                                d.push(year);
+                            }
+                            d.push(v);
+                        }
+                    }
+                    if (d.length > 0 && d[1] != 0 && d[2] != 0) {
+                        data['values'].push([d[0], d[1]/d[2]]);
+                    }
+                }
+                if (data['values'].length > 0) {
+                    d = Chart.parseChartData(data);
+
+                    Chart.plotLineChart(d, "performance_chart");
+                    $("#performance_chart").dialog("open");
+                }
+            });
+
         $("#plot_performance_parmeters").button()
             .click( function(event) {
                 event.preventDefault();
@@ -284,20 +332,22 @@ Form = {
                         id = id.replace(/[^\w\*\s]/g, "\\$&")
 
                         id += "_\\#\\#\\#_";
-                        v = $("#" + id + year).val()
+                        v = $("#" + id + year).val();
                         if (v.trim() != "") {
-                            if (d.length == 0) 
-                                d.push(year)
+                            if (d.length == 0) {
+                                d.push(year);
+                            }
                             d.push(v);
                         }
                     }
-                    if (d.length > 0)
+                    if (d.length > 0) {
                         data['values'].push(d);
+                    }
                 }
                 if (data['values'].length > 0) {
                     d = Chart.parseChartData(data);
 
-                    Chart.plotLineChart(d, "performance_chart")
+                    Chart.plotLineChart(d, "performance_chart");
                     $("#performance_chart").dialog("open");
                 }
             });
@@ -675,12 +725,12 @@ Chart = {
                     years.push(d.values[v][0]);
                 }
                 if (!d.values[v][k]) {
-                    val = null
+                    val = null;
                 }
                 else {
-                    val = d.values[v][k]
+                    val = d.values[v][k];
                 }
-                dLine.push(Math.round(val))
+                dLine.push(Math.round(val * 100) / 100);
             }
             key = d.keys[k].replace("_nbr", "")
             value['ylabel'] = key
@@ -1069,7 +1119,6 @@ Map = {
         if( point && point.length > 0 ) {
             Map.bounds = point[0].geometry.viewport
             Map.geoCodeLatLng = point[0].geometry.location
-            console.log(Map.geoCodeLatLng)
             if (Map.bounds) {
                 Map.map.fitBounds(Map.bounds)
             }

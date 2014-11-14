@@ -672,15 +672,18 @@ class Html(object):
         replace_comma = False
 
         for val in enum_value:
-            if val == '(':
-                replace_comma = True
-            if val == ')':
-                replace_comma = False
+            if val == "'":
+                replace_comma = True if not replace_comma else False
+            #if val == "'":
+            #    replace_comma = False
             if replace_comma and val == ',':
                 val = "@"
             enum.append(val)
 
         enum = "".join(enum)
+        print()
+        print(enum)
+        print()
 
         row = []
         row.extend(["<select id='", key,
