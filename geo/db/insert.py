@@ -170,8 +170,6 @@ class InsertFactSheet(object):
                 sql_stmt = sql_stmt.replace("(##)", "(%)")
                 sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
 
-                print(form_data)
-                print(sql_stmt)
                 session.connection().execute(sql_stmt)
                 session.commit()
             except Exception:

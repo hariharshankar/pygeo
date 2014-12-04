@@ -239,6 +239,9 @@ class Html(object):
         method that creates the performance table.
         """
 
+        keys = []
+        values = []
+
         table_name = self.type_name + "_Performance"
         result = self.select.read(table_name,
                                   where=[["Description_ID",
@@ -246,8 +249,73 @@ class Html(object):
                                          self.description_id]]
                                   )
 
-        keys = result.keys()
-        values = result.fetchall()
+        keys.extend(result.keys())
+        values.extend(result.fetchall())
+
+        """
+        if self.type_id == 5:
+            cap_gen_table_name = "Nuclear_Capacity_Generated"
+            gwh_table_name = "Nuclear_Gigawatt_Hours_Generated"
+
+            cap_gen_result = self.select.read(cap_gen_table_name,
+                                              columns=["Unit_Description_ID", "Year_yr", "Capacity_Generated_nbr"],
+                                              where=[["Description_ID",
+                                                      "=",
+                                                      self.description_id]],
+                                              order_by=["Unit_Description_ID", "asc"]
+            )
+            cap_gen_values = cap_gen_result.fetchall()
+
+            print(cap_gen_values)
+
+            year_index = None
+            key_count = 0
+            for key in keys:
+                if key == "Year_yr":
+                    year_index = key_count
+                    break
+                elif not year_index:
+                    key_count += 1
+            yfound = []
+
+            cap_val = {}
+            for val in values:
+                for cap_gen_val in cap_gen_values:
+                    if val[year_index] == cap_gen_val[1]:
+                        #yfound.append(val[year_index])
+                        val.insert(year_index+1, cap_gen_val[2])
+
+            print(cap_gen_values)
+            unit_no = 0
+            for cap_gen_val in cap_gen_values:
+                if cap_gen_val[1] not in yfound:
+                    if not cap_val.get(cap_gen_val[1]):
+                        cap_val[cap_gen_val[1]] = []
+                        for key in keys:
+                            cap_val[cap_gen_val[1]].append(None)
+                        #year
+                        cap_val[cap_gen_val[1]].insert(year_index, cap_gen_val[1])
+                        cap_val[cap_gen_val[1]].insert(year_index+1, cap_gen_val[2])
+                        keys.insert(year_index+1, cap_gen_result.keys()[2])
+                        unit_no += 1
+                    else:
+                        unit_no += 1
+                        cap_val[cap_gen_val[1]].insert(year_index+unit_no, cap_gen_val[2])
+            for cv in cap_val:
+                print(cap_val[cv])
+                values.append(cap_val[cv])
+
+            gwh_result = self.select.read(gwh_table_name,
+                                          where=[["Description_ID",
+                                                  "=",
+                                                  self.description_id]]
+            )
+            keys.extend(gwh_result.keys())
+            values.extend(gwh_result.fetchall())
+
+        """
+        #print(keys)
+        #print(values)
 
         html = []
         html.append(self.__create_performance_table(keys, values))
@@ -382,9 +450,9 @@ class Html(object):
             if not k.find("Control_") >= 0 and not k.find("Monitor_") >= 0:
                 unit_keys.append(k)
             else:
-                key = k.replace("Control_", "")
-                key = key.replace("Monitor_", "")
-                control_keys.append(key)
+                #key = k.replace("Control_", "")
+                #key = key.replace("Monitor_", "")
+                control_keys.append(k)
 
         for value in values:
             unit_values.append(value[0:len(unit_keys)])
@@ -440,7 +508,7 @@ class Html(object):
                 key = key.replace("Year_rng2_-", "Year_To_rng2")
             null_vals.append(None)
             if self.__display_key(key):
-                row.append("<th>" + Html.__make_readable(key) + "</th>")
+                row.append("<th>" + Html.__make_readable(key, module_type="unit_control") + "</th>")
 
         if not values:
             values = []
@@ -681,9 +749,6 @@ class Html(object):
             enum.append(val)
 
         enum = "".join(enum)
-        print()
-        print(enum)
-        print()
 
         row = []
         row.extend(["<select id='", key,
@@ -754,7 +819,7 @@ class Html(object):
         return not key.find("_ID") >= 0 and not key.find("Year_yr") >= 0
 
     @staticmethod
-    def __make_readable(token):
+    def __make_readable(token, module_type=None):
         """
         Removes the geo specific parts of a label and converts _ to " ".
         """
@@ -763,6 +828,10 @@ class Html(object):
             ["_itf", "_rng1", "_rng2", "_rng3", "_nbr", "_yr", "_dt", "_omit"]
         for word in reserved_words:
             token = token.replace(word, "")
+
+        if module_type == "unit_control":
+            token = token.replace("Control_", "")
+            token = token.replace("Monitor_", "")
 
         token = token.replace("_", " ")
         return token

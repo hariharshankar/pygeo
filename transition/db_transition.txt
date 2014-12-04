@@ -837,3 +837,37 @@ alter table Waste_Upgrades modify Upgrade text null AFTER `Description_ID`;
 alter table Water_Resources_Upgrades modify Upgrade text null AFTER `Description_ID`;
 alter table Wind_Potential_Upgrades modify Upgrade text null AFTER `Description_ID`;
 alter table Wind_Upgrades modify Upgrade text null AFTER `Description_ID`;
+
+
+ALTER TABLE `Coal_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Gas_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Geothermal_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Hydro_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Nuclear_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Oil_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Solar_PV_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Solar_Thermal_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Waste_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Wind_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Gas_Fields_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Oil_Fields_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Coal_Mines_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Uranium_Mines_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Crude_Oil_Refineries_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Solar_Potential_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Wind_Potential_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Biomass_Potential_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Gas_Pipelines_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Oil_Pipelines_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Coal_Ports_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Oil_Ports_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `LNG_Ports_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Rail_Links_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Road_Links_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Shipping_Lanes_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Electric_Power_Grid_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `CO2_Storage_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Water_Resources_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+ALTER TABLE `Industries_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
+
+

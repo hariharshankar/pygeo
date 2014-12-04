@@ -1022,18 +1022,14 @@ Map = {
                 details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' /></span>";
             }
             details += "</div>";
-            if (!document.getElementById("Points_###_"+overlayNumber)) {
-                details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
-                details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
-                details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
-                overlayCounter = Map.overlaysCount + 1
+            details += this.createHiddenHtmlElement("Color_###_"+overlayNumber, overlayColor)
+            details += this.createHiddenHtmlElement("Points_###_"+overlayNumber, points)
+            details += this.createHiddenHtmlElement("Overlay_Type_###_"+overlayNumber, overlayType)
+            overlayCounter = Map.overlaysCount + 1
+            if (!document.getElementById("numberOf"+type_name+"_Overlays")) {
                 details += this.createHiddenHtmlElement("numberOf"+type_name+"_Overlays", overlayCounter)
             }
             else {
-                //$(document.getElementById("Color_###_"+overlayNumber)).attr("value", overlayColor)
-                //$(document.getElementById("Points_###_"+overlayNumber)).attr("value", points)
-                //$(document.getElementById("Overlay_Type_###_"+overlayNumber)).attr("value", overlayType)
-                overlayCounter = Map.overlaysCount + 1
                 $("#numberOf"+type_name+"_Overlays").attr("value", overlayCounter)
             }
 
