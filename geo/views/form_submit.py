@@ -50,11 +50,19 @@ def view():
                               where=[["Type_ID", "=", geo_resource.type_id]]
                               )
     modules = res_modules.first()
+    print(modules)
+    print(type(modules.Features))
 
-    for f in modules.Features:
-        module_id = f
+    features = list(modules.Features)
+    features.remove("Annual_Performance")
+    features.append("Annual_Performance")
+
+    print(features)
+
+    for f in features:
 
         table_name = geo_resource.type_name + "_" + f
+        print(f)
 
         if f.startswith("Unit_Description") or\
                 f.startswith("Environmental_Issues") or \
@@ -63,6 +71,11 @@ def view():
                 f.startswith("Upgrades"):
             insert.insert(table_name, form_data, "row_columns", description_id)
         elif f == "Annual_Performance":
+            if geo_resource.type_id == 5:
+                cap_gen_table_name = "Nuclear_Capacity_Generated"
+                gwh_table_name = "Nuclear_Gigawatt_Hours_Generated"
+                insert.insert(cap_gen_table_name, form_data, "nuclear_performance", description_id)
+                insert.insert(gwh_table_name, form_data, "nuclear_performance", description_id)
             insert.insert(table_name, form_data, "performance", description_id)
         elif f == "Location":
             insert.insert(table_name, form_data, "generic", description_id)

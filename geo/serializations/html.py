@@ -2,6 +2,8 @@
 Builds the HTML representation for the fact sheets.
 """
 
+#from geo.core.geo_resource import GeoResource
+#from geo.db import connection
 
 class Html(object):
     """
@@ -15,6 +17,7 @@ class Html(object):
         self.state_id = 0
         self.country_id = 0
         self.type_name = None
+        self.parent_plant_id = 0
 
     def generate_editable(self):
         """
@@ -94,8 +97,9 @@ class Html(object):
             owner.append(self.__make_generic_module(feature))
             owner.append(self.__make_single_row_module("Owners"))
             return "single-row-module", "".join(owner)
-        elif feature.startswith("Associated_Infrastructure") or \
-                feature.startswith("History"):
+        elif feature.startswith("Associated_Infrastructure"):
+            return "", ""
+        elif feature.startswith("History"):
             return "", ""
         else:
             return "generic-module", self.__make_generic_module(feature)
@@ -169,6 +173,33 @@ class Html(object):
                     "value='/location?description_id="
                      + str(self.description_id) + "'",
                      "class='widget_urls' />"])
+
+        ai_result = self.select.read("Associated_Infrastructure",
+                                     columns=["Associated_Parent_Plant_ID"],
+                                     where=[["Parent_Plant_ID",
+                                             "=",
+                                             self.parent_plant_id]])
+
+        ai_parent_plant_ids = ai_result.fetchall()
+
+        for ai_id in ai_parent_plant_ids:
+            ai_id = ai_id[0]
+            where = [["Parent_Plant_ID", "=", ai_id]]
+            where.extend([["and"], ["Accepted", "=", "1"]])
+
+            desc_id_result = self.select.read("History", columns=["max(Description_ID)"],
+                                   where=where)
+
+            res = desc_id_result.first()
+            ai_desc_id = res[0]
+            html.extend(["<input type='hidden'",
+                         "name='ai_map_json'",
+                         "id='ai_map_json'",
+                         "value='/location?description_id="
+                         + str(ai_desc_id) + "'",
+                         "class='widget_urls' />"])
+
+
         return "".join(html)
 
     def __make_identifiers_module(self):
@@ -252,8 +283,16 @@ class Html(object):
         keys.extend(result.keys())
         values.extend(result.fetchall())
 
-        """
         if self.type_id == 5:
+
+            units_number_result = self.select.read(self.type_name + "_Unit_Description",
+                                                   columns=["count(Description_ID)"],
+                                                   where=[["Description_ID",
+                                                           "=",
+                                                           self.description_id]])
+
+            number_of_units = units_number_result.fetchall()[0][0]
+
             cap_gen_table_name = "Nuclear_Capacity_Generated"
             gwh_table_name = "Nuclear_Gigawatt_Hours_Generated"
 
@@ -264,62 +303,82 @@ class Html(object):
                                                       self.description_id]],
                                               order_by=["Unit_Description_ID", "asc"]
             )
-            cap_gen_values = cap_gen_result.fetchall()
-
-            print(cap_gen_values)
-
-            year_index = None
-            key_count = 0
-            for key in keys:
-                if key == "Year_yr":
-                    year_index = key_count
-                    break
-                elif not year_index:
-                    key_count += 1
-            yfound = []
-
-            cap_val = {}
-            for val in values:
-                for cap_gen_val in cap_gen_values:
-                    if val[year_index] == cap_gen_val[1]:
-                        #yfound.append(val[year_index])
-                        val.insert(year_index+1, cap_gen_val[2])
-
-            print(cap_gen_values)
-            unit_no = 0
-            for cap_gen_val in cap_gen_values:
-                if cap_gen_val[1] not in yfound:
-                    if not cap_val.get(cap_gen_val[1]):
-                        cap_val[cap_gen_val[1]] = []
-                        for key in keys:
-                            cap_val[cap_gen_val[1]].append(None)
-                        #year
-                        cap_val[cap_gen_val[1]].insert(year_index, cap_gen_val[1])
-                        cap_val[cap_gen_val[1]].insert(year_index+1, cap_gen_val[2])
-                        keys.insert(year_index+1, cap_gen_result.keys()[2])
-                        unit_no += 1
-                    else:
-                        unit_no += 1
-                        cap_val[cap_gen_val[1]].insert(year_index+unit_no, cap_gen_val[2])
-            for cv in cap_val:
-                print(cap_val[cv])
-                values.append(cap_val[cv])
+            keys, values = self.__format_nuclear_performance_data(keys, values, cap_gen_result.keys(), cap_gen_result.fetchall(), number_of_units)
 
             gwh_result = self.select.read(gwh_table_name,
+                                          columns=["Unit_Description_ID", "Year_yr", "Gigawatt_Hours_Generated_nbr"],
                                           where=[["Description_ID",
                                                   "=",
-                                                  self.description_id]]
+                                                  self.description_id]],
+                                          order_by=["Unit_Description_ID", "asc"]
             )
-            keys.extend(gwh_result.keys())
-            values.extend(gwh_result.fetchall())
-
-        """
+            keys, values = self.__format_nuclear_performance_data(keys, values, gwh_result.keys(), gwh_result.fetchall(), number_of_units)
         #print(keys)
         #print(values)
 
         html = []
         html.append(self.__create_performance_table(keys, values))
         return "".join(html)
+
+    def __format_nuclear_performance_data(self, performance_keys, performance_values, nuclear_keys, nuclear_values, number_of_units):
+        year_index = None
+        key_count = 0
+        for key in performance_keys:
+            if key == "Year_yr":
+                year_index = key_count
+                break
+            elif not year_index:
+                key_count += 1
+        yfound = []
+
+        cap_val = {}
+        units = {}
+        unit_index = {}
+        for cap_gen_val in nuclear_values:
+            units[cap_gen_val[0]] = None
+        for i in range(number_of_units):
+            performance_keys.insert(year_index+i+1, nuclear_keys[2] + "_" + str(i+1))
+
+        #print(performance_keys, len(performance_keys))
+        #print(performance_values)
+
+        new_perf_val = []
+        for val in performance_values:
+            val = list(val)
+            for i in range(number_of_units):
+                val.insert(year_index+i+1, None)
+                if i < len(units):
+                    unit_index[list(units.keys())[i]] = year_index+i+1
+            #print("FFf", val, len(val))
+            new_perf_val.append(val)
+
+        for val in new_perf_val:
+            for cap_gen_val in nuclear_values:
+                if val[year_index] == cap_gen_val[1]:
+                    yfound.append(val[year_index])
+                    val[unit_index[cap_gen_val[0]]] = cap_gen_val[2]
+            #while len(val) < len(performance_keys):
+            #    val.append(None)
+            #print("HHH", val, len(val))
+
+        #print(performance_values)
+
+        for cap_gen_val in nuclear_values:
+            if cap_gen_val[1] not in yfound:
+                if not cap_val.get(cap_gen_val[1]+cap_gen_val[0]):
+                    cap_val[cap_gen_val[1]+cap_gen_val[0]] = []
+                    for key in performance_keys:
+                        cap_val[cap_gen_val[1]+cap_gen_val[0]].append(None)
+                    #year
+                    cap_val[cap_gen_val[1]+cap_gen_val[0]][year_index] = cap_gen_val[1]
+                    cap_val[cap_gen_val[1]+cap_gen_val[0]][year_index+1] = cap_gen_val[2]
+                else:
+                    cap_val[cap_gen_val[1]+cap_gen_val[0]][year_index+(len(units)-1)] = cap_gen_val[2]
+        for cv in cap_val:
+            #print(cap_val[cv], len(cap_val[cv]))
+            new_perf_val.append(cap_val[cv])
+
+        return performance_keys, new_perf_val
 
     def __create_performance_table(self, keys, values):
         """

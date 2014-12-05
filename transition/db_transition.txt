@@ -132,6 +132,7 @@ alter table Coal_Performance drop foreign key Coal_Performance_ibfk_1;
 /* remove om_description_id from description tables */
 alter table Coal_Description drop OM_Description_ID ;
 alter table Coal_Upgrade drop OM_Description_ID;
+alter table Nuclear_Unit_Description drop OM_Unit_Description_ID;
 
 
 /* make _itf fields nullable */
@@ -869,5 +870,3 @@ ALTER TABLE `Electric_Power_Grid_Owner_Details` CHANGE `Construction/EPC_Contrac
 ALTER TABLE `CO2_Storage_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
 ALTER TABLE `Water_Resources_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
 ALTER TABLE `Industries_Owner_Details` CHANGE `Construction/EPC_Contractor` `Design/EPC_Contractor` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
-
-

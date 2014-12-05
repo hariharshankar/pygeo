@@ -1162,12 +1162,7 @@ Map = {
         $("#overlay-details").prepend(html)
     },
 
-    init: function(showDrawingTools) {
-
-        if( document.getElementById('map-container') == undefined )
-            return;
-
-        $.getJSON($("#map_json").attr("value"), function(data) {
+    plotOverlays: function(data, showDrawingTools) {
 
             data = data.data
             var searchLocation = data.boundLocation;
@@ -1259,6 +1254,19 @@ Map = {
                 })(marker, location));
 
             });
+        
+        },
+
+    init: function(showDrawingTools) {
+
+        if( document.getElementById('map-container') == undefined )
+            return;
+
+        $.getJSON($("#map_json").attr("value"), function(data) {
+            Map.plotOverlays(data, showDrawingTools);
+        });
+        $.getJSON($("#ai_map_json").attr("value"), function(data) {
+            Map.plotOverlays(data, showDrawingTools);
         });
     }
 }

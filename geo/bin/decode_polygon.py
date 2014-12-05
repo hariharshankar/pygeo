@@ -40,8 +40,8 @@ class DecodePolygon(object):
         coords = []
         str_len = len(encoded_string)
 
-        print(encoded_string)
-        print()
+        #print(encoded_string)
+        #print()
         while index < str_len:
             shift = 0
             result = 0
@@ -84,28 +84,26 @@ class DecodePolygon(object):
         return coords
 
     def decode_all(self):
-        t_keys, types = self.main.get_types("PowerPlants")
-        #print(types)
-        #types = [[10, "Wind"]]
+        databases = self.main.get_databases()
         session = self.conn.session
-        overlays_table = "_Overlays"
-        for typ in types:
-            type_overlay = typ[1] + overlays_table
-            c_keys, countries = self.main.get_countries(typ[0])
-            #print()
-            #print(typ)
-            #countries = [[99, "India"]]
+        for db in databases[1]:
+            print(db[0])
+            t_keys, types = self.main.get_types(db[0])
+            overlays_table = "_Overlays"
+            for typ in types:
+                type_overlay = typ[1] + overlays_table
 
-            points = self.select.read(type_overlay,
-                                      columns=['Overlay_ID', 'Points'])
-            for point in points:
-                if not point[1]:
-                    continue
+                points = self.select.read(type_overlay,
+                                          columns=['Overlay_ID', 'Points'])
+                for point in points:
+                    if not point[1]:
+                        continue
 
-                decoded_point = self.decode_GMap(point[1])
-                sql = "UPDATE " + type_overlay + " SET Points=:decoded_point WHERE Overlay_ID=:overlay_id"
-                session.execute(sql, {"overlay_id": point[0], "decoded_point": json.dumps(decoded_point)})
-            session.commit()
+                    decoded_point = self.decode_GMap(point[1])
+                    sql = "UPDATE " + type_overlay + " SET Points=:decoded_point WHERE Overlay_ID=:overlay_id"
+                    print(sql, point[0])
+                    session.execute(sql, {"overlay_id": point[0], "decoded_point": json.dumps(decoded_point)})
+                session.commit()
         session.close()
 
 
