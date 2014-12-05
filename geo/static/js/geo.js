@@ -1265,9 +1265,11 @@ Map = {
         $.getJSON($("#map_json").attr("value"), function(data) {
             Map.plotOverlays(data, showDrawingTools);
         });
+        /*
         $.getJSON($("#ai_map_json").attr("value"), function(data) {
             Map.plotOverlays(data, showDrawingTools);
         });
+        */
     }
 }
 
