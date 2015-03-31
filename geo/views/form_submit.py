@@ -50,19 +50,13 @@ def view():
                               where=[["Type_ID", "=", geo_resource.type_id]]
                               )
     modules = res_modules.first()
-    print(modules)
-    print(type(modules.Features))
-
     features = list(modules.Features)
     features.remove("Annual_Performance")
     features.append("Annual_Performance")
 
-    print(features)
-
     for f in features:
 
         table_name = geo_resource.type_name + "_" + f
-        print(f)
 
         if f.startswith("Unit_Description") or\
                 f.startswith("Environmental_Issues") or \
@@ -80,13 +74,27 @@ def view():
         elif f == "Location":
             insert.insert(table_name, form_data, "generic", description_id)
             insert.insert(geo_resource.type_name + "_Overlays", form_data, "row_columns", description_id)
-        elif f == "Identifiers":
+        elif f == "Identifiers" or f == "Dual_Node_Identifiers" or f == "Dual_Node_Locations":
                 continue
         elif f == "History":
                 continue
         elif f == "Owner_Details":
             insert.insert(geo_resource.type_name + "_Owners", form_data, "row_columns", description_id)
             insert.insert(table_name, form_data, "generic", description_id)
+        elif f == "Description":
+            insert.insert(table_name, form_data, "generic", description_id)
+            if geo_resource.type_id == 11:
+                insert.insert(geo_resource.type_name + "_Contaminants", form_data, "enum_table", description_id)
+        elif f == "Dual_Node_Description":
+            connection_id = insert.insert(geo_resource.type_name + "_Connection_Description",
+                                          form_data, "generic")
+            station_1_id = insert.insert(geo_resource.type_name + "_Station_Description",
+                                         form_data, "generic", dual=1)
+            station_2_id = insert.insert(geo_resource.type_name + "_Station_Description",
+                                         form_data, "generic", dual=2)
+            print(connection_id, station_1_id, station_2_id)
+            insert.insert_dual_node_description(geo_resource.type_name + "_Description", form_data, description_id,
+                                                station_1_id, station_2_id, connection_id)
         elif f != "Associated_Infrastructure":
             insert.insert(table_name, form_data, "generic", description_id)
 

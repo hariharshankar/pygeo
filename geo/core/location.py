@@ -34,8 +34,10 @@ class Location(object):
         loc = result.first()
         lat = loc['Latitude_Start']
         lng = loc['Longitude_Start']
+        lat_end = loc['Latitude_End']
+        lng_end = loc['Longitude_End']
 
-        return lat, lng
+        return (lat, lng), (lat_end, lng_end)
 
     def for_one_resource(self, description_id):
         """
@@ -50,7 +52,7 @@ class Location(object):
         type_id = gresource.type_id
         type_name = self.main.get_type_name(type_id)
 
-        lat, lng = self.__get_lat_lng(type_name + "_Location", description_id)
+        (lat, lng), (lat_end, lng_end) = self.__get_lat_lng(type_name + "_Location", description_id)
 
         overlay_result = self.select.read(type_name + "_Overlays",
                                           where=[["Description_ID",
@@ -76,6 +78,9 @@ class Location(object):
         locations = {}
         locations['lat'] = lat
         locations['lng'] = lng
+        if lat_end and lng_end:
+            locations['lat_end'] = lat_end
+            locations['lng_end'] = lng_end
         locations['name'] = gresource.get_resource_name(type_name)
         locations['overlays'] = overlays
         return {"locations": [locations]}

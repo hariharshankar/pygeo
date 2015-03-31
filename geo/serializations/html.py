@@ -60,6 +60,7 @@ class Html(object):
             module_id = module
             module_heading = Html.__make_readable(module)
 
+            print(module)
             module_header_class, module_content = \
                 self.__get_module_for_feature(module)
 
@@ -81,11 +82,11 @@ class Html(object):
 
         if feature.startswith("Unit_"):
             return "single-row-module", self.__make_unit_module(feature)
-        elif feature.startswith("Location"):
+        elif feature == "Location" or feature == "Dual_Node_Locations":
             return "generic-module", self.__make_location_module()
         elif feature.startswith("Annual_Performance"):
             return "generic-module", self.__make_performance_module()
-        elif feature.startswith("Identifiers"):
+        elif feature == "Identifiers" or feature == "Dual_Node_Identifiers":
             return "generic-module", self.__make_identifiers_module()
         elif feature.startswith("Environmental_Issues")\
                 or feature.startswith("Comments") \
@@ -94,28 +95,128 @@ class Html(object):
             return "single-row-module", self.__make_single_row_module(feature)
         elif feature.startswith("Owner_Details"):
             owner = []
-            owner.append(self.__make_generic_module(feature))
+            owner.append(self.__make_generic_module(feature=feature))
             owner.append(self.__make_single_row_module("Owners"))
             return "single-row-module", "".join(owner)
         elif feature.startswith("Associated_Infrastructure"):
             return "", ""
         elif feature.startswith("History"):
             return "", ""
-        else:
-            return "generic-module", self.__make_generic_module(feature)
+        elif feature.startswith("Description"):
+            description = []
+            description.append(self.__make_generic_module(feature=feature))
+            if self.type_id == 11:
+                description.append(self.__make_enum_table_row("Contaminants"))
+            return "generic-module", "".join(description)
+        elif feature == "Refinery_Products":
+            return "generic-module", self.__make_generic_module(table_name="Crude_Oil_Refineries_Products")
+        elif feature == "Wind_Potential_Height":
+            return "generic-module", self.__make_wind_potential_height()
+        elif feature == "Dual_Node_Description":
+            return "generic-module", self.__make_description_with_segments()
+        return "", ""
 
-    def __make_generic_module(self, feature):
+    def __make_description_with_segments(self):
+        """
+        builds station and connecting pipeline sections.
+        :return:
+        """
+
+        html = []
+        desc_result = self.select.read(self.type_name + "_Description",
+                                       where=[["Description_ID",
+                                               "=",
+                                               self.description_id]]
+                                        )
+        values = desc_result.fetchone()
+        station_1_id = values[1]
+        station_2_id = values[2]
+        connection_id = values[3]
+
+
+        html.append("<h2>Station A</h2>")
+        html.append(self.__make_generic_module(feature=None,
+                                               table_name=self.type_name + "_Station_Description",
+                                               _id=("Station_ID", station_1_id), dual=1))
+
+        html.append("<h2>" + str(self.type_name) + "</h2>")
+        html.append(self.__make_generic_module(feature=None,
+                                               table_name=self.type_name + "_Connection_Description",
+                                               _id=("Connection_ID", connection_id)))
+        html.append("<h2>Station B</h2>")
+        html.append(self.__make_generic_module(feature=None,
+                                               table_name=self.type_name + "_Station_Description",
+                                               _id=("Station_ID", station_2_id), dual=2))
+
+        return "".join(html)
+
+    def __make_wind_potential_height(self):
+        """
+        Builds a module for wind potential height.
+        :return:
+        """
+
+        html = []
+        result = self.select.read("Wind_Potential_Height",
+                                  where=[["Description_ID",
+                                          "=",
+                                          self.description_id]]
+        )
+
+        keys = result.keys()
+        values = result.fetchall()
+
+        none_values = (None for k in keys)
+
+        height_ranges = self.__process_enum_from_db("Wind_Potential_Height", "Height_enumfield")
+        html.append("<table>")
+        html.append("<tr>")
+        html.append("<th></th>")
+        height_values = {}
+        for height in height_ranges:
+            html.append("<th>" + height + "</th>")
+        html.append("</tr>")
+        for value in values:
+            height_values[value[1]] = value
+
+        print(height_values)
+        for index, key in enumerate(keys):
+            if key.find("_ID") > 0 or key.find("Height_enumfield") >= 0:
+                continue
+
+            html.append("<tr>")
+            html.append("<td>" + self.__make_readable(key) + "</td>")
+            for height in height_ranges:
+                print(height)
+                html.append("<td>")
+                #if not height_values.get(height):
+                #    height_values[height] = none_values
+                val = list(height_values.get(height))
+                print(val)
+                html.append(self.__create_number_input_field(key, val[index]))
+                html.append("</td>")
+            html.append("</tr>")
+        print(keys)
+        print(values)
+        html.append("</table>")
+        return "".join(html)
+
+    def __make_generic_module(self, feature=None, table_name=None, _id=None, dual=0):
         """
         Builds the generic module representation,
         like description module.
         """
 
+        if not table_name and not feature:
+            return
         html = []
-        table_name = self.type_name + "_" + feature
+        if not table_name:
+            table_name = self.type_name + "_" + feature
+
         result = self.select.read(table_name,
-                                  where=[["Description_ID",
+                                  where=[["Description_ID" if not _id else _id[0],
                                           "=",
-                                          self.description_id]]
+                                          self.description_id if not _id else _id[1]]]
                                   )
 
         keys = result.keys()
@@ -129,7 +230,7 @@ class Html(object):
             html.append(self.__create_editable_row(k,
                                                    values[k],
                                                    table_name,
-                                                   False)
+                                                   False, dual=dual)
                         )
             html.append("</tr>")
         html.append("</table>")
@@ -157,6 +258,84 @@ class Html(object):
         html.append("</table>")
         return "".join(html)
 
+    def __process_enum_from_db(self, table_name, field_name):
+        """
+        reads the enum for the field in db, and returns a list of enum values
+        :param table_name:
+        :param field_name:
+        :return:
+        """
+        enum_result = self.select.read_column_names(table_name, where=field_name)
+
+        # the result object is a list of tuples.
+        # the tuple looks like (feature, values)
+        enum_value = enum_result[0][1].replace("enum(", "")
+        enum_value = enum_value[:-1]
+
+        enum = []
+        replace_comma = False
+
+        for val in enum_value:
+            if val == "'":
+                replace_comma = True if not replace_comma else False
+            #if val == "'":
+            #    replace_comma = False
+            if replace_comma and val == ',':
+                val = "@"
+            val = val.replace("'", "")
+            val = val.replace('"', "")
+            enum.append(val)
+
+        enum = "".join(enum)
+
+        return enum.split(",")
+
+    def __make_enum_table_row(self, feature):
+        """
+        Builds a row for spl cases where the label is read from enum
+         and a text box is provided for the value. Like Gas field contaminants.
+        :param feature:
+        :return:
+        """
+
+        table_name = self.type_name + "_" + feature
+
+        result = self.select.read(table_name,
+                                  where=[["Description_ID",
+                                          "=",
+                                          self.description_id]]
+        )
+
+        keys = result.keys()
+        values = result.fetchall()
+
+        #print(keys)
+        #print(values)
+        value_key = keys[-1]
+
+        html = []
+        html.append("<table>")
+        html.append("<tr>")
+        html.append(self.__create_label(feature, ""))
+        enum = self.__process_enum_from_db(table_name, feature)
+
+        for option in enum:
+            option = option.replace("'", "")
+            option = option.replace("@", ",")
+
+            val = ""
+            for value in values:
+                if value[1] == option:
+                    val = value[2]
+
+            html.append(self.__create_label(option, "_nbr"))
+            html.append("<td>")
+            html.append(self.__create_number_input_field(feature + "_" + option, val))
+            html.append("</td>")
+
+        html.append("</table>")
+        return "".join(html)
+
     def __make_location_module(self):
         """
         Builds the location module.
@@ -167,11 +346,11 @@ class Html(object):
         html.append("<div id='map-resize'>")
         html.append("<div id='map-container' style='height: 480px;'></div>")
         html.append("</div>")
-        html.extend(["<input type='hidden'",
-                    "name='map_json'",
-                    "id='map_json'",
+        html.extend(["<input type='hidden' ",
+                    "name='map_json' ",
+                    "id='map_json' ",
                     "value='/location?description_id="
-                     + str(self.description_id) + "'",
+                     + str(self.description_id) + "' ",
                      "class='widget_urls' />"])
 
         ai_result = self.select.read("Associated_Infrastructure",
@@ -192,13 +371,12 @@ class Html(object):
 
             res = desc_id_result.first()
             ai_desc_id = res[0]
-            html.extend(["<input type='hidden'",
-                         "name='ai_map_json'",
-                         "id='ai_map_json'",
+            html.extend(["<input type='hidden' ",
+                         "name='ai_map_json' ",
+                         "id='ai_map_json' ",
                          "value='/location?description_id="
-                         + str(ai_desc_id) + "'",
+                         + str(ai_desc_id) + "' ",
                          "class='widget_urls' />"])
-
 
         return "".join(html)
 
@@ -219,40 +397,43 @@ class Html(object):
         if not values:
             values = dict((k, None) for k in keys)
         html = []
-        html.extend(["<input type='hidden'",
-                    "name='Description_ID'",
-                    "id='Description_ID'",
+        html.extend(["<input type='hidden' ",
+                    "name='Description_ID' ",
+                    "id='Description_ID' ",
                     "value='" + str(self.description_id) + "'",
                      "/>"
                      ])
-        html.extend(["<input type='hidden'",
-                    "name='Type_ID'",
-                    "id='Type_ID'",
-                    "value='" + str(self.type_id) + "'",
+        html.extend(["<input type='hidden' ",
+                    "name='Type_ID' ",
+                    "id='Type_ID' ",
+                    "value='" + str(self.type_id) + "' ",
                      "/>"
                      ])
-        html.extend(["<input type='hidden'",
-                    "name='Country_ID'",
-                    "id='Country_ID'",
-                    "value='" + str(self.country_id) + "'",
+        html.extend(["<input type='hidden' ",
+                    "name='Country_ID' ",
+                    "id='Country_ID' ",
+                    "value='" + str(self.country_id) + "' ",
                      "/>"
                      ])
-        html.extend(["<input type='hidden'",
-                    "name='State_ID'",
-                    "id='State_ID'",
-                    "value='" + str(self.state_id) + "'",
+        html.extend(["<input type='hidden' ",
+                    "name='State_ID' ",
+                    "id='State_ID' ",
+                    "value='" + str(self.state_id) + "' ",
                      "/>"
                      ])
-        html.extend(["<input type='hidden'",
-                     "name='Type_Name'",
-                     "id='Type_Name'",
-                     "value='" + self.type_name + "'",
+        html.extend(["<input type='hidden' ",
+                     "name='Type_Name' ",
+                     "id='Type_Name' ",
+                     "value='" + self.type_name + "' ",
                      "/>"
         ])
         html.append("<table>")
 
+        segment_names = ["Name_of_this_Segment",
+                         "Name_of_the_Pipeline"]
+
         for k in keys:
-            if k == "Name_omit" or k.find("_itf") >= 0:
+            if k == "Name_omit" or k.find("_itf") >= 0 or k in segment_names:
                 html.append("<tr>")
                 html.append(self.__create_editable_row(k,
                                                        values[k],
@@ -561,10 +742,10 @@ class Html(object):
         null_vals = []
         #rng_indexes = {}
         for index, key in enumerate(keys):
-            if key.find('Year_rng1') >= 0:
-                key = key.replace("Year_rng1", "Year_From_rng1")
-            if key.find('Year_rng2') >= 0:
-                key = key.replace("Year_rng2_-", "Year_To_rng2")
+            if key.find('_rng1') >= 0:
+                key = key.replace("_rng1", "_From_rng1")
+            if key.find('_rng2') >= 0:
+                key = key.replace("_rng2", "_To_rng2")
             null_vals.append(None)
             if self.__display_key(key):
                 row.append("<th>" + Html.__make_readable(key, module_type="unit_control") + "</th>")
@@ -653,12 +834,13 @@ class Html(object):
                         )
                 count += 1
             row.append("</tr>\n")
-        row.extend(["<input type='hidden'",
-                    "name='numberOf", table_name, "'",
+        row.extend(["<input type='hidden' ",
+                    "name='numberOf", table_name, "' ",
+                    "id='numberOf", table_name, "' ",
                     "value='", str(line_count), "' />"])
         return row
 
-    def __create_editable_row(self, key, value, table_name, itf):
+    def __create_editable_row(self, key, value, table_name, itf, dual=0):
         """
         Creates a row for generic modules.
         """
@@ -676,30 +858,30 @@ class Html(object):
         row.append("<td class='input-right'>")
         key_local = key
         if key_local.find("_enumfield") >= 0:
-            row.append(self.__create_enum_field_from_table(key, value, table_name))
+            row.append(self.__create_enum_field_from_table(key, value, table_name, dual=dual))
             row.append("</td>")
             row.insert(0, self.__create_label(key_local, "_enumfield"))
         elif key_local.find("_setfield") >= 0:
-            row.append(self.__create_set_field(key, value, table_name))
+            row.append(self.__create_set_field(key, value, table_name, dual=dual))
             row.append("</td>")
             row.insert(0, self.__create_label(key_local, "_setfield"))
         elif key_local.find("_nbr") >= 0:
-            row.append(self.__create_number_input_field(key, value))
+            row.append(self.__create_number_input_field(key, value, dual=dual))
             row.append("</td>")
             row.insert(0, self.__create_label(key_local, "_nbr"))
         elif key_local.find("_enum") >= 0:
-            row.append(self.__create_enum_field(key, value))
+            row.append(self.__create_enum_field(key, value, dual=dual))
             row.append("</td>")
             row.insert(0, self.__create_label(key_local, "_enum"))
         else:
-            row.append(self.__create_input_field(key, value, "generic"))
+            row.append(self.__create_input_field(key, value, "generic", dual=dual))
             row.append("</td>")
             row.insert(0, self.__create_label(key_local, "_nbr"))
 
         return "".join(row)
 
     @staticmethod
-    def __create_input_field(key, value, row_type):
+    def __create_input_field(key, value, row_type, dual=0):
         """
         Creates an input html element.
         """
@@ -716,6 +898,8 @@ class Html(object):
 
         value = str(value)
 
+        if dual > 0:
+            key = key + "_stn" + str(dual)
         if row_type == "unit":
             return get_input_text(key, value, "10")
         if row_type == "unit_control":
@@ -727,7 +911,7 @@ class Html(object):
         else:
             return get_input_text(key, value, "95")
 
-    def __create_enum_field(self, key, value):
+    def __create_enum_field(self, key, value, dual=0):
         """
         Creates a select html element for drop down ui.
         """
@@ -739,6 +923,8 @@ class Html(object):
         result = self.select.read("`" + t_name + "`", columns=columns)
         values = result.fetchall()
 
+        if dual > 0:
+            key = key + "_stn" + str(dual)
         row.extend(["<select id='", key,
                     "' name='", key, "'>"])
 
@@ -757,7 +943,7 @@ class Html(object):
         row.append("</select>")
         return "".join(row)
 
-    def __create_set_field(self, key, value, table_name):
+    def __create_set_field(self, key, value, table_name, dual=0):
         """
         Creates a set field.
         """
@@ -767,6 +953,8 @@ class Html(object):
         enum_value = enum_value[:-1]
         row = []
 
+        if dual > 0:
+            key = key + "_stn" + str(dual)
         for option in enum_value.split(","):
             option = str(option)
             option = option.replace("'", "")
@@ -783,7 +971,7 @@ class Html(object):
                             "' value='", option, "' />", option])
         return "".join(row)
 
-    def __create_enum_field_from_table(self, key, value, table_name):
+    def __create_enum_field_from_table(self, key, value, table_name, dual=0):
         """
         Creates enum field for drop down menus.
         """
@@ -809,6 +997,8 @@ class Html(object):
 
         enum = "".join(enum)
 
+        if dual > 0:
+            key = key + "_stn" + str(dual)
         row = []
         row.extend(["<select id='", key,
                     "' name='", key, "'>"])
@@ -827,10 +1017,14 @@ class Html(object):
         return "".join(row)
 
     @staticmethod
-    def __create_number_input_field(key, value, size=15):
+    def __create_number_input_field(key, value, size=15, dual=0):
         """
         Creates an input html element for numbers.
         """
+        if not value:
+            value = ""
+        if dual > 0:
+            key = key + "_stn" + str(dual)
         return "".join(["<input type='text' name='", key,
                         "' id='", key,
                         "' value='", str(value),

@@ -25,7 +25,7 @@ class InsertFactSheet(object):
         """
         self.db_conn.session.close()
 
-    def insert(self, table_name, form_data, module_type, description_id=0):
+    def insert(self, table_name, form_data, module_type, description_id=0, dual=0):
         """
         The public method that determines how the data should be prepared
         and saved based on the module_type.
@@ -37,7 +37,7 @@ class InsertFactSheet(object):
         if not module_type or module_type == "generic":
             return self.__insert_generic_module(table_name,
                                                 form_data,
-                                                description_id)
+                                                description_id, dual=dual)
         elif module_type == "row_columns":
             return self.__insert_row_column_module(table_name,
                                                    form_data,
@@ -50,8 +50,73 @@ class InsertFactSheet(object):
             return self.__insert_history_module(form_data)
         elif module_type == "nuclear_performance":
             return self.__insert_nuclear_performance_data(table_name, form_data, description_id)
-
+        elif module_type == "enum_table":
+            return self.__insert_enum_table(table_name, form_data, description_id)
         return
+
+    def __insert_enum_table(self, table_name, form_data, description_id):
+        """
+        Inserts a row for spl cases where the label is read from enum
+         and a text box is provided for the value. Like Gas field contaminants.
+        """
+
+        type_name = form_data.get("Type_Name")
+        label = table_name.replace(type_name + "_", "")
+
+        select = Select(self.db_conn)
+        column_names = select.read_column_names(table_name)
+
+        #enum_result = select.read_column_names(table_name, where=label)
+        enum_value = column_names[1][1].replace("enum(", "")
+        enum_value = enum_value[:-1]
+
+        enum = []
+        replace_comma = False
+
+        for val in enum_value:
+            if val == "'":
+                replace_comma = True if not replace_comma else False
+            if replace_comma and val == ',':
+                val = "@"
+            enum.append(val)
+
+        enum = "".join(enum)
+
+        sql_values = {}
+        sql_fields = []
+
+        sql_statement = []
+        sql_statement.append("INSERT INTO " + table_name + " SET ")
+
+        sql_fields.append("`Description_ID`=:description_id")
+        sql_values['description_id'] = description_id
+
+        for option in enum.split(","):
+            option = option.replace("'", "")
+            option = option.replace("@", ",")
+            print(option, label+"_"+option)
+
+            value = form_data.get(label+"_"+option).strip()
+
+            if value:
+                sql_fields.append("`" + label + "`=:" + label.lower())
+                sql_values[label.lower()] = option
+                sql_fields.append("`" + column_names[2][0] + "`=:" + column_names[2][0].lower())
+                sql_values[column_names[2][0].lower()] = value
+
+        sql_statement.append(",".join(sql_fields))
+        print("".join(sql_statement), sql_values)
+
+        session = self.db_conn.session
+        try:
+            session.execute("".join(sql_statement), sql_values)
+            session.commit()
+        except Exception as e:
+            print(e)
+        finally:
+            session.close()
+
+        return 1
 
     def __insert_history_module(self, form_data):
         """
@@ -115,10 +180,10 @@ class InsertFactSheet(object):
 
         return description_id
 
-    def __insert_generic_module(self, table_name, form_data, description_id):
+    def insert_dual_node_description(self, table_name, form_data, description_id,
+                                       station_1_id, station_2_id, connection_id):
         """
-        Prepares and saves data for a generic module like _Description,
-        _Location, etc.
+        for dual node descriptions
         """
 
         sql_values = {}
@@ -130,14 +195,23 @@ class InsertFactSheet(object):
         sql_statement.append("INSERT INTO " + table_name + " SET ")
         alt_sql_statement.append("INSERT INTO " + table_name + " SET ")
 
-        sql_fields.append("`Description_ID`=:description_id")
+        sql_fields.append("`Description_ID`=:description_id,"
+                          "Station_1_ID=:station_1_id,"
+                          "Station_2_ID=:station_2_id,"
+                          "Connection_ID=:connection_id")
         sql_values['description_id'] = description_id
-
         alt_sql_fields.append("`Description_ID`=%(description_id)s")
+        sql_values['station_1_id'] = station_1_id
+        alt_sql_fields.append("`Station_1_ID`=%(station_1_id)s")
+        sql_values['station_2_id'] = station_2_id
+        alt_sql_fields.append("`Station_2_ID`=%(station_2_id)s")
+        sql_values['connection_id'] = connection_id
+        alt_sql_fields.append("`Connection_ID`=%(connection_id)s")
 
         select = Select(self.db_conn)
         column_names = select.read_column_names(table_name)
 
+        print(form_data)
         for k in column_names:
             if not form_data.get(k[0]):
                 continue
@@ -172,6 +246,7 @@ class InsertFactSheet(object):
                 sql_stmt = sql_stmt.replace("(##)", "(%)")
                 sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
 
+                #print(sql_stmt)
                 session.connection().execute(sql_stmt)
                 session.commit()
             except Exception:
@@ -181,6 +256,80 @@ class InsertFactSheet(object):
             session.close()
 
         return 1
+
+    def __insert_generic_module(self, table_name, form_data, description_id, dual=0):
+        """
+        Prepares and saves data for a generic module like _Description,
+        _Location, etc.
+        """
+
+        sql_values = {}
+        sql_fields = []
+        alt_sql_fields = []
+        insert_id = 0
+
+        alt_sql_statement = []
+        sql_statement = []
+        sql_statement.append("INSERT INTO " + table_name + " SET ")
+        alt_sql_statement.append("INSERT INTO " + table_name + " SET ")
+
+        if description_id > 0:
+            sql_fields.append("`Description_ID`=:description_id")
+            sql_values['description_id'] = description_id
+            alt_sql_fields.append("`Description_ID`=%(description_id)s")
+
+        select = Select(self.db_conn)
+        column_names = select.read_column_names(table_name)
+
+        for k in column_names:
+            kk = k[0]
+            if dual > 0:
+                kk = kk + "_stn" + str(dual)
+            if not form_data.get(kk):
+                continue
+            value = form_data.get(kk)
+
+            if kk.find("_ID") < 0 and value:
+                key = k[0]
+                key = key.replace("(", "")
+                key = key.replace(")", "")
+                key = key.replace(":", "")
+                key = key.replace("%", "")
+                sql_fields.append("`" + k[0] + "`=:" + key.lower())
+                alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
+                sql_values[key.lower()] = value.strip()
+
+        sql_statement.append(",".join(sql_fields))
+        alt_sql_statement.append(",".join(alt_sql_fields))
+
+        session = self.db_conn.session
+        try:
+            result = session.execute("".join(sql_statement), sql_values)
+            session.commit()
+            insert_id = result.lastrowid
+        except Exception:
+            try:
+                # may be there is a spl char in the sql stmt
+                # using connection().execute will not quote the sql stmt
+                # and some messy hack is needed to avoid param execution
+                sql_stmt = " ".join(alt_sql_statement)
+                sql_stmt = sql_stmt.replace("(%)", "(##)")
+                sql_stmt = re.sub(r"(\d+)%", "\g<1>##", sql_stmt)
+                sql_stmt = sql_stmt % sql_values
+                sql_stmt = sql_stmt.replace("(##)", "(%)")
+                sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
+
+                #print(sql_stmt)
+                result = session.connection().execute(sql_stmt)
+                session.commit()
+                insert_id = result.lastrowid
+            except Exception:
+                session.rollback()
+                raise
+        finally:
+            session.close()
+
+        return insert_id
 
     def __insert_performance_module(self,
                                     table_name,

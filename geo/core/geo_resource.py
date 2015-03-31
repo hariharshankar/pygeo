@@ -47,6 +47,7 @@ class GeoResource(Html):
             self.__get_ids()
 
         self.type_name = self.main.get_type_name(self.type_id)
+        self.types_with_segments = [19, 20, 24, 25, 26, 27]
 
     def __get_ids(self):
         """
@@ -106,11 +107,15 @@ class GeoResource(Html):
         if self.name:
             return self.name
 
+        name_field = "Name_omit"
+        if self.type_id in self.types_with_segments:
+            name_field = "Name_of_this_Segment"
+
         desc_table = type_name + "_Description"
         desc = self.select.read(desc_table,
-                                columns=["Name_omit"],
+                                columns=[name_field],
                                 where=[["Description_ID", "=",
                                         self.get_latest_revision_id(moderated=False)]]
                                 )
-        self.name = desc.first()['Name_omit']
+        self.name = desc.first()[name_field]
         return self.name

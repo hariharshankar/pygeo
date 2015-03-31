@@ -14,6 +14,7 @@ class Moderation(object):
 
     def __init__(self, db_conn):
         self.db_conn = db_conn
+        self.types_with_segments = [19, 20, 24, 25, 26, 27]
 
     def get_all_resources(self, country_id=0, type_id=0):
         """
@@ -50,6 +51,9 @@ class Moderation(object):
                                       ]
         )
         """
+        name_field = "Name_omit"
+        if type_id in self.types_with_segments:
+            name_field = "Name_of_this_Segment"
 
         select = Select(self.db_conn)
         sql = "SELECT Parent_Plant_ID,Description_ID FROM History WHERE \
@@ -78,11 +82,11 @@ class Moderation(object):
                 resources[did['Parent_Plant_ID']] = did['Description_ID']
 
         names = select.read(type_name + "_Description",
-                            columns=["Description_ID", "Name_omit"],
+                            columns=["Description_ID", name_field],
                             where=[["Description_ID", "in",
                                    list(resources.values())]
                                    ],
-                            order_by=["Name_omit", "ASC"])
+                            order_by=[name_field, "ASC"])
 
 
         values = [name for name in names if name[0] is not None]

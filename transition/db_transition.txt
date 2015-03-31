@@ -146,6 +146,8 @@ ALTER TABLE  `Coal_Description` CHANGE  `Power_Plant_Used_For_enumfield`  `Power
 
 alter table Coal_Environmental_Issues change Description Description text null;
 
+ALTER TABLE  `Gas_Fields_Description` CHANGE  `Field_Overall_Rating_setfield_itf`  `Field_Overall_Rating_setfield_itf` SET(  'State-of-the-art',  'Worth Duplicating', 'Environmentally Responsible' );
+
 /* GAS changes */
 
 alter table Gas_Overlays drop foreign key Gas_Overlays_fk;
@@ -389,6 +391,7 @@ alter table Gas_Fields_Comments drop foreign key Gas_Fields_Comments_fk;
 alter table Gas_Fields_Owners drop foreign key Gas_Fields_Owners_fk;
 alter table Gas_Fields_Unit_Description drop foreign key Gas_Fields_Unit_fk;
 alter table Gas_Fields_Performance drop foreign key Gas_Fields_Performance_ibfk_1;
+alter table Gas_Fields_Contaminants drop foreign key Gas_Fields_Contaminants_Description_fk;
 
 alter table Gas_Fields_Environmental_Issues change Description Description text null;
 
@@ -535,7 +538,7 @@ alter table Gas_Pipelines_Environmental_Issues change Description Description te
 /* Oil_Pipelines_ changes */
 
 alter table Oil_Pipelines_Overlays drop foreign key Oil_Pipelines_Overlays_fk;
-/*alter table Oil_Pipelines_Description drop foreign key Oil_Pipelines_Description_fk;*/
+alter table Oil_Pipelines_Description drop foreign key Oil_Pipelines_Description_ibfk_1;
 alter table Oil_Pipelines_Location drop foreign key Oil_Pipelines_Location_fk;
 alter table Oil_Pipelines_Upgrade drop foreign key Oil_Pipelines_Upgrade_fk;
 alter table Oil_Pipelines_Owner_Details drop foreign key Oil_Pipelines_Owner_Details_fk;
@@ -546,7 +549,9 @@ alter table Oil_Pipelines_Owners drop foreign key Oil_Pipelines_Owners_fk;
 alter table Oil_Pipelines_Performance drop foreign key Oil_Pipelines_Performance_ibfk_1;
 
 alter table Oil_Pipelines_Environmental_Issues change Description Description text null;
+ALTER TABLE Oil_Pipelines_Description DROP PRIMARY KEY;
 
+ALTER TABLE  `Oil_Pipelines_Description` CHANGE  `Pipeline_Overall_Rating_setfield_itf`  `Pipeline_Overall_Rating_setfield_itf` SET(  'State-of-the-art', 'Worth Duplicating',  'Environmentally Responsible' ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL;
 
 
 /* Coal_Ports_ changes */

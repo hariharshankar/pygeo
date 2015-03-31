@@ -367,6 +367,94 @@ Form = {
         $(".performance-values").scrollLeft(2868);
     },
 
+    addNuclearPerformanceUnit: function() {
+        var numberOfUnits = +$("#numberOfNuclear_Unit_Description").val() - 1;
+        var vals = $($(".performance-values .odd-row")[0]).html();
+        vals = vals.replace(/value="[a-z0-9.]*"/g, "value=''");
+        $(".performance-label .perf-row").each( function(rowIndex, v) {
+            if ($(this).text() == "Gigawatt Hours Generated " + numberOfUnits 
+                || $(this).text() == "Capacity Generated " + numberOfUnits) {
+                var ele = $(this).html();
+                ele = ele.split(numberOfUnits).join(numberOfUnits+1);
+
+                $(ele).insertAfter(this);
+                vals = vals.split("_" + numberOfUnits + "_").join("_" + numberOfUnits+1 + "_");
+                $(vals).insertAfter($(".performance-values").children()[rowIndex]);
+            }
+        });
+        
+
+
+    },
+    addSingleRow: function(ele) {
+        $(ele).parent().children().each( function() {
+            if ($(this)[0].tagName.toLowerCase() == "table") {
+                var parentTable = $(this); 
+                var newRow = $(parentTable).find(".single-rows").last().html();
+                newRow = "<tr>" + newRow + "</tr>";
+
+                var index = 0;
+                $(parentTable).children().first().children().each( function() {
+                    if ($(this).attr && $(this).attr("type") == "hidden") {
+                        index = parseInt($(this).attr("value")) + 1;
+                        $(this).attr("value", index.toString());
+                    }
+                });
+                var n = "";
+                for (var i=0, c; c=$(newRow).children()[i]; i++) {
+                    if ($(c).children().length > 0) {
+                        var t = $(c).children().first();
+                        $(t).attr("value", "");
+                        if ($(t).attr("name")) {
+                            var elementName = $(t).attr("name").split("_###_")[0] + "_###_" + index;
+                            $(t).attr("name", elementName);
+                            $(t).attr("id", elementName);
+                            n += "<td>" + $(t)[0].outerHTML + "</td>";
+                        }
+                    }
+                    else if (i == 1) {
+                        n += "<td>" + index + "</td>";
+                    }
+                }
+
+                $("<tr class='single-rows'>"+n+"</tr>").insertAfter($(parentTable).find(".single-rows").last());
+            }
+        });
+        if ($("#Type_ID").val() == "5") {
+            Form.addNuclearPerformanceUnit();
+        }
+    },
+    removeSingleRow: function(ele) {
+                $(ele).parent().parent().find(".single-rows").each( function() {
+                    if ($(this).children().first().children().first()[0].checked) {
+                        $(this).parent().parent().children().first().children().each( function() {
+                            if ($(this).attr && $(this).attr("type") == "hidden") {
+                                var v = parseInt($(this).attr("value")) - 1;
+                                $(this).attr("value", v.toString());
+                            }
+                        });
+                        $(this).remove();
+                    }
+                });
+                var i =0;
+                $(ele).parent().parent().find(".single-rows").each( function() {
+                    i++;
+                    var k=0;
+                    $(this).children().each( function() {
+                        k++;
+                        var el = $(this).children().first();
+                        var id = el.attr("id");
+                        if (id && id.search("_###_") > 0) {
+                            el.attr("id", id.split("_###_")[0] + "_###_" + i);
+                            el.attr("name", id.split("_###_")[0] + "_###_" + i);
+                        }
+                        else if (k == 2) {
+                            el.context.innerHTML = i;
+                        }
+                    });
+                });
+            },
+
     init: function() {
 
         $("#submit").button().center();
@@ -416,74 +504,15 @@ Form = {
             .button()
             .click(function(event) {
                 event.preventDefault();
-                $(this).parent().children().each( function() {
-                    if ($(this)[0].tagName.toLowerCase() == "table") {
-                        var parentTable = $(this) 
-                        var newRow = $(parentTable).find(".single-rows").last().html()
-                        newRow = "<tr>" + newRow + "</tr>"
-                        
-                        var index = 0;
-                        $(parentTable).children().first().children().each( function() {
-                            if ($(this).attr && $(this).attr("type") == "hidden") {
-                                index = parseInt($(this).attr("value")) + 1
-                                $(this).attr("value", index.toString())
-                            }
-                        })
-                        var n = ""
-                        for (var i=0, c; c=$(newRow).children()[i]; i++) {
-                            if ($(c).children().length > 0) {
-                                var t = $(c).children().first()
-                                $(t).attr("value", "")
-                                if ($(t).attr("name")) {
-                                    var elementName = $(t).attr("name").split("_###_")[0] + "_###_" + index
-                                    $(t).attr("name", elementName)
-                                    $(t).attr("id", elementName)
-                                    n += "<td>" + $(t)[0].outerHTML + "</td>"
-                                }
-                            }
-                            else if (i == 1) {
-                                n += "<td>" + index + "</td>"
-                            }
-                        }
-
-                        $("<tr class='single-rows'>"+n+"</tr>").insertAfter($(parentTable).find(".single-rows").last())
-                    }
-                })
-            })
+                Form.addSingleRow(this);
+            });
 
 
         $(".remove-single-row-button")
             .button()
             .click(function(event) {
                 event.preventDefault();
-                $(this).parent().parent().find(".single-rows").each( function() {
-                    if ($(this).children().first().children().first()[0].checked) {
-                        $(this).parent().parent().children().first().children().each( function() {
-                            if ($(this).attr && $(this).attr("type") == "hidden") {
-                                var v = parseInt($(this).attr("value")) - 1
-                                $(this).attr("value", v.toString())
-                            }
-                        })
-                        $(this).remove()
-                    }
-                })
-                var i =0
-                $(this).parent().parent().find(".single-rows").each( function() {
-                    i++
-                    var k=0;
-                    $(this).children().each( function() {
-                        k++
-                        var ele = $(this).children().first()
-                        var id = ele.attr("id")
-                        if (id && id.search("_###_") > 0) {
-                            ele.attr("id", id.split("_###_")[0] + "_###_" + i)
-                            ele.attr("name", id.split("_###_")[0] + "_###_" + i)
-                        }
-                        else if (k == 2) {
-                            ele.context.innerHTML = i
-                        }
-                    })
-                })
+                Form.removeSingleRow(this);
             });
         Map.init(true);
         Form.initPerformance();
@@ -1216,20 +1245,27 @@ Map = {
             $.each(data.locations, function(location) {
                 var lat,lng,name;
                 if (data.locations[location][0] != undefined) {
-                    lat = data.locations[location][0]
-                    lng = data.locations[location][1]
-                    name = data.locations[location][2]
+                    lat = data.locations[location][0];
+                    lng = data.locations[location][1];
+                    name = data.locations[location][2];
                 }
                 else {
-                    lat = data.locations[location]['lat']
-                    lng = data.locations[location]['lng']
+                    lat = data.locations[location]['lat'];
+                    lng = data.locations[location]['lng'];
+
+                    var lat_end = null;
+                    var lng_end = null;
+                    if (data.locations[location]['lat_end'] != undefined) {
+                        lat_end = data.locations[location]['lat_end'];
+                        lng_end = data.locations[location]['lng_end'];
+                    }
 
                     // drawing saved overlays
-                    name = data.locations[location]['name']
+                    name = data.locations[location]['name'];
                     if (data.locations[location]['overlays'] != null) {
                         if (data.locations[location]['overlays'].length > 0) {
-                            var overlays = data.locations[location]['overlays']
-                            Map.drawSavedOverlays(overlays)
+                            var overlays = data.locations[location]['overlays'];
+                            Map.drawSavedOverlays(overlays);
                         }
                     }
                 }
@@ -1253,6 +1289,20 @@ Map = {
                     }
                 })(marker, location));
 
+                if (lat_end != null) {
+                    Map.showLatLng(lat_end, lng_end)
+                    marker_end = new google.maps.Marker({
+                        position: new google.maps.LatLng(lat_end,lng_end),
+                        map: Map.map
+                    });
+                    google.maps.event.addListener(marker_end, 'click', (function(marker_end, location) {
+                        return function() {
+                            var infoWindow = new google.maps.InfoWindow();
+                            infoWindow.setContent(name);
+                            infoWindow.open(Map.map, marker_end)
+                        }
+                    })(marker_end, location));
+                }
             });
         
         },
@@ -1265,11 +1315,21 @@ Map = {
         $.getJSON($("#map_json").attr("value"), function(data) {
             Map.plotOverlays(data, showDrawingTools);
         });
-        /*
         $.getJSON($("#ai_map_json").attr("value"), function(data) {
-            Map.plotOverlays(data, showDrawingTools);
+            //Map.plotOverlays(data, false, true);
+            data = data.data.locations[0]
+                    lat = data['lat']
+                    lng = data['lng']
+
+                    // drawing saved overlays
+                    name = data['name']
+                    if (data['overlays'] != null) {
+                        if (data['overlays'].length > 0) {
+                            var overlays = data['overlays']
+                            Map.drawSavedOverlays(overlays)
+                        }
+                    }
         });
-        */
     }
 }
 
