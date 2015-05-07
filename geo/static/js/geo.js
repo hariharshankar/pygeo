@@ -455,6 +455,20 @@ Form = {
                 });
             },
 
+    createAbstract: function() {
+        var abstract = "";
+        abstract += $("#Name_omit").val();
+        abstract += " is located at ";
+        abstract += $("#Location").val();
+        abstract += ". It's location coordinates are: ";
+        abstract += "Latitude = " + $("#Latitude_Start").val() + ", Longitude = " + $("#Longitude_Start").val() + ". ";
+        abstract += "This infrastructure is of TYPE " + $("#Type_Name").val();
+        abstract += " with a design capacity of " + " MWe. ";
+        abstract += "It is operated by " + $("#Operating_Company").val() + ".";
+
+        $("#Abstract_module").text(abstract);
+    },
+
     init: function() {
 
         $("#submit").button().center();
@@ -1167,13 +1181,24 @@ Map = {
             for (var p=0; p<points.length; p++) {
                 pointsArray.push(new google.maps.LatLng(points[p][0], points[p][1]))
             }
-            Map.overlaysArray[Map.overlaysCount] = new google.maps.Polygon({
-                path: pointsArray,
-                fillColor: overlays[o].color,
-                fillOpacity: Map.mapOpacity,
-                strokeWeight: Map.mapStrokeWeight,
-                map: Map.map
-            })
+            if (overlay.overlayType == "Polygon") {
+                Map.overlaysArray[Map.overlaysCount] = new google.maps.Polygon({
+                    path: pointsArray,
+                    fillColor: overlays[o].color,
+                    fillOpacity: Map.mapOpacity,
+                    strokeWeight: Map.mapStrokeWeight,
+                    map: Map.map
+                });
+            }
+            else {
+                Map.overlaysArray[Map.overlaysCount] = new google.maps.Polyline({
+                    path: pointsArray,
+                    strokeColor: overlays[o].color,
+                    strokeOpacity: 1.0,
+                    strokeWeight: 3,
+                    map: Map.map
+                });
+            }
             var overlayNumber = parseInt(o) + 1
             Map.addOverlayEvents(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber)
             Map.updateOverlayData(Map.overlaysArray[Map.overlaysCount], overlays[o].overlayType, overlayNumber, overlays[o].overlayName)
@@ -1189,6 +1214,7 @@ Map = {
         html += "<br/>"
 
         $("#overlay-details").prepend(html)
+        Form.createAbstract();
     },
 
     plotOverlays: function(data, showDrawingTools) {

@@ -200,7 +200,10 @@ class Main(object):
                                              [country_id[0]
                                               for country_id in country_ids]]]
                                      )
-        return keys, [list(country) for country in countries.fetchall()]
+
+        print(countries)
+        country_list = countries.fetchall()
+        return keys, [list(country) for country in country_list]
 
     def get_states(self, country):
         """

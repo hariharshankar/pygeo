@@ -56,8 +56,11 @@ class Html(object):
 
         html = []
 
+        module_names.append("Notes")
+        module_names.insert(0, "Abstract")
+
         for module in module_names:
-            module_id = module
+            module_id = module + "_module"
             module_heading = Html.__make_readable(module)
 
             print(module)
@@ -80,7 +83,11 @@ class Html(object):
         Invokes the appropriate methods to build the module.
         """
 
-        if feature.startswith("Unit_"):
+        if feature == "Abstract":
+            return "generic-module", self.__create_abstract_module()
+        elif feature == "Notes":
+            return "generic-module", self.__create_notes_module()
+        elif feature.startswith("Unit_"):
             return "single-row-module", self.__make_unit_module(feature)
         elif feature == "Location" or feature == "Dual_Node_Locations":
             return "generic-module", self.__make_location_module()
@@ -115,6 +122,13 @@ class Html(object):
         elif feature == "Dual_Node_Description":
             return "generic-module", self.__make_description_with_segments()
         return "", ""
+
+    def __create_abstract_module(self):
+
+        return "abstract"
+
+    def __create_notes_module(self):
+        return "notes"
 
     def __make_description_with_segments(self):
         """

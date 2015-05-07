@@ -1,0 +1,187 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui-1.10.2.custom/css/custom-theme/jquery-ui-1.10.2.custom.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/geo.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='chosen_v1.0.0/chosen.min.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-1.9.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='chosen_v1.0.0/chosen.jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sha1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/geo.js') }}"></script>
+    <script>
+        $( function() {
+            $( "#account_info" ).hide();
+            $( "#login_page" ).hide();
+            //$( "#energy_resources_type" ).hide().menu();
+            /*
+            $( "#energy_resources" ).button()
+            .click( function() {
+                window.location = "/resources/";
+            });
+            .click( function() {
+                var menu = $("#energy_resources_type").show().position({
+                    my: "right top",
+                    at: "right bottom",
+                    of: this
+                });
+                $( document ).one("click", function() {
+                    menu.hide();
+                });
+                return false;
+            });
+            $( "#home" ).button()
+            .click( function() {
+                window.location = "/";
+            });
+            $( "#country_summary" ).button()
+            .click( function() {
+                window.location = "/summary/country/";
+            });
+            $( "#type_summary" ).button()
+            .click( function() {
+                window.location = "/summary/type/";
+            });
+            $( "#analyze" ).button()
+            .click( function() {
+                window.location = "/analyze/";
+            });
+            $( "#map_data" ).button()
+            .click( function() {
+                window.location = "/map/";
+            });
+            */
+            //$( "#download_data" ).button();
+            $( "#moderation" ).button()
+            .click( function() {
+                window.location = "/moderation";
+            });
+
+            if( $("#logged_username").val() != null ) {
+                showAccountMenu()
+            }
+            else {
+                showLoginMenu()
+            }
+
+            Search.init();
+        });
+
+        function showLoginMenu() {
+            $("#account_info").hide();
+            $("#login_page").show();
+
+            $("#login_submit")
+                .button()
+                .click( function() {
+                    info = {}
+                    info['username'] = $("#username").val()
+                    info['password'] = SHA1( $("#password").val() )
+                    $.post( "{{ url_for('user.login') }}", info,  function(data) {
+                        if (data['data']['error']) {
+                            $("#login_message")
+                            .text("Error: Invalid username or password.")
+                            .addClass("ui-state-error")
+                        }
+                        else {
+                            t = "Logged in successfully. Welcome <b>" + data['data']['fullname'] +"</b>!"
+                            $("#login_message")
+                                .html(t)
+                                .addClass("ui-state-highlight");
+                            location.reload();
+                        }
+                    });
+                });
+        }
+
+        function showAccountMenu() {
+            $("#login_page").hide()
+            $("#account_info").show()
+        }
+
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</head>
+<body onload="{% block body_onload %}{% endblock %}">
+    <div id="header">
+        <a href="{{ url_for('index.home') }}" alt="Home" title="Home">
+            <img src="{{ url_for('static', filename='img/geo_logo.png') }}" class="logo"/>
+        </a>
+        <div id="toolbar" class="ui-widget-header ui-corner-all">
+            <a id="home" href="/">Home</a>
+            |
+            <a id="energy_resources" href="/resources/">List of Data Pages</a>
+            |
+            <a id="country_summary" href="/summary/country/">Summary by Country</a>
+            |
+            <a id="type_summary" href="/summary/type/">Summary by Type</a>
+            |
+            <a id="map_data" href="/map/">Map Data</a>
+            <!--
+            |
+            <button id="analyze" name="analyze">analyze</button>
+            -->
+        </div>
+    </div>
+    <div id="wrapper">
+        <div id="leftPane">
+            <div class='leftPane-module-container'>
+                    <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
+            </div>
+            <div class='leftPane-module-container'>
+                <div class="leftPane-header">
+                    <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                    <h3>Login</h3>
+                </div>
+                <div id="leftPane-login" class='leftPane-module'>
+                    <div id="login_page">
+                        <fieldset>
+                            <label for="username">Username:</label>
+                            <input type="text" size="10" id="username" name="username" class="text ui-widget-content ui-corner-all"/>
+                            <label for="password">Password:</label>
+                            <input type="password" size="10" id="password" name="password" class="text ui-widget-content ui-corner-all"/>
+                        </fieldset>
+                        <button id="login_submit" style="margin: 5px;">Login</button>
+                        <div id="login_message" style="padding: 5px;"></div>
+                    </div>
+                    <div id="account_info">
+                        {% if session.username %}
+                        <input type="hidden" id="logged_username" name="logged_username" value={{session.username}} />
+                        <input type="hidden" id="logged_fullname" name="logged_fullname" value={{session.fullname}} />
+                        <input type="hidden" id="logged_user_id" name="logged_user_id" value={{session.user_id}} />
+                        <div style="padding-bottom: 5px; padding-top: 5px;">Logged in as <b>{{session.username}}</b></div>
+                        <a href="{{ url_for('user.logout', next=request.url) }}">Logout</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div id="helpful-links">
+                <h3>Helpful Links</h3>
+                <a href="/moderation">Submissions awaiting moderation</a>
+                <a href="/partners">Partners and collaborators</a>
+            </div>
+            {% block user_pref %}{% endblock %}
+        </div>
+        <div id="content">
+            <div class="leftPane-header">
+                <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                <h3>Search and Populate</h3>
+            </div>
+            <div id="searchLeftPane" class="leftPane-module">
+                <div id='searchDatabase_Type' class='searchSelectable'></div>
+                <div id='searchType' class='searchSelectable'></div>
+                <div id='searchCountry' class='searchSelectable'></div>
+                <div id='searchState' class='searchSelectable'></div>
+                <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
+
+            </div>
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

@@ -7,6 +7,7 @@ import flask
 from geo.db import connection
 import geo.views.form as form
 import geo.views.resources as resources
+import geo.views.new_resources as new_resources
 import geo.views.moderation as moderation
 import geo.views.moderation_submit as moderationsubmit
 import geo.views.map
@@ -33,6 +34,7 @@ conn = connection.Db()
 
 form.db = conn
 resources.db = conn
+new_resources.db = conn
 menu.db = conn
 geo.views.map.db = conn
 location.db = conn
@@ -49,6 +51,7 @@ moderationsubmit.db = conn
 # html
 app.register_blueprint(form.mod)
 app.register_blueprint(resources.mod)
+app.register_blueprint(new_resources.mod)
 app.register_blueprint(moderation.mod)
 app.register_blueprint(geo.views.map.mod)
 app.register_blueprint(formsubmit.mod)
