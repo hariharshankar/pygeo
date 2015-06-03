@@ -7,15 +7,12 @@ mod = flask.Blueprint("new_resources", __name__)
 
 
 @mod.route("/new_resources/")
-@mod.route("/new_resources/<string:db_type>/<int:typ>/<int:country>/<int:state>")
 def view(db_type=None, typ=None, country=None, state=None):
 
     """
-    if not typ or not country:
-        typ = flask.request.args.get("type", 0)
-        country = flask.request.args.get("country", 0)
-        state = flask.request.args.get("state", 0)
-
+    if not typ or not country or not state:
+        # TODO handle error with message
+        return flask.abort(404)
 
     main = Main(db)
 

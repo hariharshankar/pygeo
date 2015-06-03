@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
     <meta charset="utf-8" />
-    <title>{% block title %}{% endblock %}</title>
+    <title>Create new energy resources</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='jquery-ui-1.10.2.custom/css/custom-theme/jquery-ui-1.10.2.custom.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/geo.css') }}">
@@ -170,14 +170,16 @@
         <div id="content">
             <div class="leftPane-header">
                 <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
-                <h3>Search and Populate</h3>
+                <h3>Choose an energy resource type, country and state</h3>
             </div>
             <div id="searchLeftPane" class="leftPane-module">
                 <div id='searchDatabase_Type' class='searchSelectable'></div>
                 <div id='searchType' class='searchSelectable'></div>
                 <div id='searchCountry' class='searchSelectable'></div>
                 <div id='searchState' class='searchSelectable'></div>
-                <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
+                <div class='searchUpdateButton' id='searchUpdateButton'>
+                    <button id='createResource' class='createResource'>Create</button>
+                </div>
 
             </div>
             {% block content %}{% endblock %}

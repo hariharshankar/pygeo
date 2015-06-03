@@ -171,7 +171,7 @@ class Main(object):
 
         return keys, [list(typ) for typ in types.fetchall()]
 
-    def get_countries(self, typ):
+    def get_countries(self, typ, new_resource=False):
         """
         Returns all the countries that has data for the given type.
 
@@ -188,11 +188,19 @@ class Main(object):
         if not type_id:
             return
 
+        keys = ["Country_ID", "Country"]
+
+        # if a new resource, return all the countries.
+        if new_resource:
+            countries = self.select.read("Country",
+                                            columns=["Country_ID", "Country"])
+            country_list = countries.fetchall()
+            return keys, [list(country) for country in country_list]
+
         country_ids = self.select.read("History",
                                        columns=["distinct(Country_ID)"],
                                        where=[["Type_ID", "=", type_id]]
                                        )
-        keys = ["Country_ID", "Country"]
 
         countries = self.select.read("Country",
                                      columns=["Country_ID", "Country"],
@@ -201,11 +209,11 @@ class Main(object):
                                               for country_id in country_ids]]]
                                      )
 
-        print(countries)
+        #print(countries)
         country_list = countries.fetchall()
         return keys, [list(country) for country in country_list]
 
-    def get_states(self, country):
+    def get_states(self, country, new_resource=False):
         """
         Returns all the states for a country.
 

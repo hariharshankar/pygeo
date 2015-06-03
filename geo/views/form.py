@@ -7,6 +7,7 @@ mod = flask.Blueprint("form", __name__)
 db = None
 
 
+@mod.route("/create_resources/")
 @mod.route("/form.php")
 @mod.route("/geoid/<int:description_id>", endpoint='factsheet')
 def view(description_id=None):

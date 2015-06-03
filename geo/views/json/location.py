@@ -23,10 +23,9 @@ def view():
 
     if desc_id > 0:
         return flask.jsonify(data=loc.for_one_resource(description_id=description_id))
-    elif typ > 0 and country > 0:
+    elif int(typ) > 0 and int(country) > 0:
         return flask.jsonify(data=loc.for_many_resources(type_id=typ, country_id=country))
     else:
-        bound_location = None
         main = Main(db)
         prefs = main.get_user_pref()
         country_name = main.get_country_name(prefs[2])

@@ -156,7 +156,10 @@ Search = {
         var url = $("#jsonListService").attr("value")
         var data = {}
 
-        data["return_type"] = type.toLowerCase()
+        data["return_type"] = type.toLowerCase();
+        if (Geo.getPageUrl().search("/new_resources/") >= 0) {
+            data['new_resources'] = true;
+        }
 
         $(t).prevAll('.searchSelectable').each( function(index) {
 
@@ -190,6 +193,23 @@ Search = {
 
         
         Search.createSelectables($(".searchSelectable").first())
+
+        $("#createResource")
+        .button()
+        .click (function(event) {
+            event.preventDefault()
+            params = Search.getUserValues()
+            base_url = Geo.getPageUrl()
+            
+            b = base_url.replace("http://", "").split('/')
+            url = "http://" + b[0] + "/";
+
+            url += "new_resources";
+            if (['type', 'country'].indexOf(b[2]) >= 0) {
+                url += "/" + b[2];
+            }
+            window.location.href = url + params
+        });
 
         $("#updateSearch")
         .button()
