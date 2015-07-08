@@ -2,7 +2,8 @@
 Builds the HTML representation for the fact sheets.
 """
 
-#from geo.core.geo_resource import GeoResource
+from geo.core.geo_resource import GeoResource
+from geo.core.main import Main
 #from geo.db import connection
 
 class Html(object):
@@ -10,37 +11,27 @@ class Html(object):
     Builds the HTML representation for the fact sheets.
     """
 
-    def __init__(self):
-        self.description_id = 0
-        self.select = None
-        self.type_id = 0
-        self.state_id = 0
-        self.country_id = 0
-        self.type_name = None
-        self.parent_plant_id = 0
+    def __init__(self, resource):
+        self.resource = resource
 
     def generate_editable(self):
         """
         Creates an html form using the resource data.
         """
 
-        html = []
-        #if int(self.description_id) > 0:
-        html = self.__generate_resource_modules()
-
-        return html
+        return self.__generate_resource_modules()
 
     def __generate_resource_modules(self):
         """
         Handles creating the appropriate module representation.
         """
 
-        res_modules = self.select.read("Type_Features",
-                                       where=[["Type_ID", "=", self.type_id]]
+        res_modules = self.resource.select.read("Type_Features",
+                                       where=[["Type_ID", "=", self.resource.type_id]]
                                        )
         modules = res_modules.first()
         module_names = []
-        full_feature_list = self.select.read_column_names("Type_Features", where='Features')[0][1]
+        full_feature_list = self.resource.select.read_column_names("Type_Features", where='Features')[0][1]
 
         if type(modules.Features) == str:
             module_names = modules.Features.split(',')
@@ -106,13 +97,13 @@ class Html(object):
             owner.append(self.__make_single_row_module("Owners"))
             return "single-row-module", "".join(owner)
         elif feature.startswith("Associated_Infrastructure"):
-            return "", ""
+            return "generic-module", self.__create_associated_infrastructure()
         elif feature.startswith("History"):
             return "", ""
         elif feature.startswith("Description"):
             description = []
             description.append(self.__make_generic_module(feature=feature))
-            if self.type_id == 11:
+            if self.resource.type_id == 11:
                 description.append(self.__make_enum_table_row("Contaminants"))
             return "generic-module", "".join(description)
         elif feature == "Refinery_Products":
@@ -122,6 +113,38 @@ class Html(object):
         elif feature == "Dual_Node_Description":
             return "generic-module", self.__make_description_with_segments()
         return "", ""
+
+    def __create_associated_infrastructure(self):
+
+        html = []
+
+        result = self.resource.select.read("Associated_Infrastructure",
+                                  where=[["Parent_Plant_ID",
+                                          "=",
+                                          self.resource.parent_plant_id]]
+                                  )
+
+        keys = result.keys()
+        values = result.fetchall()
+        for value in values:
+            ai_parent_plant_id = value[keys.index("Associated_Parent_Plant_ID")]
+
+            ai_res = GeoResource(self.resource.connection, description_id=ai_parent_plant_id)
+
+            html.append("<b><a href=\"geoid/%s\" target=\"_blank\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
+                                                                                ai_res.get_resource_name()))
+
+        html.append('<div id="searchLeftPane" class="leftPane-module">')
+        html.append("<div id='searchDatabase_Type' class='searchSelectable'></div>")
+        html.append("<div id='searchType' class='searchSelectable'></div>")
+        html.append("<div id='searchCountry' class='searchSelectable'></div>")
+        html.append("<div id='searchState' class='searchSelectable'></div>")
+        #html.append("<div class='searchUpdateButton' id='searchUpdateButton'>")
+        #html.append("<button id='createResource' class='createResource'>Create</button>")
+        #html.append("</div>")
+
+        html.append("</div>")
+        return "".join(html)
 
     def __create_abstract_module(self):
 
@@ -137,10 +160,10 @@ class Html(object):
         """
 
         html = []
-        desc_result = self.select.read(self.type_name + "_Description",
+        desc_result = self.resource.select.read(self.resource.type_name + "_Description",
                                        where=[["Description_ID",
                                                "=",
-                                               self.description_id]]
+                                               self.resource.description_id]]
                                         )
         values = desc_result.fetchone()
         station_1_id = values[1]
@@ -150,16 +173,16 @@ class Html(object):
 
         html.append("<h2>Station A</h2>")
         html.append(self.__make_generic_module(feature=None,
-                                               table_name=self.type_name + "_Station_Description",
+                                               table_name=self.resource.type_name + "_Station_Description",
                                                _id=("Station_ID", station_1_id), dual=1))
 
-        html.append("<h2>" + str(self.type_name) + "</h2>")
+        html.append("<h2>" + str(self.resource.type_name) + "</h2>")
         html.append(self.__make_generic_module(feature=None,
-                                               table_name=self.type_name + "_Connection_Description",
+                                               table_name=self.resource.type_name + "_Connection_Description",
                                                _id=("Connection_ID", connection_id)))
         html.append("<h2>Station B</h2>")
         html.append(self.__make_generic_module(feature=None,
-                                               table_name=self.type_name + "_Station_Description",
+                                               table_name=self.resource.type_name + "_Station_Description",
                                                _id=("Station_ID", station_2_id), dual=2))
 
         return "".join(html)
@@ -171,10 +194,10 @@ class Html(object):
         """
 
         html = []
-        result = self.select.read("Wind_Potential_Height",
+        result = self.resource.select.read("Wind_Potential_Height",
                                   where=[["Description_ID",
                                           "=",
-                                          self.description_id]]
+                                          self.resource.description_id]]
         )
 
         keys = result.keys()
@@ -225,12 +248,12 @@ class Html(object):
             return
         html = []
         if not table_name:
-            table_name = self.type_name + "_" + feature
+            table_name = self.resource.type_name + "_" + feature
 
-        result = self.select.read(table_name,
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID" if not _id else _id[0],
                                           "=",
-                                          self.description_id if not _id else _id[1]]]
+                                          self.resource.description_id if not _id else _id[1]]]
                                   )
 
         keys = result.keys()
@@ -256,11 +279,11 @@ class Html(object):
         Builds multi column modules like unit description.
         """
 
-        table_name = self.type_name + "_" + feature
-        result = self.select.read(table_name,
+        table_name = self.resource.type_name + "_" + feature
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                          "=",
-                                         self.description_id]]
+                                         self.resource.description_id]]
                                   )
         keys = result.keys()
         values = result.fetchall()
@@ -279,7 +302,7 @@ class Html(object):
         :param field_name:
         :return:
         """
-        enum_result = self.select.read_column_names(table_name, where=field_name)
+        enum_result = self.resource.select.read_column_names(table_name, where=field_name)
 
         # the result object is a list of tuples.
         # the tuple looks like (feature, values)
@@ -312,12 +335,12 @@ class Html(object):
         :return:
         """
 
-        table_name = self.type_name + "_" + feature
+        table_name = self.resource.type_name + "_" + feature
 
-        result = self.select.read(table_name,
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                           "=",
-                                          self.description_id]]
+                                          self.resource.description_id]]
         )
 
         keys = result.keys()
@@ -364,14 +387,14 @@ class Html(object):
                     "name='map_json' ",
                     "id='map_json' ",
                     "value='/location?description_id="
-                     + str(self.description_id) + "' ",
+                     + str(self.resource.description_id) + "' ",
                      "class='widget_urls' />"])
 
-        ai_result = self.select.read("Associated_Infrastructure",
+        ai_result = self.resource.select.read("Associated_Infrastructure",
                                      columns=["Associated_Parent_Plant_ID"],
                                      where=[["Parent_Plant_ID",
                                              "=",
-                                             self.parent_plant_id]])
+                                             self.resource.parent_plant_id]])
 
         ai_parent_plant_ids = ai_result.fetchall()
 
@@ -380,7 +403,7 @@ class Html(object):
             where = [["Parent_Plant_ID", "=", ai_id]]
             where.extend([["and"], ["Accepted", "=", "1"]])
 
-            desc_id_result = self.select.read("History", columns=["max(Description_ID)"],
+            desc_id_result = self.resource.select.read("History", columns=["max(Description_ID)"],
                                    where=where)
 
             res = desc_id_result.first()
@@ -399,11 +422,11 @@ class Html(object):
         Makes the identifier module.
         """
 
-        table_name = self.type_name + "_Description"
-        result = self.select.read(table_name,
+        table_name = self.resource.type_name + "_Description"
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                          "=",
-                                         self.description_id]]
+                                         self.resource.description_id]]
                                   )
 
         keys = result.keys()
@@ -414,31 +437,31 @@ class Html(object):
         html.extend(["<input type='hidden' ",
                     "name='Description_ID' ",
                     "id='Description_ID' ",
-                    "value='" + str(self.description_id) + "'",
+                    "value='" + str(self.resource.description_id) + "'",
                      "/>"
                      ])
         html.extend(["<input type='hidden' ",
                     "name='Type_ID' ",
                     "id='Type_ID' ",
-                    "value='" + str(self.type_id) + "' ",
+                    "value='" + str(self.resource.type_id) + "' ",
                      "/>"
                      ])
         html.extend(["<input type='hidden' ",
                     "name='Country_ID' ",
                     "id='Country_ID' ",
-                    "value='" + str(self.country_id) + "' ",
+                    "value='" + str(self.resource.country_id) + "' ",
                      "/>"
                      ])
         html.extend(["<input type='hidden' ",
                     "name='State_ID' ",
                     "id='State_ID' ",
-                    "value='" + str(self.state_id) + "' ",
+                    "value='" + str(self.resource.state_id) + "' ",
                      "/>"
                      ])
         html.extend(["<input type='hidden' ",
                      "name='Type_Name' ",
                      "id='Type_Name' ",
-                     "value='" + self.type_name + "' ",
+                     "value='" + self.resource.type_name + "' ",
                      "/>"
         ])
         html.append("<table>")
@@ -468,43 +491,43 @@ class Html(object):
         keys = []
         values = []
 
-        table_name = self.type_name + "_Performance"
-        result = self.select.read(table_name,
+        table_name = self.resource.type_name + "_Performance"
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                          "=",
-                                         self.description_id]]
+                                         self.resource.description_id]]
                                   )
 
         keys.extend(result.keys())
         values.extend(result.fetchall())
 
-        if self.type_id == 5:
+        if self.resource.type_id == 5:
 
-            units_number_result = self.select.read(self.type_name + "_Unit_Description",
+            units_number_result = self.resource.select.read(self.resource.type_name + "_Unit_Description",
                                                    columns=["count(Description_ID)"],
                                                    where=[["Description_ID",
                                                            "=",
-                                                           self.description_id]])
+                                                           self.resource.description_id]])
 
             number_of_units = units_number_result.fetchall()[0][0]
 
             cap_gen_table_name = "Nuclear_Capacity_Generated"
             gwh_table_name = "Nuclear_Gigawatt_Hours_Generated"
 
-            cap_gen_result = self.select.read(cap_gen_table_name,
+            cap_gen_result = self.resource.select.read(cap_gen_table_name,
                                               columns=["Unit_Description_ID", "Year_yr", "Capacity_Generated_nbr"],
                                               where=[["Description_ID",
                                                       "=",
-                                                      self.description_id]],
+                                                      self.resource.description_id]],
                                               order_by=["Unit_Description_ID", "asc"]
             )
             keys, values = self.__format_nuclear_performance_data(keys, values, cap_gen_result.keys(), cap_gen_result.fetchall(), number_of_units)
 
-            gwh_result = self.select.read(gwh_table_name,
+            gwh_result = self.resource.select.read(gwh_table_name,
                                           columns=["Unit_Description_ID", "Year_yr", "Gigawatt_Hours_Generated_nbr"],
                                           where=[["Description_ID",
                                                   "=",
-                                                  self.description_id]],
+                                                  self.resource.description_id]],
                                           order_by=["Unit_Description_ID", "asc"]
             )
             keys, values = self.__format_nuclear_performance_data(keys, values, gwh_result.keys(), gwh_result.fetchall(), number_of_units)
@@ -686,11 +709,11 @@ class Html(object):
         """
 
         html = []
-        table_name = self.type_name + "_" + feature
-        result = self.select.read(table_name,
+        table_name = self.resource.type_name + "_" + feature
+        result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                          "=",
-                                         self.description_id]]
+                                         self.resource.description_id]]
                                   )
         keys = result.keys()
         values = result.fetchall()
@@ -719,7 +742,7 @@ class Html(object):
             self.__create_spreadsheet_row(
                 unit_keys,
                 unit_values,
-                self.type_name + "_" + feature,
+                self.resource.type_name + "_" + feature,
                 "unit")
         )
         html.append("</table>")
@@ -731,7 +754,7 @@ class Html(object):
                 self.__create_spreadsheet_row(
                     control_keys,
                     control_values,
-                    self.type_name + "_" + feature,
+                    self.resource.type_name + "_" + feature,
                     "unit_control")
             )
             html.append("</table>")
@@ -934,7 +957,7 @@ class Html(object):
 
         columns = ["`" + t_name + "_ID`", "`" + t_name + "`"]
 
-        result = self.select.read("`" + t_name + "`", columns=columns)
+        result = self.resource.select.read("`" + t_name + "`", columns=columns)
         values = result.fetchall()
 
         if dual > 0:
@@ -961,7 +984,7 @@ class Html(object):
         """
         Creates a set field.
         """
-        result = self.select.read_column_names(table_name, where=key)
+        result = self.resource.select.read_column_names(table_name, where=key)
 
         enum_value = result[0][1].replace("set(", "")
         enum_value = enum_value[:-1]
@@ -990,7 +1013,7 @@ class Html(object):
         Creates enum field for drop down menus.
         """
         db_key = key.split("_###_")[0]
-        result = self.select.read_column_names(table_name, where=db_key)
+        result = self.resource.select.read_column_names(table_name, where=db_key)
 
         # the result object is a list of tuples.
         # the tuple looks like (db_key, values)

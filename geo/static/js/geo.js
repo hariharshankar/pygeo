@@ -379,7 +379,7 @@ Form = {
                                             - $(".performance-label").width()
                                            - 20); 
         */
-        $(".performance-values").width($("#Annual_Performance").width() 
+        $(".performance-values").width($("#Annual_Performance_module").width() 
                                             - $(".performance-label").width()
                                             - 20); 
         // setting the scrollbar to point to 2010
@@ -548,8 +548,8 @@ Form = {
                 event.preventDefault();
                 Form.removeSingleRow(this);
             });
-        Map.init(true);
         Form.initPerformance();
+        Map.init(true);
     }
 }
 

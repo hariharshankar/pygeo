@@ -1,6 +1,7 @@
 import flask
 from geo.core.geo_resource import GeoResource
 from geo.core.main import Main
+from geo.serializations.html import Html
 
 
 mod = flask.Blueprint("form", __name__)
@@ -25,7 +26,8 @@ def view(description_id=None):
     else:
         geo_resource = GeoResource(db, description_id)
 
-    html = geo_resource.generate_editable()
+    html_repr = Html(geo_resource)
+    html = html_repr.generate_editable()
     title = geo_resource.get_resource_name(geo_resource.type_name)
     if not title:
         title = "New %s %s" % (main.get_type_name(prefs[1]), prefs[0])

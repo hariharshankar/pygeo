@@ -4,10 +4,9 @@ Defining an energy resource.
 
 from geo.db.query import Select
 from geo.core.main import Main
-from geo.serializations.html import Html
 
 
-class GeoResource(Html):
+class GeoResource(object):
     """
     Defines an energy resource.
     """
@@ -24,7 +23,7 @@ class GeoResource(Html):
         The primitive class for all geo resources.
         """
 
-        Html.__init__(self)
+        #Html.__init__(self)
 
         if not description_id or int(description_id) == 0:
             if not type_id and not country_id and not state_id:
@@ -95,7 +94,7 @@ class GeoResource(Html):
         self.latest_revision_id = res[0]
         return self.latest_revision_id
 
-    def get_resource_name(self, type_name):
+    def get_resource_name(self, type_name=None):
         """
         Get the name of the resource. Requires type name to be passed
         as the name is in the description table.
@@ -106,6 +105,9 @@ class GeoResource(Html):
 
         if self.name:
             return self.name
+
+        if not type_name:
+            type_name = self.type_name
 
         name_field = "Name_omit"
         if self.type_id in self.types_with_segments:
