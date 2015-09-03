@@ -17,7 +17,7 @@ class Db(object):
         connection_string = ""
         if sys.version_info[0] == 3:
             connection_string = \
-                "mysql+mysqlconnector://geo:0p3nM0d3!@localhost/geoDev"
+                "mysql+pymysql://geo:0p3nM0d3!@localhost/geoDev"
         elif sys.version_info[0] == 2:
             connection_string = "mysql://geo:0p3nM0d3!@localhost/geoDev"
         else:

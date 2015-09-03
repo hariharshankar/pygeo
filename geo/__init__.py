@@ -22,6 +22,9 @@ import geo.views.json.location as location
 import geo.views.json.menu as menu
 import geo.views.json.summarydata as summarydata
 import geo.views.json.linechart as linechart
+import geo.views.json.get_resources as get_resources
+import geo.views.json.add_ai as add_ai
+import geo.views.show_ai as show_ai
 
 # static html
 import geo.views.static.partners as partners
@@ -47,6 +50,9 @@ user.db = conn
 index.db = conn
 moderation.db = conn
 moderationsubmit.db = conn
+get_resources.db = conn
+add_ai.db = conn
+show_ai.db = conn
 
 # html
 app.register_blueprint(form.mod)
@@ -60,12 +66,15 @@ app.register_blueprint(country_summary.mod)
 app.register_blueprint(user.mod)
 app.register_blueprint(index.mod)
 app.register_blueprint(moderationsubmit.mod)
+app.register_blueprint(add_ai.mod)
+app.register_blueprint(show_ai.mod)
 
 # json services
 app.register_blueprint(summarydata.mod)
 app.register_blueprint(location.mod)
 app.register_blueprint(menu.mod)
 app.register_blueprint(linechart.mod)
+app.register_blueprint(get_resources.mod)
 
 # static html
 app.register_blueprint(partners.mod)

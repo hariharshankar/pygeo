@@ -97,7 +97,8 @@ class Html(object):
             owner.append(self.__make_single_row_module("Owners"))
             return "single-row-module", "".join(owner)
         elif feature.startswith("Associated_Infrastructure"):
-            return "generic-module", self.__create_associated_infrastructure()
+            #return "generic-module", self.__create_associated_infrastructure()
+            return "generic-module", "Associated Infrastructure"
         elif feature.startswith("History"):
             return "", ""
         elif feature.startswith("Description"):
@@ -117,7 +118,6 @@ class Html(object):
     def __create_associated_infrastructure(self):
 
         html = []
-
         result = self.resource.select.read("Associated_Infrastructure",
                                   where=[["Parent_Plant_ID",
                                           "=",
@@ -134,15 +134,17 @@ class Html(object):
             html.append("<b><a href=\"geoid/%s\" target=\"_blank\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
                                                                                 ai_res.get_resource_name()))
 
-        html.append('<div id="searchLeftPane" class="leftPane-module">')
-        html.append("<div id='searchDatabase_Type' class='searchSelectable'></div>")
-        html.append("<div id='searchType' class='searchSelectable'></div>")
-        html.append("<div id='searchCountry' class='searchSelectable'></div>")
-        html.append("<div id='searchState' class='searchSelectable'></div>")
-        #html.append("<div class='searchUpdateButton' id='searchUpdateButton'>")
-        #html.append("<button id='createResource' class='createResource'>Create</button>")
-        #html.append("</div>")
+        html.append('<div id="searchAI" class="ai-search-module">')
+        html.append("<div id='aiDatabase_Type' class='aiSelectable'></div>")
+        html.append("<div id='aiType' class='aiSelectable'></div>")
+        html.append("<div id='aiCountry' class='aiSelectable'></div>")
+        html.append("<div id='aiState' class='aiSelectable'></div>")
+        html.append("<div class='aiUpdateButton' id='aiUpdateButton'>")
+        html.append("<button id='createAIResource' class='createAIResource'>Create</button>")
+        html.append("</div>")
 
+        html.append("</div>")
+        html.append("<div id='aiResources' class='aiSelectable' style='top: 20px;'>")
         html.append("</div>")
         return "".join(html)
 
@@ -216,7 +218,7 @@ class Html(object):
         for value in values:
             height_values[value[1]] = value
 
-        print(height_values)
+        #print(height_values)
         for index, key in enumerate(keys):
             if key.find("_ID") > 0 or key.find("Height_enumfield") >= 0:
                 continue
@@ -233,8 +235,8 @@ class Html(object):
                 html.append(self.__create_number_input_field(key, val[index]))
                 html.append("</td>")
             html.append("</tr>")
-        print(keys)
-        print(values)
+        #print(keys)
+        #print(values)
         html.append("</table>")
         return "".join(html)
 

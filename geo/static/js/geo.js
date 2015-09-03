@@ -31,6 +31,211 @@ Geo = {
     }
 } 
 
+AI = {
+    aiDatabase_Type: "",
+    aiType: "",
+    aiCountry: "",
+    aiState: "",
+    aiTab: "",
+
+    selectableIds: [],
+
+    createHtmlForSelectables: function (element, data) {
+        select = "";
+        var k = ""
+        if (data["keys"].length == 2)
+            k = data['keys'][1]
+        else
+            k = data['keys'][0]
+
+        if (k == "Database_Type") {
+            k = "Category";
+        }
+        var elementContentClass = element + "Content";
+
+        var disableSelect = false
+        if (Geo.getPageUrl().search("/summary/type/") >= 0 && 
+                ['aiDatabase_Type', 'aiState'].indexOf(element) >= 0) {
+            disableSelect = true
+            if (element == "aiDatabase_Type") {
+                AI[element] = "powerplants"
+            }
+        } 
+        else if (Geo.getPageUrl().search("/summary/country/") >= 0 && 
+                ['aiDatabase_Type', 'aiState', 'aiType'].indexOf(element) >= 0) {
+            disableSelect = true
+            if (element == "aiDatabase_Type") {
+                AI[element] = "powerplants"
+            }
+        } 
+        if (disableSelect) {
+            select += "<select data-placeholder='Choose a "+k+"'class='chosen-select' style='width: 90%;' disabled='disabled'>"
+        }
+        else {
+            select += "<select data-placeholder='Choose a "+k+"'class='chosen-select' style='width: 90%;'>"
+        }
+        for (var v in data['values']) {
+            var value = data['values'][v]
+            var v = ""
+            id = 0
+            if (value.length == 2) {
+                id = value[0]
+                v = value[1]
+            }
+            else {
+                v = value[0]
+                id = v
+            }
+                
+            if (AI[element] == undefined) AI[element] = "";
+            if (v && AI[element].toLowerCase() == v.toLowerCase() || AI[element] == id) 
+                select += "<option class='ui-widget-content ui-selected "+elementContentClass+"' value='"+id+"' selected='selected'>"+v+"</option>";
+            else
+                select += "<option class='ui-widget-content "+elementContentClass+"' value='"+id+"'>"+v+"</option>";
+        }
+        select += "</select>"
+        $(select).insertAfter("#"+element)
+        $(".chosen-select").chosen()
+
+        sel = $("#"+element).next()
+        sel.change(function() {
+            $(this).nextAll('.aiSelectableHeader').remove()
+            nextSelect = $(this).next().next()
+            nextSelect.nextAll('.chosen-select').remove()
+            nextSelect.nextAll('.chosen-container').remove()
+            AI.createSelectables(nextSelect)
+        })
+        heading = "<h3 class='aiSelectableHeader'>"+k+"</h3>";
+        $("#"+element).before(heading)
+        $("."+elementContentClass).click(function() {
+            $(this).addClass("ui-selected").siblings().removeClass("ui-selected")
+        })
+        AI.createSelectables($("#"+element).next().next().next())
+    },
+
+    getUserValues: function() {
+
+        params = ""
+        $(".aiSelectable").each(function() {
+            var key = $(this).attr("id").replace("search", "").toLowerCase()
+            var value = $(this).next().next().find(".chosen-single").text()
+            if ($(this).next().attr('disabled') != 'disabled') {
+
+                if (!value || value == "") {
+                    value = ""
+                }
+                $(this).next().children().each( function() {
+                    if ($(this).text().toLowerCase() == value.toLowerCase()) {
+                        params += "/" + $(this).attr('value').toLowerCase()
+                    }
+                });
+            }
+        })
+        return params
+    },
+
+    getSelectValues: function (reqUrl, reqData, callbackElement) {
+        $.ajax({
+            type: "GET",
+            url: reqUrl,
+            data: reqData,
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",            
+            success: function(data, textStatus, jqXHR) {
+                AI.createHtmlForSelectables(callbackElement, data)
+            }
+        })    
+    },
+
+    getUserValues: function() {
+
+        params = "?"
+        $(".aiSelectable").each(function() {
+            var key = $(this).attr("id").replace("ai", "").toLowerCase()
+            var value = $(this).next().next().find(".chosen-single").text()
+            if ($(this).next().attr('disabled') != 'disabled') {
+
+                if (!value || value == "") {
+                    value = ""
+                }
+                $(this).next().children().each( function() {
+                    if ($(this).text().toLowerCase() == value.toLowerCase()) {
+                        params += key +"=" + $(this).attr('value').toLowerCase() + "&";
+                    }
+                });
+            }
+        })
+        return params
+    },
+
+    createSelectables: function(t) {
+        if ($(t).attr("id") == "aiUpdateButton") {
+            var uservals = AI.getUserValues();
+            $.ajax({url: "/get_resources" + uservals, dataType: "json",
+                success: function(data, textStatus, jqXHR) {
+                    var select = "<select id='selectedAI' size=12 style='min-width: 440px; height: 250px;'>"
+                    for(var i=0, res; res=data.resources[i]; i++) {
+                        select += "<option value='"+res.Description_ID+"' style='padding: 3px 0;'>"+res.Name+"</option>";
+                    }
+                    select += "</select>"
+                    $("#aiResources").html(select);
+                }
+            });
+
+
+            $("#createAIResource")
+            .button()
+            .click (function(event) {
+                event.preventDefault()
+                selectedResource = $("#selectedAI option:selected").attr("value");
+                descid = $("#Description_ID").attr("value");
+
+                if (!selectedResource) {
+                    return;
+                }
+                $.ajax({
+                    url: "/add_ai?did=" + descid + "&assid=" + selectedResource,
+                    success: function(data, textStatus, jqXHR) {
+                        AI.init();
+                    }
+                });
+
+            });
+            return;
+        }
+        var type = $(t).attr("id").replace("ai", "")
+        var url = $("#jsonListService").attr("value")
+        var data = {}
+
+        data["return_type"] = type.toLowerCase();
+        if (Geo.getPageUrl().search("/new_resources/") >= 0) {
+            data['new_resources'] = true;
+        }
+
+        $(t).prevAll('.aiSelectable').each( function(index) {
+
+            var prevType = $(this).attr("id").replace("ai", "").toLowerCase()
+            var prevValue = ""
+             
+            data[prevType] = $(this).next().next().children('.chosen-single').text()
+        });
+        AI.getSelectValues(url + "?" + $.param(data), null, "ai"+type)
+            
+        var id = $(t).attr("id")
+
+        AI.selectableIds.push($(t).attr("id"))
+    },
+    init: function() {
+        $.ajax({
+            url: "/show_ai/" + $("#Description_ID").attr("value"),
+            success: function(data, textStatus, jqXHR) {
+                $("#Associated_Infrastructure_module").empty().append(data);
+                AI.createSelectables($(".aiSelectable").first());
+            }
+        });
+    }
+}
+
 Search = {
 
     searchDatabase_Type: "",
@@ -549,6 +754,7 @@ Form = {
                 Form.removeSingleRow(this);
             });
         Form.initPerformance();
+        AI.init()
         Map.init(true);
     }
 }

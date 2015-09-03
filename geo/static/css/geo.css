@@ -474,3 +474,17 @@ table.line-html-table {
 .create-new-plant {
     margin-bottom: 15px;
 }
+
+#Associated_Infrastructure_module {
+    display: table;
+}
+
+#searchAI {
+    width: 450px;
+    float: left;
+}
+
+#aiResources {
+    min-width: 440px;
+    float: right;
+}
