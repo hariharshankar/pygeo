@@ -15,6 +15,50 @@ jQuery.fn.center = function () {
     return this;
 }
 
+$.extend($.expr[":"], {
+    "containsIn": function( elem, i, match, array) {
+        return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+    }
+});
+
+SearchableUnits = {
+    delay: function() {
+        var timer = 0;
+        return function( callback, ms) {
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    },
+
+    addSearch: function() {
+        var form = $("<form>").attr({"class": "searchform", "action": "#"}),
+            input = $("<input>").attr({
+                "class": "searchinput",
+                "type": "search",
+                "placeholder": "Filter results by Manufacturer/Model/Type",
+                "style": "font-size: 1.5em; padding: 15px; width: 500px; margin-left: 25%"
+            });
+
+        $(form).append(input).appendTo($(".search"));
+        $(input).change(function() {
+            var filter = $(this).val();
+            if (filter.length >= 3 || filter.length == 0) {
+                $(".summary-results").find(".searchable:not(:containsIn(" + filter + "))").closest(".module-container").hide();
+                $(".summary-results").find(".searchable:containsIn(" + filter + ")").closest(".module-container").show();
+            }
+        }).keyup( function() {
+            SearchableUnits.delay($(this).change(), 500);
+            //$(this).change();
+        });
+
+    },
+
+    init: function() {
+        SearchableUnits.addSearch();
+    }
+}
+
+
 Geo = {
     searchDatabase_Type_Default: "PowerPlants",
     searchType_Default: "1",
@@ -426,7 +470,7 @@ Search = {
             b = base_url.replace("http://", "").split('/')
             url = "http://" + b[0] + "/";
 
-            if (['resources', 'summary', 'map', 'analyze'].indexOf(b[1]) >= 0) {
+            if (['resources', 'summary', 'map', 'analyze', 'allunits'].indexOf(b[1]) >= 0) {
                 url += b[1];
                 if (['type', 'country'].indexOf(b[2]) >= 0) {
                     url += "/" + b[2];
@@ -909,7 +953,6 @@ Chart = {
                     .interpolate('monotone')
                     // assign the X function to plot our line as we wish
                     .x(function(d,i) { 
-                        //console.log(d, i)
                         return x(new Date(lineData[0].xvalues[i].toString()));
                     })
                     .y(function(d) { 

@@ -53,6 +53,10 @@ def view(country_id=None, country_abbr=None):
         <td>{map_link}</td>
     </tr>
     <tr>
+        <td style="width: 70%">List All Units in Individual Plants</td>
+        <td>{all_units_link}</td>
+    </tr>
+    <tr>
         <td style="width: 70%">Complete summary:</td>
         <td>{summary_link}</td>
     </tr>
@@ -102,6 +106,13 @@ def view(country_id=None, country_abbr=None):
         map_link.append(str(country_id) + "/0/")
         map_link.append("' target='_blank'>Map</a>")
 
+        all_units = []
+        all_units.append("<a href='/allunits/")
+        all_units.append(pref[0] + "/")
+        all_units.append(str(t['Type_ID']) + "/")
+        all_units.append(str(country_id))
+        all_units.append("' target='_blank'>All Units</a>")
+
         module = {}
         module['heading'] = type_name
         module['content'] = module_content.format(type_name=type_name,
@@ -110,6 +121,7 @@ def view(country_id=None, country_abbr=None):
                                                   cumulative_capacity=t['Cumulative_Capacity_Total'],
                                                   summary_link="".join(s_link),
                                                   map_link="".join(map_link),
+                                                  all_units_link="".join(all_units),
                                                   pie_id=type_name,
                                                   pie_value=t['Cumulative_Capacity_Total'])
 

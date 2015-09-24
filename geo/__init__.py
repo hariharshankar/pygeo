@@ -25,6 +25,7 @@ import geo.views.json.linechart as linechart
 import geo.views.json.get_resources as get_resources
 import geo.views.json.add_ai as add_ai
 import geo.views.show_ai as show_ai
+import geo.views.allunits as allunits
 
 # static html
 import geo.views.static.partners as partners
@@ -53,6 +54,7 @@ moderationsubmit.db = conn
 get_resources.db = conn
 add_ai.db = conn
 show_ai.db = conn
+allunits.db = conn
 
 # html
 app.register_blueprint(form.mod)
@@ -68,6 +70,7 @@ app.register_blueprint(index.mod)
 app.register_blueprint(moderationsubmit.mod)
 app.register_blueprint(add_ai.mod)
 app.register_blueprint(show_ai.mod)
+app.register_blueprint(allunits.mod)
 
 # json services
 app.register_blueprint(summarydata.mod)

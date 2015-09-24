@@ -1,0 +1,23 @@
+{% extends "search.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body_onload %}SearchableUnits.init();{% endblock %}
+{% block user_pref %}{{ user_pref|safe }}{% endblock %}
+{% block right_pane_content %}
+<div id="summary-results ui-widget ui-helper-reset" class='summary-results' style="width: 1000px;">
+
+    <div class="search"></div>
+
+    <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>All {{ type }} Unit Information for {{ country }}</h3>
+
+    {% for r in resources %}
+        <div class="module-container ui-corner-bottom ui-widget-content">
+          <h3 id='line-chart-heading' class='ui-widget-header summary-widget-header'>
+              <a href="/geoid/{{ r.resource_id }}">{{ r.resource_name }}</a>
+          </h3>
+          <div style="font-size: 1.1em;">
+              {{ r.content|safe }}
+          </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

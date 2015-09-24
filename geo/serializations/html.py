@@ -13,12 +13,14 @@ class Html(object):
 
     def __init__(self, resource):
         self.resource = resource
+        self.editable = True
 
     def generate_editable(self):
         """
         Creates an html form using the resource data.
         """
 
+        self.editable = True
         return self.__generate_resource_modules()
 
     def __generate_resource_modules(self):
@@ -79,7 +81,7 @@ class Html(object):
         elif feature == "Notes":
             return "generic-module", self.__create_notes_module()
         elif feature.startswith("Unit_"):
-            return "single-row-module", self.__make_unit_module(feature)
+            return "single-row-module", self.make_unit_module(feature)
         elif feature == "Location" or feature == "Dual_Node_Locations":
             return "generic-module", self.__make_location_module()
         elif feature.startswith("Annual_Performance"):
@@ -705,7 +707,7 @@ class Html(object):
 
         return "".join(table)
 
-    def __make_unit_module(self, feature):
+    def make_unit_module(self, feature):
         """
         Builds the unit description module.
         """
@@ -814,10 +816,14 @@ class Html(object):
         for val in values:
             count = 0
             row.append("<tr class='single-rows'>")
-            row.extend(["<td><input type='checkbox'",
-                        "id='", table_name, "_###_", str(line_count),
-                        "' name='", table_name, "_###_", str(line_count),
-                        "'></td>"])
+            if self.editable:
+                row.extend(["<td><input type='checkbox'",
+                            "id='", table_name, "_###_", str(line_count),
+                            "' name='", table_name, "_###_", str(line_count),
+                            "'></td>"])
+            else:
+                row.extend(["<td></td>"])
+
             line_count += 1
             row.extend(["<td>", str(line_count), "</td>"])
             for value in val:
@@ -873,10 +879,11 @@ class Html(object):
                         )
                 count += 1
             row.append("</tr>\n")
-        row.extend(["<input type='hidden' ",
-                    "name='numberOf", table_name, "' ",
-                    "id='numberOf", table_name, "' ",
-                    "value='", str(line_count), "' />"])
+        if self.editable:
+            row.extend(["<input type='hidden' ",
+                        "name='numberOf", table_name, "' ",
+                        "id='numberOf", table_name, "' ",
+                        "value='", str(line_count), "' />"])
         return row
 
     def __create_editable_row(self, key, value, table_name, itf, dual=0):
@@ -919,8 +926,7 @@ class Html(object):
 
         return "".join(row)
 
-    @staticmethod
-    def __create_input_field(key, value, row_type, dual=0):
+    def __create_input_field(self, key, value, row_type, dual=0):
         """
         Creates an input html element.
         """
@@ -928,11 +934,17 @@ class Html(object):
             """
             creates the input html.
             """
-            return "".join(["<input type='text' name='", key,
+            if self.editable:
+                return "".join(["<input type='text' name='", key,
                             "' id='", key,
                             "' value='", value,
                             "' size='", size, "' />"
                             ])
+            else:
+                return "".join(["<span class='searchable'>",
+                                str(value),
+                                "</span>"
+                                ])
 
 
         value = str(value)
@@ -1038,25 +1050,31 @@ class Html(object):
 
         if dual > 0:
             key = key + "_stn" + str(dual)
+
         row = []
-        row.extend(["<select id='", key,
-                    "' name='", key, "'>"])
+        if self.editable:
+            row.extend(["<select id='", key,
+                        "' name='", key, "'>"])
         for option in enum.split(","):
             option = option.replace("'", "")
             option = option.replace("@", ",")
             if option == value:
-                row.extend(["<option value='", option,
-                            "' selected='selected'>", option,
-                            "</option>"])
+                if self.editable:
+                    row.extend(["<option value='", option,
+                                "' selected='selected'>", option,
+                                "</option>"])
+                else:
+                    row.extend(["<span>", option, "</span>"])
             else:
-                row.extend(["<option value='", option,
-                            "'>", option, "</option>"])
+                if self.editable:
+                    row.extend(["<option value='", option,
+                                "'>", option, "</option>"])
 
-        row.append("</select>")
+        if self.editable:
+            row.append("</select>")
         return "".join(row)
 
-    @staticmethod
-    def __create_number_input_field(key, value, size=15, dual=0):
+    def __create_number_input_field(self, key, value, size=15, dual=0):
         """
         Creates an input html element for numbers.
         """
@@ -1064,11 +1082,17 @@ class Html(object):
             value = ""
         if dual > 0:
             key = key + "_stn" + str(dual)
-        return "".join(["<input type='text' name='", key,
-                        "' id='", key,
-                        "' value='", str(value),
-                        "' size='", str(size), "' />"
-                        ])
+        if self.editable:
+            return "".join(["<input type='text' name='", key,
+                            "' id='", key,
+                            "' value='", str(value),
+                            "' size='", str(size), "' />"
+                            ])
+        else:
+            return "".join(["<span>",
+                            str(value),
+                            "</span>"
+                            ])
 
     @staticmethod
     def __create_label(key, field_type):
