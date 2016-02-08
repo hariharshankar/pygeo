@@ -25,6 +25,9 @@ class Moderation(object):
 
         """
 
+        db_cxn = self.db_conn.session
+        db_cur = db_cxn.cursor(dictionary=True)
+
         if int(country_id) <= 0 or int(type_id) <= 0:
             return ([], [])
 
@@ -55,14 +58,13 @@ class Moderation(object):
         if type_id in self.types_with_segments:
             name_field = "Name_of_this_Segment"
 
-        select = Select(self.db_conn)
         sql = "SELECT Parent_Plant_ID,Description_ID FROM History WHERE \
                 Parent_Plant_ID in \
                     (SELECT distinct(Parent_Plant_ID) \
                     FROM History \
-                    WHERE Country_ID=:country_id \
-                    and Type_ID=:type_id \
-                    and Accepted=:accepted \
+                    WHERE Country_ID=%(country_id)s \
+                    and Type_ID=%(type_id)s \
+                    and Accepted=%(accepted)s \
                     ) \
               and Accepted=1;"
         data = {
@@ -70,27 +72,29 @@ class Moderation(object):
             "type_id": type_id,
             "accepted": 1
         }
-        description_ids = self.db_conn.session.execute(sql, data)
-        self.db_conn.session.close()
+        db_cur.execute(sql, data)
 
         keys = ["Description_ID", "Name"]
 
+        select = Select(self.db_conn)
         # get the latest description id for all resources
         resources = {}
-        for did in description_ids:
+        for did in db_cur:
             if resources.get(did['Parent_Plant_ID'], 0) < int(did['Description_ID']):
                 resources[did['Parent_Plant_ID']] = did['Description_ID']
 
-        names = select.read(type_name + "_Description",
+        result = select.read(type_name + "_Description",
                             columns=["Description_ID", name_field],
                             where=[["Description_ID", "in",
                                    list(resources.values())]
                                    ],
                             order_by=[name_field, "ASC"])
 
+        #names = result.fetchall()
 
-        values = [name for name in names if name[0] is not None]
-        return keys, values
+        #values = [name for name in names if name.get("Description_ID") is not None]
+        db_cxn.close()
+        return select.process_result_set(result)
 
     def get_resources_to_moderate(self):
         """

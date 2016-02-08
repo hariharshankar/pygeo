@@ -11,19 +11,20 @@ class InsertFactSheet(object):
     Handling data insertion for the fact sheet.
     """
 
-    def __init__(self, db_conn):
+    def __init__(self, db):
         """
         Query the database.
         :param db: a valid database connection.
         """
-        self.db_conn = db_conn
+        self.db = db
+        self.db_conn = db.session
 
     def __del__(self):
         """
         Closing the open sessions.
         :return:
         """
-        self.db_conn.session.close()
+        self.db_conn.close()
 
     def insert(self, table_name, form_data, module_type, description_id=0, dual=0):
         """
@@ -63,7 +64,7 @@ class InsertFactSheet(object):
         type_name = form_data.get("Type_Name")
         label = table_name.replace(type_name + "_", "")
 
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         #enum_result = select.read_column_names(table_name, where=label)
@@ -99,18 +100,18 @@ class InsertFactSheet(object):
             value = form_data.get(label+"_"+option).strip()
 
             if value:
-                sql_fields.append("`" + label + "`=:" + label.lower())
+                sql_fields.append("`" + label + "`=%(" + label.lower() + ")s")
                 sql_values[label.lower()] = option
-                sql_fields.append("`" + column_names[2][0] + "`=:" + column_names[2][0].lower())
+                sql_fields.append("`" + column_names[2][0] + "`=%(" + column_names[2][0].lower() + ")s")
                 sql_values[column_names[2][0].lower()] = value
 
         sql_statement.append(",".join(sql_fields))
         print("".join(sql_statement), sql_values)
 
-        session = self.db_conn.session
+        session = self.db_conn.cursor()
         try:
             session.execute("".join(sql_statement), sql_values)
-            session.commit()
+            self.db_conn.commit()
         except Exception as e:
             print(e)
         finally:
@@ -125,20 +126,20 @@ class InsertFactSheet(object):
         """
 
         sql_fields = []
-        sql_fields.extend(["`User_ID`=:user_id",
-                          "`Moderated`=:moderated",
-                          "`Moderator_ID`=:moderator_id",
-                          "`Type_ID`=:type_id",
-                          "`Country_ID`=:country_id",
-                          "`State_ID`=:state_id",
-                          "`Accepted`=:accepted"])
+        sql_fields.extend(["`User_ID`=%(user_id)s",
+                          "`Moderated`=%(moderated)s",
+                          "`Moderator_ID`=%(moderator_id)s",
+                          "`Type_ID`=%(type_id)s",
+                          "`Country_ID`=%(country_id)s",
+                          "`State_ID`=%(state_id)s",
+                          "`Accepted`=%(accepted)s"])
 
         sql_values = {}
 
         parent_plant_id = form_data.get("Parent_Plant_ID", 0)
 
         if int(parent_plant_id) > 0:
-            sql_fields.append("`Parent_Plant_ID`=:parent_plant_id")
+            sql_fields.append("`Parent_Plant_ID`=%(parent_plant_id)s")
             sql_values['parent_plant_id'] = parent_plant_id
 
         sql_statement = "INSERT INTO History SET " + ",".join(sql_fields)
@@ -151,33 +152,30 @@ class InsertFactSheet(object):
         sql_values['state_id'] = form_data.get('State_ID')
         sql_values['accepted'] = form_data.get('Accepted')
 
-        session = self.db_conn.session
+        session = self.db_conn.cursor()
         try:
-            result = session.execute(sql_statement, sql_values)
-            session.commit()
+            session.execute(sql_statement, sql_values)
+            self.db_conn.commit()
         except Exception:
-            session.rollback()
+            #session.rollback()
             raise
-        finally:
-            session.close()
 
-        description_id = result.lastrowid
+        description_id = session.lastrowid
 
         if int(parent_plant_id) == 0:
             parent_update_stmt = "UPDATE HISTORY SET \
-                Parent_Plant_ID=:parent_plant_id \
-                WHERE Description_ID=:description_id"
+                Parent_Plant_ID=%(parent_plant_id)s \
+                WHERE Description_ID=%(description_id)s"
             try:
                 session.execute(parent_update_stmt,
                                 {'parent_plant_id': description_id,
                                  'description_id': description_id})
-                session.commit()
+                self.db_conn.commit()
             except Exception:
-                session.rollback()
+                #session.rollback()
                 raise
-            finally:
-                session.close()
 
+        session.close()
         return description_id
 
     def insert_dual_node_description(self, table_name, form_data, description_id,
@@ -208,7 +206,7 @@ class InsertFactSheet(object):
         sql_values['connection_id'] = connection_id
         alt_sql_fields.append("`Connection_ID`=%(connection_id)s")
 
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         print(form_data)
@@ -230,10 +228,10 @@ class InsertFactSheet(object):
         sql_statement.append(",".join(sql_fields))
         alt_sql_statement.append(",".join(alt_sql_fields))
 
-        session = self.db_conn.session
+        session = self.db_conn.cursor()
         try:
-            session.execute("".join(sql_statement), sql_values)
-            session.commit()
+            session.execute("".join(alt_sql_statement), sql_values)
+            self.db_conn.commit()
         except Exception:
             try:
                 # may be there is a spl char in the sql stmt
@@ -247,10 +245,10 @@ class InsertFactSheet(object):
                 sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
 
                 #print(sql_stmt)
-                session.connection().execute(sql_stmt)
-                session.commit()
+                session.execute(sql_stmt)
+                self.db_conn.commit()
             except Exception:
-                session.rollback()
+                #session.rollback()
                 raise
         finally:
             session.close()
@@ -278,7 +276,7 @@ class InsertFactSheet(object):
             sql_values['description_id'] = description_id
             alt_sql_fields.append("`Description_ID`=%(description_id)s")
 
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         for k in column_names:
@@ -296,18 +294,24 @@ class InsertFactSheet(object):
                 key = key.replace(":", "")
                 key = key.replace("%", "")
                 sql_fields.append("`" + k[0] + "`=:" + key.lower())
-                alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
-                sql_values[key.lower()] = value.strip()
+                alt_sql_fields.append("`" + k[0] + "`=%(" + key.lower() + ")s")
+                value = value.strip().replace("'", "")
+                value = value.replace('"', "")
+                sql_values[key.lower()] = value
 
         sql_statement.append(",".join(sql_fields))
         alt_sql_statement.append(",".join(alt_sql_fields))
 
-        session = self.db_conn.session
+        session = self.db_conn.cursor(dictionary=True)
         try:
-            result = session.execute("".join(sql_statement), sql_values)
-            session.commit()
-            insert_id = result.lastrowid
+            print("".join(alt_sql_statement))
+            print(sql_values)
+            session.execute("".join(alt_sql_statement), sql_values)
+            self.db_conn.commit()
+            insert_id = session.lastrowid
         except Exception:
+            print(session.statement)
+            """
             try:
                 # may be there is a spl char in the sql stmt
                 # using connection().execute will not quote the sql stmt
@@ -320,12 +324,14 @@ class InsertFactSheet(object):
                 sql_stmt = re.sub(r"(\d+)##", "\g<1>%", sql_stmt)
 
                 #print(sql_stmt)
-                result = session.connection().execute(sql_stmt)
-                session.commit()
+                result = session.execute(sql_stmt)
+                self.db_conn.commit()
                 insert_id = result.lastrowid
             except Exception:
-                session.rollback()
+                #session.rollback()
                 raise
+            """
+            raise
         finally:
             session.close()
 
@@ -341,7 +347,7 @@ class InsertFactSheet(object):
         start_decade = 1950
         end_decade = 2020
         table_name = table_name.replace("_Annual", "")
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         for year in range(start_decade, end_decade):
@@ -383,10 +389,10 @@ class InsertFactSheet(object):
             sql_statement.append(",".join(sql_fields))
             alt_sql_statement.append(",".join(alt_sql_fields))
 
-            session = self.db_conn.session
+            session = self.db_conn.cursor()
             try:
-                session.execute("".join(sql_statement), sql_values)
-                session.commit()
+                session.execute("".join(alt_sql_statement), sql_values)
+                self.db_conn.commit()
             except Exception:
                 try:
                     # may be there is a spl char in the sql stmt
@@ -396,10 +402,10 @@ class InsertFactSheet(object):
                     sql_stmt = sql_stmt.replace("(%)", "(##)")
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
-                    session.connection().execute(sql_stmt)
-                    session.commit()
+                    session.execute(sql_stmt)
+                    self.db_conn.commit()
                 except Exception:
-                    session.rollback()
+                    #session.rollback()
                     raise
             finally:
                 session.close()
@@ -414,7 +420,7 @@ class InsertFactSheet(object):
         Handles multiple column modules like unit_description.
         """
 
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         number_of_rows = form_data.get("numberOf" + table_name, 0)
@@ -453,10 +459,11 @@ class InsertFactSheet(object):
             sql_statement.append(",".join(sql_fields))
             alt_sql_statement.append(",".join(alt_sql_fields))
 
-            session = self.db_conn.session
+            session = self.db_conn.cursor()
             try:
-                session.execute("".join(sql_statement), sql_values)
-                session.commit()
+                print("".join(sql_statement) % sql_values)
+                session.execute("".join(alt_sql_statement), sql_values)
+                self.db_conn.commit()
             except Exception:
                 try:
                     # may be there is a spl char in the sql stmt
@@ -468,10 +475,11 @@ class InsertFactSheet(object):
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     sql_stmt = sql_stmt.replace("##_", "%_")
-                    session.connection().execute(sql_stmt)
-                    session.commit()
+                    print(sql_stmt)
+                    session.execute(sql_stmt)
+                    self.db_conn.commit()
                 except Exception:
-                    session.rollback()
+                    #session.rollback()
                     raise
             finally:
                 session.close()
@@ -480,7 +488,7 @@ class InsertFactSheet(object):
 
     def __insert_nuclear_performance_data(self, table_name, form_data, description_id):
 
-        select = Select(self.db_conn)
+        select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
         number_of_units = form_data.get("numberOfNuclear_Unit_Description", 0)
@@ -544,10 +552,10 @@ class InsertFactSheet(object):
                 sql_statement.append(",".join(sql_fields))
                 alt_sql_statement.append(",".join(alt_sql_fields))
 
-                session = self.db_conn.session
+                session = self.db_conn.cursor()
                 try:
-                    session.execute("".join(sql_statement), sql_values)
-                    session.commit()
+                    session.execute("".join(alt_sql_statement), sql_values)
+                    self.db_conn.commit()
                 except Exception:
                     try:
                         # may be there is a spl char in the sql stmt
@@ -559,10 +567,10 @@ class InsertFactSheet(object):
                         sql_stmt = sql_stmt % sql_values
                         sql_stmt = sql_stmt.replace("(##)", "(%)")
                         sql_stmt = sql_stmt.replace("##_", "%_")
-                        session.connection().execute(sql_stmt)
-                        session.commit()
+                        session.execute(sql_stmt)
+                        self.db_conn.commit()
                     except Exception:
-                        session.rollback()
+                        #session.rollback()
                         raise
                 finally:
                     session.close()

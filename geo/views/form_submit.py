@@ -49,8 +49,9 @@ def view():
     res_modules = select.read("Type_Features",
                               where=[["Type_ID", "=", geo_resource.type_id]]
                               )
-    modules = res_modules.first()
-    features = list(modules.Features)
+    modules = res_modules.fetchone()
+    print(modules)
+    features = list(modules['Features'])
     features.remove("Annual_Performance")
     features.append("Annual_Performance")
 

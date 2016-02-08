@@ -2,7 +2,6 @@
 Builds and executes all select sql statements.
 """
 
-from sqlalchemy import text
 
 class Select(object):
     """
@@ -14,14 +13,15 @@ class Select(object):
         Query the database.
         :param db: a valid database connection.
         """
-        self.db_conn = db
+        self.db_conn = db.session
+        self.db_conn.get_warnings = True
 
     def __del__(self):
         """
         Close the open sessions.
         :return:
         """
-        self.db_conn.session.close()
+        self.db_conn.close()
 
     def read(self, table_name,
              columns=None,
@@ -39,11 +39,13 @@ class Select(object):
         :param order_by: list<<string>,<string>> order_by clause
                         ["field_name", "asc|desc"]
         :param limit: list<<int>,<int>> start stop limits like [0,1]
+        :returns: {"keys": [keys], "values": [v]}
         """
 
         if table_name == "" or table_name.find(" ") >= 0:
             return
 
+        db_cur = self.db_conn.cursor(dictionary=True)
         sql = ["SELECT"]
         alt_sql = ["SELECT"]
 
@@ -71,7 +73,7 @@ class Select(object):
                     # the prepare stmt throws an error if "in" is used
                     # with only one value. converting it into "=" instead.
                     if whe[1].lower() == 'in' and len(whe[2]) == 1:
-                        sql.extend([whe[0], "=", ":wh"+str(i)])
+                        sql.extend([whe[0], "=", "':wh%s'" % str(i)])
                         alt_sql.extend([whe[0], "=", "%(wh"+str(i)+")s"])
                         params["wh"+str(i)] = whe[2][0]
                     elif whe[1].lower() == 'in':
@@ -80,7 +82,7 @@ class Select(object):
                         vals = []
                         alt_vals = []
                         for v, val in enumerate(whe[2]):
-                            vals.append(":wh" + str(v))
+                            vals.append("':wh%s'" % str(v))
                             alt_vals.append("%(wh" + str(v)+")s")
                             params["wh"+str(v)] = str(val)
                         sql.append(",".join(vals))
@@ -89,7 +91,7 @@ class Select(object):
                         alt_sql.append(")")
                         #params["wh"+str(i)] = ",".join([str(val) for val in whe[2]])
                     else:
-                        sql.extend([whe[0], whe[1], ":wh"+str(i)])
+                        sql.extend([whe[0], whe[1], "':wh%s'" % str(i)])
                         alt_sql.extend([whe[0], whe[1], "%(wh"+str(i)+")s"])
                         params["wh"+str(i)] = whe[2]
                 elif i % 2 == 1 and whe[0].lower() in ['and', 'or']:
@@ -110,10 +112,9 @@ class Select(object):
             sql.append(",".join(limit))
             alt_sql.append("LIMIT")
             alt_sql.append(",".join(limit))
-        result = None
 
         try:
-            result = self.db_conn.session.execute(" ".join(sql), params)
+            db_cur.execute(" ".join(alt_sql), params)
         except Exception:
             try:
                 # may be there is a spl char in the sql stmt
@@ -123,16 +124,13 @@ class Select(object):
                 sql_stmt = sql_stmt.replace("(%)", "(##)")
                 sql_stmt = sql_stmt % params
                 sql_stmt = sql_stmt.replace("(##)", "(%)")
-                result = self.db_conn.session.connection().execute(sql_stmt)
+                db_cur.execute(sql_stmt)
             except Exception:
-                self.db_conn.session.rollback()
                 raise
-            #self.db_conn.session.rollback()
-            #raise
-        finally:
-            self.db_conn.session.close()
 
-        return result
+        #print(db_cur.statement)
+        #print(db_cur.fetchwarnings())
+        return db_cur
 
     def read_column_names(self, table_name, where=None):
         """
@@ -140,26 +138,34 @@ class Select(object):
         without knowing the table columns.
         """
 
+        db_cur = self.db_conn.cursor(dictionary=True)
 
         sql = "SHOW COLUMNS FROM %s" % table_name
         if where:
-            sql = sql + " LIKE '%s'" % where
+            sql += " LIKE '%s'" % where
 
-        return self.db_conn.session.query("Field", "Type")\
-            .from_statement(sql).all()
+        db_cur.execute(sql)
+        cols = [(dic["Field"], dic["Type"]) for dic in db_cur]
+        return cols
 
-    def process_result_set(self, result):
+    @staticmethod
+    def process_result_set(result):
         """
         Convert the returned values from result obj into lists for
         easy json serialization.
         """
 
-        keys = result.keys()
+        keys = result.column_names
         values = []
-        if not result.returns_rows:
+        if not result.with_rows:
             return keys, values
 
-        rows = result.fetchall()
-        values = [r.values() for r in rows]
-        values.sort()
+        res = result.fetchall()
+        for r in res:
+            v = []
+            for k in keys:
+                v.append(r.get(k))
+            values.append(v)
+        #sorted(values)
         return keys, values
+

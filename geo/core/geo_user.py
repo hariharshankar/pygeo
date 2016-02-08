@@ -52,7 +52,7 @@ class GeoUser(object):
         if not result:
             raise Exception("No results retrieved for the user info")
 
-        return result.first()
+        return result.fetchone()
 
     def validate_user(self, password):
         """

@@ -22,7 +22,7 @@ def view(did=None):
                                     resource.parent_plant_id]]
                         )
 
-    keys = result.keys()
+    keys = result.column_names
     values = result.fetchall()
     html = []
     for value in values:

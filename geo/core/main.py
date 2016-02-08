@@ -29,8 +29,8 @@ class Main(object):
                                   where=[["Type_ID", "=", type_id]]
                                   )
 
-        if result.returns_rows:
-            return result.first()['Type']
+        if result.with_rows:
+            return result.fetchone()['Type']
 
     def get_type_id(self, type_name):
         """
@@ -55,8 +55,8 @@ class Main(object):
                                           type_name]]
                                   )
 
-        if result.returns_rows:
-            return result.first()['Type_ID']
+        if result.with_rows:
+            return result.fetchone()['Type_ID']
 
     def get_types(self, db_name):
         """
@@ -105,8 +105,8 @@ class Main(object):
                                   where=[["Country_ID", "=", country_id]]
                                   )
 
-        if result.returns_rows:
-            return result.first()['Country']
+        if result.with_rows:
+            return result.fetchone()['Country']
 
     def get_country_id_from_abbr(self, country_abbr):
         """
@@ -117,8 +117,8 @@ class Main(object):
                                   columns=["Country_ID"],
                                   where=[["Country_Code", "=",
                                           country_abbr.lower()]])
-        if result.returns_rows:
-            return result.first()['Country_ID']
+        if result.with_rows:
+            return result.fetchone()['Country_ID']
 
     def get_country_id(self, country_name):
         """
@@ -142,8 +142,8 @@ class Main(object):
                                           country_name]]
                                   )
 
-        if result.returns_rows:
-            return result.first()['Country_ID']
+        if result.with_rows:
+            return result.fetchone()['Country_ID']
 
     def get_types_for_country(self, country_id):
         """
@@ -205,13 +205,13 @@ class Main(object):
         countries = self.select.read("Country",
                                      columns=["Country_ID", "Country"],
                                      where=[["Country_ID", "in",
-                                             [country_id[0]
+                                             [country_id["Country_ID"]
                                               for country_id in country_ids]]]
                                      )
 
         #print(countries)
-        country_list = countries.fetchall()
-        return keys, [list(country) for country in country_list]
+        #country_list = countries.fetchall()
+        return self.select.process_result_set(countries)
 
     def get_states(self, country, new_resource=False):
         """
@@ -249,8 +249,8 @@ class Main(object):
                                   where=[["State_ID", "=", state_id]]
         )
 
-        if result.returns_rows:
-            return result.first()['State']
+        if result.with_rows:
+            return result.fetchone()['State']
 
     def get_user_pref(self):
         """

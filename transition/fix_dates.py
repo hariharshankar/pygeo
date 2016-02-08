@@ -3,29 +3,31 @@ going through all tables and columns to fix python invalid dates
 like 1999-00-00
 """
 
+#import pymysql
+import mysql.connector as pymysql
+
 __author__ = 'Harihar Shankar'
 
-
-import mysql.connector
-import time
-
-
-cxn = mysql.connector.connect(user='geo', password='0p3nM0d3!', database='geoDev', raw=True)
+#cxn = pymysql.connect(user='root', password='A5k4m0r3',
+#                     database='geoDev', raw=True)
+#cxn = pymysql.connect(user='geo', password='0p3nM0d3!',
+#                      database='geoDev')
 
 cur_table = cxn.cursor(buffered=True)
 cur_describe = cxn.cursor(buffered=True)
 cur_select = cxn.cursor(buffered=True)
 cur_update = cxn.cursor(buffered=True)
+cur_alter = cxn.cursor(buffered=True)
 
 query = "SHOW TABLES"
 cur_table.execute(query)
 for tables in cur_table:
-    table = tables[0].decode('utf-8')
+    table = tables[0].decode("utf-8")
     query_desc = "SHOW COLUMNS FROM `%s`" % table
     cur_describe.execute(query_desc)
     for cols in cur_describe:
-        column_name = cols[0].decode('utf-8')
-        column_type = cols[1].decode('utf-8')
+        column_name = cols[0].decode("utf-8")
+        column_type = cols[1].decode("utf-8")
         if column_type.lower().find("date") >= 0:
             query_select = "SELECT `Description_ID`,`%s` FROM `%s`" % (column_name, table)
             conn_id = False
@@ -36,37 +38,47 @@ for tables in cur_table:
                 query_select = "SELECT `Connection_ID`,`%s` FROM `%s`" % (column_name, table)
                 conn_id = True
 
+            col_year = column_name.replace("_dt", "_dt_year")
+            col_month = column_name.replace("_dt", "_dt_month")
+            col_day = column_name.replace("_dt", "_dt_day")
+
+            query_alter = "ALTER TABLE `%s` ADD COLUMN " \
+                          "(`%s` YEAR, `%s` TINYINT(2), `%s` TINYINT(2))" %\
+                          (table, col_year, col_month, col_day)
+            cur_alter.execute(query_alter)
+
             for data in cur_select:
                 new_date = None
                 if not data[1]:
                     continue
-                date = data[1].decode('utf-8')
-                try:
-                    time.strptime(date, "%Y-%m-%d")
-                except Exception as e:
-                    dates = date.split("-")
+                date = data[1].decode("utf-8")
+                dates = date.split("-")
+                year = None
+                month = None
+                day = None
+                if dates[0] != "0000":
+                    year = dates[0]
+                if int(dates[1]) != 0:
+                    # month
+                    month = int(dates[1])
+                if int(dates[2]) != 0:
+                    # day
+                    day = int(dates[2])
+                query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s' " \
+                               "WHERE Description_ID=%s" \
+                               % (table, col_year, year,
+                                  col_month, month,
+                                  col_day, day, data[0].decode('utf-8'))
+                if conn_id:
+                    query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'" \
+                                           " WHERE Connection_ID=%s" \
+                    % (table, col_year, year,
+                       col_month, month,
+                       col_day, day, data[0])
+                cur_update.execute(query_update)
 
-                    if dates[0] == "0000":
-                        continue
-                    new_date = dates[0]
-                    if int(dates[1]) == 0:
-                        # month
-                        new_date += "-01"
-                    else:
-                        new_date += "-" + dates[1]
-                    if int(dates[2]) == 0:
-                        # day
-                        new_date += "-15"
-                    else:
-                        new_date += "-" + dates[2]
-                    time.strptime(new_date, "%Y-%m-%d")
-                if new_date:
-                    query_update = "UPDATE `%s` SET `%s`='%s' WHERE Description_ID=%s" \
-                                   % (table, column_name, new_date, data[0].decode('utf-8'))
-                    if conn_id:
-                        query_update = "UPDATE `%s` SET `%s`='%s' WHERE Connection_ID=%s" \
-                                       % (table, column_name, new_date, data[0].decode('utf-8'))
-                    cur_update.execute(query_update)
-
+            query_alter = "ALTER TABLE `%s` DROP COLUMN `%s`" %\
+                          (table, column_name)
+            cur_alter.execute(query_alter)
 cxn.commit()
 cxn.close()

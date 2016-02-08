@@ -2,9 +2,8 @@
 Instantiate a db connection.
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import sys
+import mysql.connector as mysql
+from mysql.connector.pooling import MySQLConnectionPool
 
 
 class Db(object):
@@ -14,44 +13,36 @@ class Db(object):
 
     def __init__(self):
 
-        connection_string = ""
-        if sys.version_info[0] == 3:
-            connection_string = \
-                "mysql+pymysql://geo:0p3nM0d3!@localhost/geoDev"
-        elif sys.version_info[0] == 2:
-            connection_string = "mysql://geo:0p3nM0d3!@localhost/geoDev"
-        else:
-            return
+        dbconfig = {
+            "database": "geoDev",
+            "user": "geo",
+            "password": "0p3nM0d3!",
+            "host": "localhost",
+            #"raw": True,
+            "pool_name": "geo_pool",
+            "pool_size": 20,
+            "pool_reset_session": True
+        }
 
         try:
-            self.__db_conn = create_engine(
-                connection_string,
-                echo=True)
-            session = sessionmaker(bind=self.__db_conn)
-            self.__session = session()
+            self.__conn_pool = MySQLConnectionPool(**dbconfig)
+            #self.__conn_pool = mysql.connect(**dbconfig)
         except Exception:
             raise
-
-    def __del__(self):
-        """
-        Close sessions and connections.
-        """
-        if self.__session:
-            self.__session.close()
-
 
     def __get_session(self):
         """
         Returns the private session var.
         """
-        return self.__session
+        return self.__conn_pool.get_connection()
+        #return self.__conn_pool
 
     def __cant_set(self):
-        "Raises runtime error."
+        """Raises runtime error."""
         raise RuntimeError("Private property cannot be set.")
 
     def __cant_get(self):
-        "Raises runtime error."
+        """Raises runtime error."""
         raise RuntimeError("Cannot get protected property.")
 
     db_conn = property(__cant_get, __cant_set)

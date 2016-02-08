@@ -6,8 +6,6 @@ Decoding function from
 http://cartometric.com/blog/2012/10/20/decode-google-map-encoded-points-as-well-known-text-wkt-with-python/
 """
 
-__author__ = 'Harihar Shankar'
-
 import os
 import sys
 
@@ -19,6 +17,8 @@ from geo.core.main import Main
 from geo.core.moderation import Moderation
 import json
 
+__author__ = 'Harihar Shankar'
+
 
 class DecodePolygon(object):
     """
@@ -27,10 +27,10 @@ class DecodePolygon(object):
     """
 
     def __init__(self):
-        self.conn = connection.Db()
-        self.main = Main(self.conn)
-        self.moderation = Moderation(self.conn)
-        self.select = Select(self.conn)
+        self.conn = connection.Db().session
+        self.main = Main(connection.Db())
+        self.moderation = Moderation(connection.Db())
+        self.select = Select(connection.Db())
 
     @staticmethod
     def decode_GMap(encoded_string):
@@ -85,7 +85,7 @@ class DecodePolygon(object):
 
     def decode_all(self):
         databases = self.main.get_databases()
-        session = self.conn.session
+        session = self.conn.cursor()
         for db in databases[1]:
             print(db[0])
             t_keys, types = self.main.get_types(db[0])
@@ -93,17 +93,24 @@ class DecodePolygon(object):
             for typ in types:
                 type_overlay = typ[1] + overlays_table
 
-                points = self.select.read(type_overlay,
+                result = self.select.read(type_overlay,
                                           columns=['Overlay_ID', 'Points'])
+                points = result.fetchall()
                 for point in points:
-                    if not point[1]:
+                    if not point["Points"]:
                         continue
 
-                    decoded_point = self.decode_GMap(point[1])
-                    sql = "UPDATE " + type_overlay + " SET Points=:decoded_point WHERE Overlay_ID=:overlay_id"
-                    print(sql, point[0])
-                    session.execute(sql, {"overlay_id": point[0], "decoded_point": json.dumps(decoded_point)})
-                session.commit()
+                    decoded_point = self.decode_GMap(point["Points"])
+                    #print(point, decoded_point)
+                    sql = "UPDATE " + type_overlay + " SET Points=%(decoded_point)s WHERE Overlay_ID=%(overlay_id)s"
+                    print(sql, point["Overlay_ID"])
+                    params = {
+                        "overlay_id": point["Overlay_ID"],
+                        "decoded_point": json.dumps(decoded_point)
+                    }
+                    session.execute(sql, params)
+
+                self.conn.commit()
         session.close()
 
 

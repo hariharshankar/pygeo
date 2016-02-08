@@ -61,7 +61,7 @@ class GeoResource(object):
             raise LookupError("Description ID %s does not exist." %
                               self.description_id)
 
-        ids = result.first()
+        ids = result.fetchone()
         self.type_id = ids['Type_ID']
         self.country_id = ids['Country_ID']
         self.state_id = ids['State_ID']
@@ -90,8 +90,9 @@ class GeoResource(object):
         ids = self.select.read("History", columns=["max(Description_ID)"],
                                where=where)
 
-        res = ids.first()
-        self.latest_revision_id = res[0]
+        res = ids.fetchone()
+        print(res)
+        self.latest_revision_id = res.get("max(Description_ID)")
         return self.latest_revision_id
 
     def get_resource_name(self, type_name=None):
@@ -119,5 +120,5 @@ class GeoResource(object):
                                 where=[["Description_ID", "=",
                                         self.get_latest_revision_id(moderated=False)]]
                                 )
-        self.name = desc.first()[name_field]
+        self.name = desc.fetchone().get(name_field)
         return self.name

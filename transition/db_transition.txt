@@ -522,6 +522,7 @@ alter table Biomass_Potential_Environmental_Issues change Description Descriptio
 
 alter table Gas_Pipelines_Overlays drop foreign key Gas_Pipelines_Overlays_fk;
 /*alter table Gas_Pipelines_Description drop foreign key Gas_Pipelines_Description_fk;*/
+alter table Gas_Pipelines_Description drop foreign key Gas_Pipelines_Description_ibfk_1;
 alter table Gas_Pipelines_Location drop foreign key Gas_Pipelines_Location_fk;
 alter table Gas_Pipelines_Upgrade drop foreign key Gas_Pipelines_Upgrade_fk;
 alter table Gas_Pipelines_Owner_Details drop foreign key Gas_Pipelines_Owner_Details_fk;

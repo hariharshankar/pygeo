@@ -28,10 +28,10 @@ class Location(object):
                                           "=",
                                           description_id]]
                                   )
-        if not result.returns_rows:
+        if not result.with_rows:
             return (None, None)
 
-        loc = result.first()
+        loc = result.fetchone()
         lat = loc['Latitude_Start']
         lng = loc['Longitude_Start']
         lat_end = loc['Latitude_End']

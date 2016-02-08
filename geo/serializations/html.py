@@ -3,8 +3,7 @@ Builds the HTML representation for the fact sheets.
 """
 
 from geo.core.geo_resource import GeoResource
-from geo.core.main import Main
-#from geo.db import connection
+
 
 class Html(object):
     """
@@ -31,12 +30,12 @@ class Html(object):
         res_modules = self.resource.select.read("Type_Features",
                                        where=[["Type_ID", "=", self.resource.type_id]]
                                        )
-        modules = res_modules.first()
+        modules = res_modules.fetchone()
         module_names = []
         full_feature_list = self.resource.select.read_column_names("Type_Features", where='Features')[0][1]
 
-        if type(modules.Features) == str:
-            module_names = modules.Features.split(',')
+        if type(modules['Features']) == str:
+            module_names = modules['Features'].split(',')
         else:
             full_feature_list = full_feature_list.replace("set(", "")
             full_feature_list = full_feature_list.replace(")", "")
@@ -45,7 +44,7 @@ class Html(object):
 
             module_names = [str(module)
                             for module in full_feature_list.split(",")
-                            if module in modules.Features]
+                            if module in modules['Features']]
 
         html = []
 
@@ -56,7 +55,7 @@ class Html(object):
             module_id = module + "_module"
             module_heading = Html.__make_readable(module)
 
-            print(module)
+            #print(module)
             module_header_class, module_content = \
                 self.__get_module_for_feature(module)
 
@@ -126,10 +125,10 @@ class Html(object):
                                           self.resource.parent_plant_id]]
                                   )
 
-        keys = result.keys()
+        #keys = result.column_names
         values = result.fetchall()
         for value in values:
-            ai_parent_plant_id = value[keys.index("Associated_Parent_Plant_ID")]
+            ai_parent_plant_id = value["Associated_Parent_Plant_ID"]
 
             ai_res = GeoResource(self.resource.connection, description_id=ai_parent_plant_id)
 
@@ -170,9 +169,9 @@ class Html(object):
                                                self.resource.description_id]]
                                         )
         values = desc_result.fetchone()
-        station_1_id = values[1]
-        station_2_id = values[2]
-        connection_id = values[3]
+        station_1_id = values['Station_1_ID']
+        station_2_id = values['Station_2_ID']
+        connection_id = values['Connection_ID']
 
 
         html.append("<h2>Station A</h2>")
@@ -204,10 +203,11 @@ class Html(object):
                                           self.resource.description_id]]
         )
 
-        keys = result.keys()
-        values = result.fetchall()
+        #keys = result.keys()
+        #values = result.fetchall()
+        keys, values = self.resource.select.process_result_set(result)
 
-        none_values = (None for k in keys)
+        #none_values = (None for k in keys)
 
         height_ranges = self.__process_enum_from_db("Wind_Potential_Height", "Height_enumfield")
         html.append("<table>")
@@ -260,8 +260,8 @@ class Html(object):
                                           self.resource.description_id if not _id else _id[1]]]
                                   )
 
-        keys = result.keys()
-        values = result.first()
+        keys = result.column_names
+        values = result.fetchone()
         if not values:
             values = dict((k, None) for k in keys)
 
@@ -289,8 +289,9 @@ class Html(object):
                                          "=",
                                          self.resource.description_id]]
                                   )
-        keys = result.keys()
-        values = result.fetchall()
+        #keys = result.column_names
+        #values = result.fetchall()
+        keys, values = self.resource.select.process_result_set(result)
 
         html = []
         html.append("<table>")
@@ -347,7 +348,7 @@ class Html(object):
                                           self.resource.description_id]]
         )
 
-        keys = result.keys()
+        keys = result.column_names
         values = result.fetchall()
 
         #print(keys)
@@ -410,7 +411,7 @@ class Html(object):
             desc_id_result = self.resource.select.read("History", columns=["max(Description_ID)"],
                                    where=where)
 
-            res = desc_id_result.first()
+            res = desc_id_result.fetchone()
             ai_desc_id = res[0]
             html.extend(["<input type='hidden' ",
                          "name='ai_map_json' ",
@@ -433,8 +434,8 @@ class Html(object):
                                          self.resource.description_id]]
                                   )
 
-        keys = result.keys()
-        values = result.first()
+        keys = result.column_names
+        values = result.fetchone()
         if not values:
             values = dict((k, None) for k in keys)
         html = []
@@ -492,9 +493,6 @@ class Html(object):
         method that creates the performance table.
         """
 
-        keys = []
-        values = []
-
         table_name = self.resource.type_name + "_Performance"
         result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
@@ -502,8 +500,9 @@ class Html(object):
                                          self.resource.description_id]]
                                   )
 
-        keys.extend(result.keys())
-        values.extend(result.fetchall())
+        #keys.extend(result.column_names)
+        #values.extend(result.fetchall())
+        keys, values = self.resource.select.process_result_set(result)
 
         if self.resource.type_id == 5:
 
@@ -513,7 +512,7 @@ class Html(object):
                                                            "=",
                                                            self.resource.description_id]])
 
-            number_of_units = units_number_result.fetchall()[0][0]
+            number_of_units = units_number_result.fetchall()[0]["count(Description_ID)"]
 
             cap_gen_table_name = "Nuclear_Capacity_Generated"
             gwh_table_name = "Nuclear_Gigawatt_Hours_Generated"
@@ -525,7 +524,8 @@ class Html(object):
                                                       self.resource.description_id]],
                                               order_by=["Unit_Description_ID", "asc"]
             )
-            keys, values = self.__format_nuclear_performance_data(keys, values, cap_gen_result.keys(), cap_gen_result.fetchall(), number_of_units)
+            cap_gen_keys, cap_gen_values = self.resource.select.process_result_set(cap_gen_result)
+            keys, values = self.__format_nuclear_performance_data(keys, values, cap_gen_keys, cap_gen_values, number_of_units)
 
             gwh_result = self.resource.select.read(gwh_table_name,
                                           columns=["Unit_Description_ID", "Year_yr", "Gigawatt_Hours_Generated_nbr"],
@@ -534,7 +534,8 @@ class Html(object):
                                                   self.resource.description_id]],
                                           order_by=["Unit_Description_ID", "asc"]
             )
-            keys, values = self.__format_nuclear_performance_data(keys, values, gwh_result.keys(), gwh_result.fetchall(), number_of_units)
+            gwh_keys, gwh_values = self.resource.select.process_result_set(gwh_result)
+            keys, values = self.__format_nuclear_performance_data(keys, values, gwh_keys, gwh_values, number_of_units)
         #print(keys)
         #print(values)
 
@@ -558,6 +559,7 @@ class Html(object):
         unit_index = {}
         for cap_gen_val in nuclear_values:
             units[cap_gen_val[0]] = None
+        performance_keys = list(performance_keys)
         for i in range(number_of_units):
             performance_keys.insert(year_index+i+1, nuclear_keys[2] + "_" + str(i+1))
 
@@ -719,8 +721,9 @@ class Html(object):
                                          "=",
                                          self.resource.description_id]]
                                   )
-        keys = result.keys()
-        values = result.fetchall()
+        #keys = result.column_names
+        #values = result.fetchall()
+        keys, values = self.resource.select.process_result_set(result)
 
         unit_values = []
         control_values = []
@@ -980,8 +983,8 @@ class Html(object):
                     "' name='", key, "'>"])
 
         for val in values:
-            option_value = str(val[0])
-            option_text = val[1]
+            option_value = str(val[t_name+"_ID"])
+            option_text = val[t_name]
             if option_value == str(value):
                 row.extend(["<option value='", option_value,
                             "' selected='selected'>", option_text,
