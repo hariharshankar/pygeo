@@ -22,10 +22,10 @@ class Metadata(object):
     """
 
     def __init__(self):
-        self.conn = connection.Db()
-        self.main = Main(self.conn)
-        self.moderation = Moderation(self.conn)
-        self.select = Select(self.conn)
+        self.conn = connection.Db().session
+        self.main = Main(connection.Db())
+        self.moderation = Moderation(connection.Db())
+        self.select = Select(connection.Db())
 
         self.perf_fields = ("_Performance", "Year_yr",
                        ["Total_Gigawatt_Hours_Generated_nbr", "CO2_Emitted_(Tonnes)_nbr"])
@@ -44,12 +44,13 @@ class Metadata(object):
 
     def get_unit_data(self, typ, plants):
         # units
-        units = self.select.read(typ[1] + self.unit_fields[0],
+        results = self.select.read(typ[1] + self.unit_fields[0],
                             columns=["`" + self.unit_fields[1] + "`",
                                      "`" + self.unit_fields[2] + "`", "Description_ID"],
                             where=[["Description_ID", "in",
-                                    [plant[0] for plant in plants]]])
-
+                                    [plant[0] for plant in plants]]],
+                                 dict_cursor=False)
+        units = results.fetchall()
         cumulative_capacity_total = 0
         cumulative_capacity = {}
         new_capacity = {}
@@ -88,13 +89,14 @@ class Metadata(object):
 
     def get_wind_unit_data(self, typ, plants):
         # units
-        units = self.select.read(typ[1] + self.wind_unit_fields[0],
+        results = self.select.read(typ[1] + self.wind_unit_fields[0],
                                  columns=["`" + self.wind_unit_fields[1] + "`",
                                           "`" + self.wind_unit_fields[2] + "`",
                                           "`" + self.wind_unit_fields[3] + "`"],
                                  where=[["Description_ID", "in",
-                                         [plant[0] for plant in plants]]])
-
+                                         [plant[0] for plant in plants]]],
+                                 dict_cursor=False)
+        units = results.fetchall()
         cumulative_capacity_total = 0
         new_capacity = {}
         new_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
@@ -139,10 +141,12 @@ class Metadata(object):
         else:
             cols.extend(["`" + p_col + "`" for p_col in self.perf_fields[2]])
 
-        performances = self.select.read(typ[1] + self.perf_fields[0],
+        results = self.select.read(typ[1] + self.perf_fields[0],
                                    columns=cols,
                                    where=[["Description_ID", "in",
-                                           [plant[0] for plant in plants]]])
+                                           [plant[0] for plant in plants]]],
+                                        dict_cursor=False)
+        performances = results.fetchall()
         co2 = {}
         ghg = {}
         for perf in performances:
@@ -188,17 +192,21 @@ class Metadata(object):
         # performance
         cols = [self.perf_fields[1]]
         cols.append("`" + self.nuclear_ghg_fields[2][0] + "`")
-        ghg_perf = self.select.read(typ[1] + self.nuclear_ghg_fields[0],
+        ghg_res = self.select.read(typ[1] + self.nuclear_ghg_fields[0],
                                         columns=cols,
                                         where=[["Description_ID", "in",
-                                                [plant[0] for plant in plants]]])
+                                                [plant[0] for plant in plants]]],
+                                    dict_cursor=False)
 
+        ghg_perf = ghg_res.fetchall()
         cols = [self.perf_fields[1]]
         cols.append("`" + self.nuclear_perf_fields[2][0] + "`")
-        reg_perf = self.select.read(typ[1] + self.nuclear_perf_fields[0],
+        reg_res = self.select.read(typ[1] + self.nuclear_perf_fields[0],
                                     columns=cols,
                                     where=[["Description_ID", "in",
-                                            [plant[0] for plant in plants]]])
+                                            [plant[0] for plant in plants]]],
+                                    dict_cursor=False)
+        reg_perf = reg_res.fetchall()
         co2 = {}
         ghg = {}
         for perf in ghg_perf:
@@ -243,7 +251,7 @@ class Metadata(object):
     def compute(self):
         t_keys, types = self.main.get_types("PowerPlants")
         #types = [[1, "Coal"]]
-        session = self.conn.session
+        session = self.conn.cursor()
         for typ in types:
             c_keys, countries = self.main.get_countries(typ[0])
             #countries = [[38, "Canada"]]
@@ -263,11 +271,11 @@ class Metadata(object):
                 else:
                     ghg, co2 = self.get_general_performance_data(typ, plants)
 
-                sql = "INSERT INTO metadata SET Country_ID=:country_id, \
-                 Type_ID=:type_id, Number_of_Plants=:number_of_plants, \
-                 Cumulative_Capacity=:cum_cap, \
-                 Cumulative_Capacity_Total=:cum_cap_tot, New_Capacity_Added=:new_cap, \
-                 Annual_Gigawatt_Hours_Generated=:ghg, Annual_CO2_Emitted=:co2"
+                sql = "INSERT INTO metadata SET Country_ID=%(country_id)s, \
+                 Type_ID=%(type_id)s, Number_of_Plants=%(number_of_plants)s, \
+                 Cumulative_Capacity=%(cum_cap)s, \
+                 Cumulative_Capacity_Total=%(cum_cap_tot)s, New_Capacity_Added=%(new_cap)s, \
+                 Annual_Gigawatt_Hours_Generated=%(ghg)s, Annual_CO2_Emitted=%(co2)s"
 
                 session.execute(sql, {
                     "country_id": country[0],
@@ -279,7 +287,7 @@ class Metadata(object):
                     "ghg": json.dumps(ghg),
                     "co2": json.dumps(co2)
                 })
-                session.commit()
+                self.conn.commit()
         session.close()
 
 if __name__ == "__main__":

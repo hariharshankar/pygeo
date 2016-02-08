@@ -27,7 +27,7 @@ class Select(object):
              columns=None,
              where=None,
              order_by=None,
-             limit=None):
+             limit=None, dict_cursor=True):
         """
         Fetch rows from database.
 
@@ -45,7 +45,10 @@ class Select(object):
         if table_name == "" or table_name.find(" ") >= 0:
             return
 
-        db_cur = self.db_conn.cursor(dictionary=True)
+        if dict_cursor:
+            db_cur = self.db_conn.cursor(dictionary=True)
+        else:
+            db_cur = self.db_conn.cursor()
         sql = ["SELECT"]
         alt_sql = ["SELECT"]
 
