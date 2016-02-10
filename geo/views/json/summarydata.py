@@ -25,16 +25,15 @@ def view():
         columns.extend(["Type_ID", "Country_ID", "Number_of_Plants", "Cumulative_Capacity"])
 
     select = Select(db)
-    result = select.read("metadata", columns=columns, where=where)
+    result = select.read("metadata", columns=columns, where=where, dict_cursor=False)
 
-    keys = result.keys()
+    keys = result.column_names
     values = []
-    if not result.returns_rows:
+    if not result.with_rows:
         return flask.jsonify({'keys': keys, 'values': values})
 
     rows = result.fetchall()
     for r in rows[0]:
-        print(r)
         values.append(json.loads(str(r)))
     #values = [json.loads(str(r)) for r in rows]
     #keys, values = select.process_result_set(result)

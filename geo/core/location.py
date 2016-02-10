@@ -110,8 +110,8 @@ class Location(object):
                                               "Longitude_Start"],
                                      where=[["Description_ID",
                                              "in",
-                                             [value[0] for value in values]]]
-                                     )
+                                             [value[0] for value in values]]],
+                                     dict_cursor=False)
 
         locations = locations.fetchall()
 
