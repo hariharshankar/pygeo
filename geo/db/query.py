@@ -48,7 +48,7 @@ class Select(object):
         if dict_cursor:
             db_cur = self.db_conn.cursor(dictionary=True)
         else:
-            db_cur = self.db_conn.cursor()
+            db_cur = self.db_conn.cursor(raw=True)
         sql = ["SELECT"]
         alt_sql = ["SELECT"]
 
@@ -131,7 +131,7 @@ class Select(object):
             except Exception:
                 raise
 
-        #print(db_cur.statement)
+        print(db_cur.statement)
         #print(db_cur.fetchwarnings())
         return db_cur
 

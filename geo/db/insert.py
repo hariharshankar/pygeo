@@ -453,18 +453,20 @@ class InsertFactSheet(object):
                     key = key.replace(":", "")
                     key = key.replace("%", "")
                     sql_fields.append("`" + k[0] + "`=:" + key.lower())
-                    alt_sql_fields.append("`" + k[0] + "`='%(" + key.lower() + ")s'")
+                    alt_sql_fields.append("`" + k[0] + "`=%(" + key.lower() + ")s")
                     sql_values[key.lower()] = value.strip()
 
             sql_statement.append(",".join(sql_fields))
             alt_sql_statement.append(",".join(alt_sql_fields))
 
-            session = self.db_conn.cursor()
+            session = self.db_conn.cursor(raw=True)
             try:
-                print("".join(sql_statement) % sql_values)
+                #print("".join(alt_sql_statement) % sql_values)
                 session.execute("".join(alt_sql_statement), sql_values)
                 self.db_conn.commit()
-            except Exception:
+                print("SQL: " + session.statement)
+            except Exception as e:
+                print("ERROR: " + str(e))
                 try:
                     # may be there is a spl char in the sql stmt
                     # using connection().execute will not quote the sql stmt
@@ -475,6 +477,7 @@ class InsertFactSheet(object):
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     sql_stmt = sql_stmt.replace("##_", "%_")
+                    print("ALT SQL:")
                     print(sql_stmt)
                     session.execute(sql_stmt)
                     self.db_conn.commit()
@@ -483,6 +486,7 @@ class InsertFactSheet(object):
                     raise
             finally:
                 session.close()
+
 
         return 1
 

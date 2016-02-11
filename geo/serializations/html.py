@@ -257,8 +257,8 @@ class Html(object):
         result = self.resource.select.read(table_name,
                                   where=[["Description_ID" if not _id else _id[0],
                                           "=",
-                                          self.resource.description_id if not _id else _id[1]]]
-                                  )
+                                          self.resource.description_id if not _id else _id[1]]],
+                                  dict_cursor=False)
 
         keys = result.column_names
         values = result.fetchone()
@@ -266,10 +266,10 @@ class Html(object):
             values = dict((k, None) for k in keys)
 
         html.append("<table>")
-        for k in keys:
+        for i, k in enumerate(keys):
             html.append("<tr>")
             html.append(self.__create_editable_row(k,
-                                                   values[k],
+                                                   values[i],
                                                    table_name,
                                                    False, dual=dual)
                         )
@@ -719,11 +719,13 @@ class Html(object):
         result = self.resource.select.read(table_name,
                                   where=[["Description_ID",
                                          "=",
-                                         self.resource.description_id]]
-                                  )
+                                         self.resource.description_id]],
+                                  dict_cursor=False)
         #keys = result.column_names
         #values = result.fetchall()
-        keys, values = self.resource.select.process_result_set(result)
+        #keys, values = self.resource.select.process_result_set(result)
+        keys = result.column_names
+        values = result.fetchall()
 
         unit_values = []
         control_values = []
@@ -836,8 +838,8 @@ class Html(object):
 
                 if not value:
                     value = ""
-                else:
-                    value = str(value)
+                elif type(value) == bytearray:
+                    value = value.decode("utf-8")
 
                 if keys[count].find("_enumfield") >= 0:
                     row.extend(["<td>",
@@ -896,6 +898,8 @@ class Html(object):
 
         if not value:
             value = ""
+        elif type(value) == bytearray:
+            value = value.decode("utf-8")
 
         if not self.__display_key(key):
             return ""
