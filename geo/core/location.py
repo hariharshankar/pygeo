@@ -117,9 +117,9 @@ class Location(object):
 
         for value in values:
             for location in locations:
-                if value[0] == location[0]:
-                    loc.append([location[1],
-                                location[2],
+                if value[0] == int(location[0].decode("utf8")):
+                    loc.append([location[1].decode("utf8"),
+                                location[2].decode("utf8"),
                                 value[1]
                                 ])
         """

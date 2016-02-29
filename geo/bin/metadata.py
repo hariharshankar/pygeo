@@ -62,10 +62,10 @@ class Metadata(object):
             if not unit[1] or not unit[0]:
                 continue
 
-            unit_val = math.ceil(unit[1])
+            unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = unit[0].year
+            year = str(unit[0])
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
@@ -105,15 +105,15 @@ class Metadata(object):
             if not unit[1] or not unit[0]:
                 continue
 
-            unit_val = math.ceil(unit[1])
+            unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = unit[0].year
+            year = str(unit[0])
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
             if unit[2] and float(unit[2]):
-                cap_values[year] += unit_val * math.ceil(unit[2])
+                cap_values[year] += unit_val * math.ceil(float(unit[2]))
 
         cum_cap_values = {}
         prev_year = 0
@@ -150,19 +150,19 @@ class Metadata(object):
         co2 = {}
         ghg = {}
         for perf in performances:
-            year = perf[0]
+            year = str(perf[0])
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
                 if g_val == -1:
                     ghg[year] = 0
-                ghg[year] += math.ceil(perf[1])
+                ghg[year] += math.ceil(float(perf[1]))
 
             if perf[2]:
                 c_val = co2.get(year, -1)
                 if c_val == -1:
                     co2[year] = 0
-                co2[year] += math.ceil(perf[2])
+                co2[year] += math.ceil(float(perf[2]))
 
         # for plotting purposes, the years in both the dicts must
         # be the same. so adding zeros to missing years.
@@ -210,20 +210,20 @@ class Metadata(object):
         co2 = {}
         ghg = {}
         for perf in ghg_perf:
-            year = perf[0]
+            year = str(perf[0])
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
                 if g_val == -1:
                     ghg[year] = 0
-                ghg[year] += math.ceil(perf[1])
+                ghg[year] += math.ceil(float(perf[1]))
 
         for perf in reg_perf:
             if perf[1]:
                 c_val = co2.get(year, -1)
                 if c_val == -1:
                     co2[year] = 0
-                co2[year] += math.ceil(perf[1])
+                co2[year] += math.ceil(float(perf[1]))
 
         # for plotting purposes, the years in both the dicts must
         # be the same. so adding zeros to missing years.
