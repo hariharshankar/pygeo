@@ -65,7 +65,7 @@ class Metadata(object):
             unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = str(unit[0])
+            year = unit[0].decode("utf8")
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
@@ -108,7 +108,7 @@ class Metadata(object):
             unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = str(unit[0])
+            year = unit[0].decode("utf8")
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0

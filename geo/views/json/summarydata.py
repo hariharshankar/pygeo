@@ -35,7 +35,6 @@ def view():
     rows = result.fetchall()
     for r in rows[0]:
         r = r.decode("utf8")
-        print(r, type(r))
         values.append(json.loads(r))
     #values = [json.loads(str(r)) for r in rows]
     #keys, values = select.process_result_set(result)
