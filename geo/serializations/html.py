@@ -263,7 +263,7 @@ class Html(object):
         keys = result.column_names
         values = result.fetchone()
         if not values:
-            values = dict((k, None) for k in keys)
+            values = [None for k in keys]
 
         html.append("<table>")
         for i, k in enumerate(keys):

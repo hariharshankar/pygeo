@@ -65,7 +65,7 @@ class Metadata(object):
             unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = unit[0].decode("utf8")
+            year = unit[0].decode("utf8").split("-")[0]
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
@@ -108,7 +108,7 @@ class Metadata(object):
             unit_val = math.ceil(float(unit[1]))
             cumulative_capacity_total += unit_val
 
-            year = unit[0].decode("utf8")
+            year = unit[0].decode("utf8").split("-")[0]
             val = cap_values.get(year, -1)
             if val == -1:
                 cap_values[year] = 0
@@ -150,7 +150,7 @@ class Metadata(object):
         co2 = {}
         ghg = {}
         for perf in performances:
-            year = str(perf[0])
+            year = perf[0].decode("utf8")
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
@@ -210,7 +210,7 @@ class Metadata(object):
         co2 = {}
         ghg = {}
         for perf in ghg_perf:
-            year = str(perf[0])
+            year = perf[0].decode("utf8")
 
             if perf[1]:
                 g_val = ghg.get(year, -1)
