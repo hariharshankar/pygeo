@@ -219,7 +219,7 @@ AI = {
                 success: function(data, textStatus, jqXHR) {
                     var select = "<select id='selectedAI' size=12 style='min-width: 440px; height: 250px;'>"
                     for(var i=0, res; res=data.resources[i]; i++) {
-                        select += "<option value='"+res.Description_ID+"' style='padding: 3px 0;'>"+res.Name+"</option>";
+                        select += "<option value='"+res.Description_ID+"' style='padding: 3px 0;'>"+res.Name_omit+"</option>";
                     }
                     select += "</select>"
                     $("#aiResources").html(select);
@@ -1314,6 +1314,7 @@ Map = {
     mapOpacity: 0.4,
     mapStrokeWeight: 1,
     overlaysArray: [],
+    savedMarker: null,
 
     addOverlayDetails: function(overlayType, overlayArea, overlayLength, overlayNumber, points, overlayName) {
         var type_name = $("#Type_Name").val()
@@ -1479,11 +1480,25 @@ Map = {
         var html = ""
         html += "<b>Latitude:</b>&nbsp;<input type='text' size='10' name='Latitude_Start' id='Latitude_Start' value='"+lat+"' />&nbsp;"
         html += "<b>Longitude:</b>&nbsp;<input type='text' size='10' name='Longitude_Start' id='Longitude_Start' value='"+lng+"' />&nbsp;"
+        html += "<button id='restore_placemarks' name='restore_placemarks'>Restore Placemarks</button>";
 
         html += "<br/>"
 
+        html += this.createHiddenHtmlElement("Latitude_Start_old", lat);
+        html += this.createHiddenHtmlElement("Longitude_Start_old", lng);
+
         $("#overlay-details").prepend(html)
         Form.createAbstract();
+        $("#restore_placemarks")
+        .button()
+        .click( function(event) {
+            event.preventDefault();
+            var old_lat = $("#Latitude_Start_old").val();
+            var old_lng = $("#Longitude_Start_old").val();
+            $("#Latitude_Start").val(old_lat);
+            $("#Longitude_Start").val(old_lng);
+        });
+
     },
 
     plotOverlays: function(data, showDrawingTools) {
@@ -1604,9 +1619,9 @@ Map = {
 
     init: function(showDrawingTools) {
 
-        if( document.getElementById('map-container') == undefined )
+        if( document.getElementById('map-container') == undefined ) {
             return;
-
+        }
         $.getJSON($("#map_json").attr("value"), function(data) {
             Map.plotOverlays(data, showDrawingTools);
         });
