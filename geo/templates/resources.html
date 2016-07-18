@@ -11,6 +11,7 @@
         <a class="create-new-plant-button"><b>Choose a state to create new {{ type }} {{ category }}</b></a>
         <script>
             $( ".create-new-plant-button" ).button()
+            .prop("disabled", true");
         </script>
     {% endif %}
 </div>

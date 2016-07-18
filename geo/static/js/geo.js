@@ -270,6 +270,11 @@ AI = {
         AI.selectableIds.push($(t).attr("id"))
     },
     init: function() {
+        console.log($("#Description_ID").attr("value"));
+        if ($("#Description_ID").attr("value") == 0) {
+        console.log($("#Description_ID").attr("value"));
+            $("#Associated_Infrastructure_module").html("Associated Infrastructures cannot be added for new plants at the moment."); 
+        }
         $.ajax({
             url: "/show_ai/" + $("#Description_ID").attr("value"),
             success: function(data, textStatus, jqXHR) {
@@ -1410,7 +1415,8 @@ Map = {
                 strokeWeight: Map.mapStrokeWeight,
                 clickable: false,
                 zIndex: 1,
-                editable: true 
+                editable: true,
+                draggable: true
             }
             event.overlay.setOptions({'options': options})
             overlayType = drawingManager.getDrawingMode()
@@ -1497,6 +1503,8 @@ Map = {
             var old_lng = $("#Longitude_Start_old").val();
             $("#Latitude_Start").val(old_lat);
             $("#Longitude_Start").val(old_lng);
+            //latlng = new google.maps.LatLng({lat: parseInt(old_lat), lng: parseInt(old_lng)});
+            Map.savedMarker.setPosition({lat: parseFloat(old_lat), lng: parseFloat(old_lng)});
         });
 
     },
@@ -1548,7 +1556,7 @@ Map = {
                         position: new google.maps.LatLng(lat,lng),
                         map: Map.map
                     });
-                }, 500);
+                }, 1000);
 
                 return;
             }
@@ -1588,9 +1596,17 @@ Map = {
                 }
                 marker = new google.maps.Marker({
                     position: new google.maps.LatLng(lat,lng),
+                    editable: true,
+                    draggable: true,
                     map: Map.map
                 });
 
+                google.maps.event.addListener(marker, 'dragend', (function(marker, location) {
+                    return function() {
+                        $("#Latitude_Start").val(marker.position.lat());
+                        $("#Longitude_Start").val(marker.position.lng());
+                    }
+                })(marker, location));
                 google.maps.event.addListener(marker, 'click', (function(marker, location) {
                     return function() {
                         var infoWindow = new google.maps.InfoWindow();
@@ -1599,10 +1615,14 @@ Map = {
                     }
                 })(marker, location));
 
+                Map.savedMarker = marker;
+
                 if (lat_end != null) {
                     Map.showLatLng(lat_end, lng_end)
                     marker_end = new google.maps.Marker({
                         position: new google.maps.LatLng(lat_end,lng_end),
+                        editable: true,
+                        draggable: true,
                         map: Map.map
                     });
                     google.maps.event.addListener(marker_end, 'click', (function(marker_end, location) {
