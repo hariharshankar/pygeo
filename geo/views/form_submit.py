@@ -103,5 +103,5 @@ def view():
     flask.flash("Your changes were successfully submitted and is awaiting moderation.<br/>\
           Link to <a href='" +
           flask.url_for('form.factsheet', description_id=old_description_id) +
-          "' target='_blank'>Original FactSheet</a>", "warning")
+          "'>Original FactSheet</a>", "warning")
     return flask.redirect(flask.url_for('form.factsheet', description_id=description_id))

@@ -132,7 +132,7 @@ class Html(object):
 
             ai_res = GeoResource(self.resource.connection, description_id=ai_parent_plant_id)
 
-            html.append("<b><a href=\"geoid/%s\" target=\"_blank\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
+            html.append("<b><a href=\"geoid/%s\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
                                                                                 ai_res.get_resource_name()))
 
         html.append('<div id="searchAI" class="ai-search-module">')

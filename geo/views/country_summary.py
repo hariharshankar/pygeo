@@ -97,21 +97,21 @@ def view(country_id=None, country_abbr=None):
         s_link.append("<a href='/summary/type/")
         s_link.append(str(t['Type_ID']))
         s_link.append("/" + str(country_id))
-        s_link.append("' target='_blank'>Click Here</a>")
+        s_link.append("'>Click Here</a>")
 
         map_link = []
         map_link.append("<a href='/map/")
         map_link.append(db_name.lower() + "/")
         map_link.append(str(t['Type_ID']) + "/")
         map_link.append(str(country_id) + "/0/")
-        map_link.append("' target='_blank'>Map</a>")
+        map_link.append("'>Map</a>")
 
         all_units = []
         all_units.append("<a href='/allunits/")
         all_units.append(pref[0] + "/")
         all_units.append(str(t['Type_ID']) + "/")
         all_units.append(str(country_id))
-        all_units.append("' target='_blank'>All Units</a>")
+        all_units.append("'>All Units</a>")
 
         module = {}
         module['heading'] = type_name

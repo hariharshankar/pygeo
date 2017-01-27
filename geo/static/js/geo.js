@@ -95,6 +95,7 @@ AI = {
         if (k == "Database_Type") {
             k = "Category";
         }
+        k = "Select " + k;
         var elementContentClass = element + "Content";
 
         var disableSelect = false
@@ -270,10 +271,8 @@ AI = {
         AI.selectableIds.push($(t).attr("id"))
     },
     init: function() {
-        console.log($("#Description_ID").attr("value"));
         if ($("#Description_ID").attr("value") == 0) {
-        console.log($("#Description_ID").attr("value"));
-            $("#Associated_Infrastructure_module").html("Associated Infrastructures cannot be added for new plants at the moment."); 
+            $("#Associated_Infrastructure_module").html("Associated Infrastructures cannot be added for new plants at the moment.");
         }
         $.ajax({
             url: "/show_ai/" + $("#Description_ID").attr("value"),
@@ -306,6 +305,7 @@ Search = {
         if (k == "Database_Type") {
             k = "Category";
         }
+        k = "Select " + k;
         var elementContentClass = element + "Content";
 
         var disableSelect = false
@@ -1170,7 +1170,8 @@ Chart = {
                 var a = d.startAngle + (d.endAngle - d.startAngle)/2 - Math.PI/2;
                 d.cy = Math.sin(a) * (radius - 75);
                 return d.y = Math.sin(a) * (radius - 20);
-            })
+            });
+            /*
             .text(function(d, i) { return pie_data.labels[i] + " - " + d.value + " MWe"; })
                 .each(function(d) {
                     var bbox = this.getBBox();
@@ -1178,7 +1179,36 @@ Chart = {
                     d.ox = d.x + bbox.width/2 + 2;
                     d.sy = d.oy = d.y + 5;
                 });
+                */
+var legendRectSize = (radius * 0.05);
+var legendSpacing = radius * 0.02;
 
+
+var legend = svg.selectAll('.legend')
+        .data(color.domain())
+        .enter()
+        .append('g')
+        .attr('class', 'legend')
+        .attr('transform', function(d, i) {
+            var height = legendRectSize + legendSpacing;
+            var offset =  height * color.domain().length / 2;
+            var horz = -3 * legendRectSize;
+            var vert = i * height - offset;
+            return 'translate(' + horz + ',' + vert + ')';
+        });
+
+    legend.append('rect')
+        .attr('width', legendRectSize)
+        .attr('height', legendRectSize)
+        .style('fill', color)
+        .style('stroke', color);
+
+    legend.append('text')
+        .attr('x', legendRectSize + legendSpacing)
+        .attr('y', legendRectSize - (legendSpacing-4))
+        .text(function(d) { return pie_data.labels[d]; });
+
+/*
             svg.append("defs").append("marker")
                 .attr("id", "circ")
                 .attr("markerWidth", 6)
@@ -1203,6 +1233,7 @@ Chart = {
                         return "M" + d.ox + "," + d.oy + "L" + d.sx + "," + d.sy + " " + d.cx + "," + d.cy;
                     }
                 });
+                */
         }
     }
 
@@ -1332,8 +1363,13 @@ Map = {
         if (overlayNumber > Map.overlaysCount) {
             details += "<div id='overlay_"+overlayNumber+"' name='overlay_"+overlayNumber+"' >";
             details += "<span id='overlay_color_"+overlayNumber+"' name='overlay_color_"+overlayNumber+"' style='background: "+overlayColor+"; width: 10px; height: 10px;'>&nbsp;&nbsp;&nbsp;</span>&nbsp;"
-            details += "<span id='overlay_area_"+overlayNumber+"'>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;</span>"
-            if (document.getElementById("Overlay_Name_###_"+overlayNumber) != "") {
+            if (overlayType == "Polygon") {
+                details += "<span id='overlay_area_"+overlayNumber+"'>Area: <b>"+overlayArea+" km<sup>2</sup></b>&nbsp;|&nbsp;</span>"
+            }
+            else if (overlayType == "Polyline") {
+                details += "<span id='overlay_area_"+overlayNumber+"'>Length: <b>"+parseFloat(overlayLength/1000).toFixed(2)+" km</b>&nbsp;|&nbsp;</span>"
+            }
+            if (document.getElementById("Overlay_Name_###_"+overlayNumber) != "" && overlayName ) {
                 details += "<span>Description: <input type='input' size='15' id='Overlay_Name_###_"+overlayNumber+"' name='Overlay_Name_###_"+overlayNumber+"' value='"+overlayName+"' /></span>";
             }
             else {

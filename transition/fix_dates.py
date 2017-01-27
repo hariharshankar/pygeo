@@ -10,8 +10,8 @@ __author__ = 'Harihar Shankar'
 
 #cxn = pymysql.connect(user='root', password='A5k4m0r3',
 #                     database='geoDev', raw=True)
-#cxn = pymysql.connect(user='geo', password='0p3nM0d3!',
-#                      database='geoDev')
+cxn = pymysql.connect(user='geo', password='0p3nM0d3!',
+                      database='geoDev')
 
 cur_table = cxn.cursor(buffered=True)
 cur_describe = cxn.cursor(buffered=True)
@@ -22,12 +22,13 @@ cur_alter = cxn.cursor(buffered=True)
 query = "SHOW TABLES"
 cur_table.execute(query)
 for tables in cur_table:
-    table = tables[0].decode("utf-8")
+    #table = tables[0].decode("utf-8")
+    table = tables[0]
     query_desc = "SHOW COLUMNS FROM `%s`" % table
     cur_describe.execute(query_desc)
     for cols in cur_describe:
-        column_name = cols[0].decode("utf-8")
-        column_type = cols[1].decode("utf-8")
+        column_name = cols[0]
+        column_type = cols[1]
         if column_type.lower().find("date") >= 0:
             query_select = "SELECT `Description_ID`,`%s` FROM `%s`" % (column_name, table)
             conn_id = False
@@ -51,7 +52,7 @@ for tables in cur_table:
                 new_date = None
                 if not data[1]:
                     continue
-                date = data[1].decode("utf-8")
+                date = data[1]
                 dates = date.split("-")
                 year = None
                 month = None
@@ -68,7 +69,7 @@ for tables in cur_table:
                                "WHERE Description_ID=%s" \
                                % (table, col_year, year,
                                   col_month, month,
-                                  col_day, day, data[0].decode('utf-8'))
+                                  col_day, day, data[0])
                 if conn_id:
                     query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'" \
                                            " WHERE Connection_ID=%s" \

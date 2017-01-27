@@ -16,12 +16,13 @@ class Moderation(object):
         self.db_conn = db_conn
         self.types_with_segments = [19, 20, 24, 25, 26, 27]
 
-    def get_all_resources(self, country_id=0, type_id=0):
+    def get_all_resources(self, country_id=0, type_id=0, state_id=0):
         """
         Fetches the most recent version for all the resources
         for the given country and type.
-        @param: country: country id/name
-        @param: typ: type id/name
+        @param: country_id: country id
+        @param: type_id: type id
+        @param: state_id: state id
 
         """
 
@@ -72,6 +73,23 @@ class Moderation(object):
             "type_id": type_id,
             "accepted": 1
         }
+        if state_id > 0:
+            sql = "SELECT Parent_Plant_ID,Description_ID FROM History WHERE \
+                    Parent_Plant_ID in \
+                        (SELECT distinct(Parent_Plant_ID) \
+                        FROM History \
+                        WHERE Country_ID=%(country_id)s \
+                        and State_ID=%(state_id)s \
+                        and Type_ID=%(type_id)s \
+                        and Accepted=%(accepted)s \
+                        ) \
+                  and Accepted=1;"
+            data = {
+                "country_id": country_id,
+                "type_id": type_id,
+                "state_id": state_id,
+                "accepted": 1
+            }
         db_cur.execute(sql, data)
 
         keys = ["Description_ID", "Name"]
@@ -90,9 +108,6 @@ class Moderation(object):
                                    ],
                             order_by=[name_field, "ASC"])
 
-        #names = result.fetchall()
-
-        #values = [name for name in names if name.get("Description_ID") is not None]
         db_cxn.close()
         return select.process_result_set(result)
 

@@ -7,7 +7,7 @@
     {% for new in new_submits %}
     <div class="{{ loop.cycle('odd-row', 'even-row') }}">
         <span class="row-number">{{ loop.index }}.</span>
-        <a href="{{ baseurl + new.description_id }}" target="_blank">{{ new.type_name }} - {{ new.country_name }} - {{ new.geo_name }}</a>
+        <a href="{{ baseurl + new.description_id }}">{{ new.type_name }} - {{ new.country_name }} - {{ new.geo_name }}</a>
     </div>
     {% endfor %}
 </div>
@@ -16,7 +16,7 @@
     {% for ed in edits %}
     <div class="{{ loop.cycle('odd-row', 'even-row') }}">
         <span class="row-number">{{ loop.index }}.</span>
-        <a href="{{ baseurl + ed.description_id }}" target="_blank">{{ ed.type_name }} - {{ ed.country_name }} - {{ ed.geo_name }}</a>
+        <a href="{{ baseurl + ed.description_id }}">{{ ed.type_name }} - {{ ed.country_name }} - {{ ed.geo_name }}</a>
     </div>
     {% endfor %}
 </div>

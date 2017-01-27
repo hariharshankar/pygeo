@@ -2,6 +2,7 @@
 {% block user_pref %}{{ user_pref|safe }}{% endblock %}
 {% block right_pane_content %}
 <div class="create-new-plant">
+    <h3>Create {{ category }}</h3>
     {% if state %}
         <a class="create-new-plant-button" href="/form.php"><b>Create new {{ type }} {{ category }} in {{ state }}, {{ country }}</b></a>
         <script>
@@ -16,10 +17,11 @@
     {% endif %}
 </div>
 <div class='tab-content'>
+    <h3>View and Edit {{ category }}</h3>
     {% for v in values %}
     <div class="{{ loop.cycle('odd-row', 'even-row') }}">
         <span class="row-number">{{ loop.index }}.</span>
-        <a href="{{ baseurl ~ v[0] }}" target="_blank">{{ v[1] }}</a>
+        <a href="{{ baseurl ~ v[0] }}">{{ v[1] }}</a>
     </div>
     {% endfor %}
 </div>

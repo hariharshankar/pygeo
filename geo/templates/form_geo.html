@@ -133,14 +133,15 @@
             <div class='leftPane-module-container'>
                 <div class="leftPane-header">
                     <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
-                    <h3>Search and Populate</h3>
+                    <h3>Search, Create and Edit GEO Data</h3>
                 </div>
                 <div id="searchLeftPane" class="leftPane-module">
                     <div id='searchDatabase_Type' class='searchSelectable'></div>
                     <div id='searchType' class='searchSelectable'></div>
                     <div id='searchCountry' class='searchSelectable'></div>
                     <div id='searchState' class='searchSelectable'></div>
-                    <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
+                    <div class='searchUpdateButton' id='searchUpdateButton'>
+                        <button id='updateSearch' class='updateSearch'>Search, Create and Edit</button></div>
 
                 </div>
                 <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />

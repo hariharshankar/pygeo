@@ -132,22 +132,28 @@
         <div id="leftPane">
             <div class='leftPane-module-container'>
                 <div class="leftPane-header">
+                    <!--
                     <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
-                    <h3>Search and Populate</h3>
+                    -->
+                    <h3>Search, Create and Edit GEO Data</h3>
                 </div>
                 <div id="searchLeftPane" class="leftPane-module">
                     <div id='searchDatabase_Type' class='searchSelectable'></div>
                     <div id='searchType' class='searchSelectable'></div>
                     <div id='searchCountry' class='searchSelectable'></div>
                     <div id='searchState' class='searchSelectable'></div>
-                    <div class='searchUpdateButton' id='searchUpdateButton'><button id='updateSearch' class='updateSearch'>Search</button></div>
+                    <div class='searchUpdateButton' id='searchUpdateButton'>
+                        <button id='updateSearch' class='updateSearch'>Search</button>
+                    </div>
 
                     <input type="hidden" name="jsonListService" id="jsonListService" value="{{ url_for('menu.menu') }}" />
                 </div>
             </div>
             <div class='leftPane-module-container'>
                 <div class="leftPane-header">
+                    <!--
                     <span class="ui-icon ui-icon-circle-minus" style="display: inline-block; float: left;"></span>
+                    -->
                     <h3>Login</h3>
                 </div>
                 <div id="leftPane-login" class='leftPane-module'>
@@ -182,6 +188,43 @@
         <div id="content">
             {% block content %}{% endblock %}
         </div>
+
+<div class="footer">
+  <hr/>
+  <p>
+    <a rel="license"
+    href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative
+    Commons License" style="border-width:0"
+    src="https://i.creativecommons.org/l/by/3.0/us/80x15.png"
+    /></a><span xmlns:dc="https://purl.org/dc/elements/1.1/">
+    <a href="http://GlobalEnergyObservatory.org/">Global
+    Energy Observatory</a></span>
+   is licensed under a <a rel="license"
+    href="http://creativecommons.org/licenses/by/3.0/us/">Creative
+    Commons Attribution 3.0 United States License</a>.
+  </p>
+
+  <p>
+    <strong>Disclaimer:</strong> All attempts have been made to ensure
+    that data, information, and tools residing at GlobalEnergyObservatory are of
+    high quality. If, inspite of our efforts, users encounter
+    errors, please contact us by e-mail. GlobalEnergyObservatory does not guarantee
+    the reliability, accuracy, or completeness of the data or
+    information provided, or the reliability and functionality of
+    software tools provided. Data and software tools are subject to
+    the <a href="http://www.copyright.gov/legislation/dmca.pdf">
+      Digital Millennium Copyright Act (DMCA)
+    </a>.
+  </p>
+
+  <p>
+    <strong><b>Acknowledgment:</b></strong> Users using and
+    downloading information from this site are requested to
+    acknowledge our contribution and reference us as follows: "Data
+    obtained from http://GlobalEnergyObservatory.org/".
+  </p>
+
+</div>
     </div>
 </body>
 </html>
