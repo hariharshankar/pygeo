@@ -133,12 +133,18 @@ class Moderation(object):
         edits = []
 
         for description_id in description_ids:
+
+            if not description_id['Parent_Plant_ID']:
+                #TODO: this should not happen. all versions shd have a parent. error from old code?
+                continue
+
             geo_resource = GeoResource(self.db_conn, description_id['Description_ID'])
             type_id = geo_resource.type_id
             country_id = geo_resource.country_id
 
             type_name = main.get_type_name(type_id)
             country_name = main.get_country_name(country_id)
+
             geo_name = geo_resource.get_resource_name(type_name=type_name)
             if description_id['Description_ID'] == description_id['Parent_Plant_ID']:
                 new_submits.append({

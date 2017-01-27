@@ -1183,7 +1183,15 @@ Chart = {
 var legendRectSize = (radius * 0.05);
 var legendSpacing = radius * 0.02;
 
-
+//console.log(pie_data);
+var pie_perc = [];
+var sum=0;
+for (var k=0, f; f=pie_data.values[k]; k++) {
+    sum += f;
+}
+for (var k=0, f; f=pie_data.values[k]; k++) {
+    pie_perc[k] = (f/sum) * 100;
+}
 var legend = svg.selectAll('.legend')
         .data(color.domain())
         .enter()
@@ -1206,7 +1214,7 @@ var legend = svg.selectAll('.legend')
     legend.append('text')
         .attr('x', legendRectSize + legendSpacing)
         .attr('y', legendRectSize - (legendSpacing-4))
-        .text(function(d) { return pie_data.labels[d]; });
+        .text(function(d) { return pie_data.labels[d] + ", " + parseFloat(pie_perc[d]).toFixed(2) + "%"; });
 
 /*
             svg.append("defs").append("marker")
