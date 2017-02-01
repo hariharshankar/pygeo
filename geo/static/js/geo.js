@@ -227,25 +227,6 @@ AI = {
                 }
             });
 
-
-            $("#createAIResource")
-            .button()
-            .click (function(event) {
-                event.preventDefault()
-                selectedResource = $("#selectedAI option:selected").attr("value");
-                descid = $("#Description_ID").attr("value");
-
-                if (!selectedResource) {
-                    return;
-                }
-                $.ajax({
-                    url: "/add_ai?did=" + descid + "&assid=" + selectedResource,
-                    success: function(data, textStatus, jqXHR) {
-                        AI.init();
-                    }
-                });
-
-            });
             return;
         }
         var type = $(t).attr("id").replace("ai", "")
@@ -270,17 +251,61 @@ AI = {
 
         AI.selectableIds.push($(t).attr("id"))
     },
+
+    showAI: function() {
+        $.ajax({
+            url: "/show_ai/" + $("#Description_ID").attr("value"),
+            success: function(data, textStatus, jqXHR) {
+                $("#AIList").empty().append(data);
+            }
+        });
+    },
+
     init: function() {
         if ($("#Description_ID").attr("value") == 0) {
             $("#Associated_Infrastructure_module").html("Associated Infrastructures cannot be added for new plants at the moment.");
         }
-        $.ajax({
-            url: "/show_ai/" + $("#Description_ID").attr("value"),
-            success: function(data, textStatus, jqXHR) {
-                $("#Associated_Infrastructure_module").empty().append(data);
-                AI.createSelectables($(".aiSelectable").first());
+
+        html = []
+        html.push('<div id="AIList" class=""></div>');
+        html.push("<h2>Add Associated Infrastructure by selecting a Resource below</h2><hr/><br/>");
+        html.push('<div id="searchAI" class="ai-search-module">');
+        html.push("<div id='aiDatabase_Type' class='aiSelectable'></div>");
+        html.push("<div id='aiType' class='aiSelectable'></div>");
+        html.push("<div id='aiCountry' class='aiSelectable'></div>");
+        html.push("<div id='aiState' class='aiSelectable'></div>");
+        html.push("<div class='aiUpdateButton' id='aiUpdateButton' style='padding-top: 10px;'>");
+        html.push("<button id='createAIResource' class='createAIResource'>Add Associated Infrastructure</button>");
+        html.push("</div>");
+
+        html.push("</div>");
+        html.push("<div id='aiResources' class='aiSelectable' style='top: 40px; position: relative;'>");
+        html.push("</div>");
+
+        $("#Associated_Infrastructure_module").empty().append(html.join(""));
+
+        $("#createAIResource")
+        .button()
+        .click (function(event) {
+            event.preventDefault()
+            selectedResource = $("#selectedAI option:selected").attr("value");
+            descid = $("#Description_ID").attr("value");
+
+            if (!selectedResource) {
+                return;
             }
+            $.ajax({
+                url: "/add_ai?did=" + descid + "&assid=" + selectedResource,
+                success: function(data, textStatus, jqXHR) {
+                    AI.showAI();
+                }
+            });
+
         });
+        AI.createSelectables($(".aiSelectable").first());
+
+        AI.showAI();
+
     }
 }
 

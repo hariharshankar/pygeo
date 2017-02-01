@@ -131,7 +131,7 @@ class Select(object):
             except Exception:
                 raise
 
-        print(db_cur.statement)
+        #print(db_cur.statement)
         #print(db_cur.fetchwarnings())
         return db_cur
 

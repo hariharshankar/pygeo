@@ -15,8 +15,6 @@ def view():
     if not int(vals["did"]) > 0 or not int(vals["assid"]) > 0:
         return
 
-    session = db.session
-
     gr = GeoResource(db, vals["did"])
     vals["ppid"] = gr.parent_plant_id
     vals["typ"] = gr.type_id
@@ -31,20 +29,23 @@ def view():
         return
 
     sql = "INSERT INTO Associated_Infrastructure SET " \
-          "`Parent_Plant_ID`=:ppid," \
-          "`Type_ID`=:typ," \
-          "`Associated_Parent_Plant_ID`=:assppid," \
-          "`Associated_Type_ID`=:asstypeid," \
-          "`Associated_Country_ID`=:asscountryid," \
-          "`Associated_State_ID`=:assstateid"
+          "`Parent_Plant_ID`=%(ppid)s," \
+          "`Type_ID`=%(typ)s," \
+          "`Associated_Parent_Plant_ID`=%(assppid)s," \
+          "`Associated_Type_ID`=%(asstypeid)s," \
+          "`Associated_Country_ID`=%(asscountryid)s," \
+          "`Associated_State_ID`=%(assstateid)s"
+
+    db_conn = db.session
+    session = db_conn.cursor(dictionary=True)
 
     try:
         session.execute(sql, vals)
-        session.commit()
+        db_conn.commit()
     except:
-        session.rollback()
+        db_conn.rollback()
         raise
     finally:
-        session.close()
+        db_conn.close()
 
     return "Success"

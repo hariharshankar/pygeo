@@ -6,6 +6,7 @@ body {
     font: 0.9em "EB Garamond", Georgia, serif !important;
     width: 1100px;
     height: auto;
+    min-height: 100%;
 }
 
 #header {
@@ -496,5 +497,5 @@ table.line-html-table {
 	width: 100%;
 	clear: both;
     height: 60px;
-    margin: 60px 0 0 0;
+    margin: 160px 0 0 0;
 }

@@ -95,7 +95,7 @@ class InsertFactSheet(object):
         for option in enum.split(","):
             option = option.replace("'", "")
             option = option.replace("@", ",")
-            print(option, label+"_"+option)
+            #print(option, label+"_"+option)
 
             value = form_data.get(label+"_"+option).strip()
 
@@ -106,7 +106,7 @@ class InsertFactSheet(object):
                 sql_values[column_names[2][0].lower()] = value
 
         sql_statement.append(",".join(sql_fields))
-        print("".join(sql_statement), sql_values)
+        #print("".join(sql_statement), sql_values)
 
         session = self.db_conn.cursor()
         try:
@@ -209,7 +209,7 @@ class InsertFactSheet(object):
         select = Select(self.db)
         column_names = select.read_column_names(table_name)
 
-        print(form_data)
+        #print(form_data)
         for k in column_names:
             if not form_data.get(k[0]):
                 continue
@@ -304,13 +304,13 @@ class InsertFactSheet(object):
 
         session = self.db_conn.cursor(dictionary=True)
         try:
-            print("".join(alt_sql_statement))
-            print(sql_values)
+            #print("".join(alt_sql_statement))
+            #print(sql_values)
             session.execute("".join(alt_sql_statement), sql_values)
             self.db_conn.commit()
             insert_id = session.lastrowid
         except Exception:
-            print(session.statement)
+            #print(session.statement)
             """
             try:
                 # may be there is a spl char in the sql stmt
@@ -464,9 +464,9 @@ class InsertFactSheet(object):
                 #print("".join(alt_sql_statement) % sql_values)
                 session.execute("".join(alt_sql_statement), sql_values)
                 self.db_conn.commit()
-                print("SQL: " + session.statement)
+                #print("SQL: " + session.statement)
             except Exception as e:
-                print("ERROR: " + str(e))
+                #print("ERROR: " + str(e))
                 try:
                     # may be there is a spl char in the sql stmt
                     # using connection().execute will not quote the sql stmt
@@ -477,8 +477,8 @@ class InsertFactSheet(object):
                     sql_stmt = sql_stmt % sql_values
                     sql_stmt = sql_stmt.replace("(##)", "(%)")
                     sql_stmt = sql_stmt.replace("##_", "%_")
-                    print("ALT SQL:")
-                    print(sql_stmt)
+                    #print("ALT SQL:")
+                    #print(sql_stmt)
                     session.execute(sql_stmt)
                     self.db_conn.commit()
                 except Exception:
@@ -486,7 +486,6 @@ class InsertFactSheet(object):
                     raise
             finally:
                 session.close()
-
 
         return 1
 

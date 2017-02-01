@@ -37,15 +37,18 @@ def view():
         "moderated_time": time.gmtime()
     }
     sql = "UPDATE History SET \
-            Moderated=:moderated, \
-            Moderator_ID=:moderator_id, \
-            Accepted=:accepted, \
-            Comments=:comments, \
-            Moderated_Time_Stamp=:moderated_time \
-            WHERE Description_ID=:description_id"
+`Moderated`=%(moderated)s, \
+`Moderator_ID`=%(moderator_id)s, \
+`Accepted`=%(accepted)s, \
+`Comments`=%(comments)s, \
+`Moderated_Time_Stamp`=%(moderated_time)s \
+WHERE `Description_ID`=%(description_id)s"
 
-    db.session.execute(sql, data)
-    db.session.commit()
+    db_conn = db.session
+    session = db_conn.cursor(dictionary=True)
+
+    session.execute(sql, data)
+    db_conn.commit()
 
     flask.flash("The moderation was successful.")
     return flask.redirect(flask.url_for('form.factsheet', description_id=description_id))

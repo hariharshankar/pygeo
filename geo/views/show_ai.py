@@ -25,12 +25,17 @@ def view(did=None):
     keys = result.column_names
     values = result.fetchall()
     html = []
+    html.append("<ul>")
     for value in values:
-        ai_parent_plant_id = value[keys.index("Associated_Parent_Plant_ID")]
+        ai_parent_plant_id = value["Associated_Parent_Plant_ID"]
         ai_res = GeoResource(db, description_id=ai_parent_plant_id)
-        html.append("<b><a href=\"geoid/%s\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
+        html.append("<li>")
+        html.append("<b><a href=\"/geoid/%s\" target=\"_blank\">%s</a></b><br/>" % (ai_res.get_latest_revision_id(),
                                                                                    ai_res.get_resource_name()))
+        html.append("</li>")
 
+    html.append("</ul>")
+    """
     html.append('<div id="searchAI" class="ai-search-module">')
     html.append("<div id='aiDatabase_Type' class='aiSelectable'></div>")
     html.append("<div id='aiType' class='aiSelectable'></div>")
@@ -43,5 +48,6 @@ def view(did=None):
     html.append("</div>")
     html.append("<div id='aiResources' class='aiSelectable' style='top: 20px;'>")
     html.append("</div>")
+    """
     return "".join(html)
 

@@ -228,12 +228,12 @@ class Html(object):
             html.append("<tr>")
             html.append("<td>" + self.__make_readable(key) + "</td>")
             for height in height_ranges:
-                print(height)
+                #print(height)
                 html.append("<td>")
                 #if not height_values.get(height):
                 #    height_values[height] = none_values
                 val = list(height_values.get(height))
-                print(val)
+                #print(val)
                 html.append(self.__create_number_input_field(key, val[index]))
                 html.append("</td>")
             html.append("</tr>")
@@ -404,7 +404,7 @@ class Html(object):
         ai_parent_plant_ids = ai_result.fetchall()
 
         for ai_id in ai_parent_plant_ids:
-            ai_id = ai_id[0]
+            ai_id = ai_id["Associated_Parent_Plant_ID"]
             where = [["Parent_Plant_ID", "=", ai_id]]
             where.extend([["and"], ["Accepted", "=", "1"]])
 
@@ -412,7 +412,7 @@ class Html(object):
                                    where=where)
 
             res = desc_id_result.fetchone()
-            ai_desc_id = res[0]
+            ai_desc_id = list(res.values())[0]
             html.extend(["<input type='hidden' ",
                          "name='ai_map_json' ",
                          "id='ai_map_json' ",
