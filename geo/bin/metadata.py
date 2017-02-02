@@ -29,7 +29,8 @@ class Metadata(object):
 
         self.perf_fields = ("_Performance", "Year_yr",
                        ["Total_Gigawatt_Hours_Generated_nbr", "CO2_Emitted_(Tonnes)_nbr"])
-        self.unit_fields = ("_Unit_Description", "Date_Commissioned_dt", "Capacity_(MWe)_nbr")
+        self.unit_fields = ("_Unit_Description", "Date_Commissioned_dt_year", "Date_Commissioned_dt_month",
+                            "Date_Commissioned_dt_day", "Capacity_(MWe)_nbr")
 
         self.alt_types = [4, 7, 8, 10]
         self.alt_perf_fields = ("_Performance", "Year_yr",
@@ -39,14 +40,16 @@ class Metadata(object):
                                 ["Plant_Load_Factor_(%)_nbr"])
         self.nuclear_ghg_fields = ("_Gigawatt_Hours_Generated", "Year_yr",
                                    ["Gigawatt_Hours_Generated_nbr"])
-        self.wind_unit_fields = ("_Unit_Description", "Date_Commissioned_dt",
-                                 "Peak_MWe_per_Turbine_nbr", "Number_Of_Turbines_nbr")
+        self.wind_unit_fields = ("_Unit_Description", "Date_Commissioned_dt_year", "Date_Commissioned_dt_month",
+                                 "Date_Commissioned_dt_day", "Peak_MWe_per_Turbine_nbr", "Number_Of_Turbines_nbr")
 
     def get_unit_data(self, typ, plants):
         # units
         results = self.select.read(typ[1] + self.unit_fields[0],
                             columns=["`" + self.unit_fields[1] + "`",
-                                     "`" + self.unit_fields[2] + "`", "Description_ID"],
+                                     "`" + self.unit_fields[2] + "`",
+                                     "`" + self.unit_fields[3] + "`",
+                                     "`" + self.unit_fields[4] + "`", "Description_ID"],
                             where=[["Description_ID", "in",
                                     [plant[0] for plant in plants]]],
                                  dict_cursor=False)
@@ -54,8 +57,9 @@ class Metadata(object):
         cumulative_capacity_total = 0
         cumulative_capacity = {}
         new_capacity = {}
-        new_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
-        cumulative_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
+        dt = str(self.unit_fields[1]) + "-" + str(self.unit_fields[2]) + "-" + str(self.unit_fields[3])
+        new_capacity['keys'] = [dt, self.unit_fields[4]]
+        cumulative_capacity['keys'] = [dt, self.unit_fields[4]]
         cap_values = {}
         cum_cap_values = {}
         for unit in units:
@@ -92,14 +96,17 @@ class Metadata(object):
         results = self.select.read(typ[1] + self.wind_unit_fields[0],
                                  columns=["`" + self.wind_unit_fields[1] + "`",
                                           "`" + self.wind_unit_fields[2] + "`",
-                                          "`" + self.wind_unit_fields[3] + "`"],
+                                          "`" + self.wind_unit_fields[3] + "`",
+                                          "`" + self.wind_unit_fields[4] + "`",
+                                          "`" + self.wind_unit_fields[5] + "`"],
                                  where=[["Description_ID", "in",
                                          [plant[0] for plant in plants]]],
                                  dict_cursor=False)
         units = results.fetchall()
         cumulative_capacity_total = 0
         new_capacity = {}
-        new_capacity['keys'] = [self.unit_fields[1], self.unit_fields[2]]
+        dt = str(self.unit_fields[1]) + "-" + str(self.unit_fields[2]) + "-" + str(self.unit_fields[3])
+        new_capacity['keys'] = [dt, self.unit_fields[4]]
         cap_values = {}
         for unit in units:
             if not unit[1] or not unit[0]:

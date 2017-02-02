@@ -3,19 +3,16 @@ going through all tables and columns to fix python invalid dates
 like 1999-00-00
 """
 
-#import pymysql
 import mysql.connector as pymysql
 
 __author__ = 'Harihar Shankar'
 
-#cxn = pymysql.connect(user='root', password='A5k4m0r3',
-#                     database='geoDev', raw=True)
 cxn = pymysql.connect(user='geo', password='0p3nM0d3!',
                       database='geoDev')
 
 cur_table = cxn.cursor(buffered=True)
 cur_describe = cxn.cursor(buffered=True)
-cur_select = cxn.cursor(buffered=True)
+cur_select = cxn.cursor(buffered=True, raw=True)
 cur_update = cxn.cursor(buffered=True)
 cur_alter = cxn.cursor(buffered=True)
 
@@ -52,7 +49,7 @@ for tables in cur_table:
                 new_date = None
                 if not data[1]:
                     continue
-                date = data[1]
+                date = data[1].decode("utf8")
                 dates = date.split("-")
                 year = None
                 month = None
@@ -69,13 +66,13 @@ for tables in cur_table:
                                "WHERE Description_ID=%s" \
                                % (table, col_year, year,
                                   col_month, month,
-                                  col_day, day, data[0])
+                                  col_day, day, data[0].decode("utf8"))
                 if conn_id:
                     query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'" \
                                            " WHERE Connection_ID=%s" \
                     % (table, col_year, year,
                        col_month, month,
-                       col_day, day, data[0])
+                       col_day, day, data[0].decode("utf8"))
                 cur_update.execute(query_update)
 
             query_alter = "ALTER TABLE `%s` DROP COLUMN `%s`" %\
