@@ -158,6 +158,8 @@ class Select(object):
         easy json serialization.
         """
 
+        if not result:
+            return [], []
         keys = result.column_names
         values = []
         if not result.with_rows:

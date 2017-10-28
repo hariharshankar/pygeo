@@ -1589,7 +1589,6 @@ Map = {
                 geoCodeSearch = true;
                 geoCoder.geocode({'address': searchLocation, 'partialmatch':true}, Map.getMapBounds);
             }
-
             $("#map-container").width("100%")
             $("#map-container").height("600px")
 

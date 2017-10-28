@@ -2,7 +2,7 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/geo.js') }}"></script>
-<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&amp;libraries=drawing,geometry"></script>
+<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyAveV8vQj-utZITKgBnVCbovB03hrgNvWE&libraries=drawing,geometry&v=3"></script>
 {% endblock %}
 
 {% block user_pref %}{{ user_pref|safe }}{% endblock %}

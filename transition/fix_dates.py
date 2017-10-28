@@ -43,7 +43,10 @@ for tables in cur_table:
             query_alter = "ALTER TABLE `%s` ADD COLUMN " \
                           "(`%s` YEAR, `%s` TINYINT(2), `%s` TINYINT(2))" %\
                           (table, col_year, col_month, col_day)
-            cur_alter.execute(query_alter)
+            try:
+                cur_alter.execute(query_alter)
+            except:
+                pass
 
             for data in cur_select:
                 new_date = None
@@ -64,16 +67,19 @@ for tables in cur_table:
                     day = int(dates[2])
                 query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s' " \
                                "WHERE Description_ID=%s" \
-                               % (table, col_year, year,
-                                  col_month, month,
-                                  col_day, day, data[0].decode("utf8"))
+                               % (table, col_year or 0, year or 0,
+                                  col_month or 0, month or 0,
+                                  col_day or 0, day or 0, data[0].decode("utf8"))
                 if conn_id:
                     query_update = "UPDATE `%s` SET `%s`='%s', `%s`='%s', `%s`='%s'" \
                                            " WHERE Connection_ID=%s" \
-                    % (table, col_year, year,
-                       col_month, month,
-                       col_day, day, data[0].decode("utf8"))
-                cur_update.execute(query_update)
+                    % (table, col_year or 0, year or 0,
+                       col_month or 0, month or 0,
+                       col_day or 0, day or 0, data[0].decode("utf8"))
+                try:
+                    cur_update.execute(query_update)
+                except pymysql.DataError:
+                    pass
 
             query_alter = "ALTER TABLE `%s` DROP COLUMN `%s`" %\
                           (table, column_name)

@@ -53,6 +53,8 @@ class Metadata(object):
                             where=[["Description_ID", "in",
                                     [plant[0] for plant in plants]]],
                                  dict_cursor=False)
+        if not results:
+            return 0, {}, {}
         units = results.fetchall()
         cumulative_capacity_total = 0
         cumulative_capacity = {}
@@ -153,6 +155,8 @@ class Metadata(object):
                                    where=[["Description_ID", "in",
                                            [plant[0] for plant in plants]]],
                                         dict_cursor=False)
+        if not results:
+            return {}, {}
         performances = results.fetchall()
         co2 = {}
         ghg = {}
